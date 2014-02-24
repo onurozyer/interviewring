@@ -1,0 +1,84 @@
+
+
+/*body{position: relative;}*/
+canvas{position: absolute;}
+
+/*#__cvfl-coverflow{ height: 540px; margin: auto; margin-left:188px; overflow: hidden; */
+/*                  position: relative; width: 720px;*/
+/*}*/
+#__cvfl-coverflow{ margin: auto; margin-left:188px; overflow: hidden; 
+                  position: relative; width: 100%;
+}
+
+#__cvfl-coverflow-label{ color: #fff; font: 14pt Arial; line-height: 1.0em;
+	position: relative;top: 443px;z-index: 700;margin-left:85px; margin-top:15px;
+}
+
+#__cvfl-coverflow-label a{ font-size:12px; color:#000000;}
+#__cvfl-coverflow-holder{ width: 100%; background:transparent;padding:15px 0; }
+#artist { font-size:13px; color:#00ff00;}
+#smallerPreview { margin-top: 0px; float:left; position: relative; bottom: 0px;}
+#smallerPreview img { width: 80px; height:80px;}
+#__lb-im {  z-index:1000; left:-325px; width:350px; height:350px;}
+
+    /* ----- scrollbar ----- */
+    .scrollbar {
+        width: 50%;
+        margin: 0px auto;
+        margin-top: 10px;
+        height: 16px;
+        background: url(../images/scrollbar_white.png) left center repeat-x;
+        position: relative;
+        overflow: visible;
+        z-index: 55;
+    }
+
+        .scrollbar .slider {
+            width: 16px;
+            height: 16px;
+            background: url(../images/slider_white.png) center center no-repeat;
+            /*cursor: move;*/
+            z-index: 55;
+        }
+
+
+
+        .scrollbar .first {
+            width: 16px;
+            height: 16px;
+            background: url(../images/slider_ghost.png) center center no-repeat;
+            /*cursor: move;*/
+            z-index: 50;
+	    text-align: center;
+            color: #000000;
+        }
+
+        .scrollbar .last {
+            width: 16px;
+            height: 16px;
+            background: url(../images/slider_ghost.png) center center no-repeat;
+            /*cursor: move;*/
+            z-index: 50;
+	    text-align: center;
+            color: #000000;
+        }
+
+        
+        /* only for IE <= 6 and a alphatransparent slider image */
+        * html .ContentFlow .scrollbar .slider { background-image: none; }
+        * html .ContentFlow .scrollbar .slider .virtualSlider {
+            filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=crop, src='../images/slider_white.png');
+        }
+            .scrollbar .slider .position {
+                position: relative;
+                top: 120%;
+                width: auto;
+                margin: 8px auto;
+                font-size: 16px;
+                font-weight: bold;
+                color: silver;
+                white-space: pre;
+                z-index: 55;
+            }
+
+

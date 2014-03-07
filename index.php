@@ -26,9 +26,13 @@ session_start();
   <title>Interview Ring</title>
   <link href='./images/x-icon3.png' rel='icon' type='image/x-icon'/> 
   <link rel="shortcut icon" href="./images/x-icon3.png" type="image/x-icon" />
+<!--
   <link href='http://fonts.googleapis.com/css?family=Merriweather' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Merriweather:300' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Six+Caps' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Short+Stack|Arvo:400,700,400italic,700italic|Montserrat:400,700' rel='stylesheet' type='text/css'>
+-->
+
 
 
   <script type="text/javascript" src="http://platform.linkedin.com/in.js?async=true">
@@ -72,9 +76,10 @@ session_start();
 
   <!-- Page specific --> 
   <script type="text/javascript" src="js/interviewers.js"></script> 
+  <script type="text/javascript" src="js/randlib.js"></script>
   <script type="text/javascript" src="js/utils.js"></script>
   <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
-  <link rel="stylesheet" href="css/style.css" type="text/css">
+  <link rel="stylesheet" href="css/style.710C28.css" type="text/css">
 
 
 
@@ -129,6 +134,7 @@ session_start();
       document.getElementById("step3").onclick=function() {showSelectAvailability();};
       }
 
+      document.getElementById('explore').value = "Find interviewers from diverse industries and companies";
 
     }
 
@@ -181,6 +187,9 @@ session_start();
       document.getElementById("step1").onclick=function() {showHome();};
       document.getElementById("step2").onclick=function() {showSearch();};
       document.getElementById("step3").onclick=function() {showCheckOut();};
+
+
+      populateFilters();
 
     }
 
@@ -503,13 +512,17 @@ session_start();
       //console.log(JSON.stringify(mail));
       //console.log(user[0].inID);//FE77HfB5Pw
 
+      var d = new Date()
+      var tzOffset = d.getTimezoneOffset();
+
+
       var mailObj = {};
       mailObj.anyNew = newMail;
       mailObj.mail = mail;
 
 
       $.ajax({url:"./saveData.php", 
-              data: {id: user[0].inID, email: user[0].email, role: 'give', services: JSON.stringify(services), calendar: JSON.stringify(schedule), mail: JSON.stringify(mailObj), cart: JSON.stringify(cartItems) },
+              data: {id: user[0].inID, tzOffset: tzOffset, email: user[0].email, education: user[0].education, role: 'give', services: JSON.stringify(services), calendar: JSON.stringify(schedule), mail: JSON.stringify(mailObj), cart: JSON.stringify(cartItems) },
               type:'post',
               async:false
       });
@@ -520,13 +533,15 @@ session_start();
         {
           inID: user[0].inID,
           role: 'give',
-          services: JSON.stringify(services),
+          providedServices: JSON.stringify(services),
           calendar: JSON.stringify(schedule)
         }];
         productStore.loadData(myNewRecord, true);
       }
       productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
-      productStore.getById(user[0].inID).data.services = JSON.stringify(services);
+      productStore.getById(user[0].inID).data.providedServices = JSON.stringify(services);
+      productStore.getById(user[0].inID).data.email = user[0].email;
+      productStore.getById(user[0].inID).data.education = user[0].education;
       productStore.getById(user[0].inID).data.role = 'give';
       productStore.getById(user[0].inID).data.first = user[0].first;
       productStore.getById(user[0].inID).data.last = user[0].last;
@@ -594,34 +609,34 @@ Ext.create('Ext.fx.Animator', {
   <div id="header">
     <div id="headerClearfix" class="clearfix">
       <div class="logo">
-        <a onclick="showHome();"><img src="images/splash2.png" alt="LOGO" style="height: 200px; margin-left: -40px; margin-top: 0px;"></a>
+        <a onclick="showHome();"><img src="images/logo6.png" alt="LOGO" style="height: 90px; margin-left: -50px; margin-top: -10px;"></a>
         <!--<a onclick="showHome();"><img src="images/huddle.png" alt="LOGO" style="height: 200px; margin-left: -30px; margin-top: 0px;"></a>-->
         <!--<a><img src="images/logo-ring.png" alt="LOGO" style="height: 130px;"</a>-->
         <!--<span style="margin-left: -90px; top: -20px;color:white;font-family: 'Merriweather Sans', sans-serif;font-size:20px;">The Career Services Marketplace</span>-->
       </div>
       <div class="login" id="login" style="display: none;">
-        <a style="color:#d3e17f;" onmouseover='this.style.cursor="pointer"; this.style.color="#F1FFAF";' onmouseout='this.style.color="#d3e17f";' onclick="IN.User.authorize(); return true;">login/create account</a>
+        <a style="color:#FFFFFF;" onmouseover='this.style.cursor="pointer"; this.style.color="#CCCCCC";' onmouseout='this.style.color="#FFFFFF";' onclick="IN.User.authorize(); return true;">login/create account</a>
       </div>
       <div id="headercontent" style="display: none;">
-      <img id="step" style="z-index: 34; height: 90px; position: relative; top: 60px; float: left; left: 10px;" src="./images/step1.png" alt="step" />
-      <img id="step1" src="images/0.gif" alt="step1" style="position: absolute; top: 75px; margin-left: 20px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showHome();'/>
-      <img id="step2" src="images/0.gif" alt="step2" style="position: absolute; top: 75px; margin-left: 115px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showSearch();'/>
-      <img id="step3" src="images/0.gif" alt="step3" style="position: absolute; top: 75px; margin-left: 210px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showCheckOut();'/>
+      <img id="step" style="z-index: 34; height: 90px; position: relative; top: 30px; float: left; left: 10px;" src="./images/step1.png" alt="step" />
+      <img id="step1" src="images/0.gif" alt="step1" style="position: absolute; top: 45px; margin-left: 20px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showHome();'/>
+      <img id="step2" src="images/0.gif" alt="step2" style="position: absolute; top: 45px; margin-left: 115px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showSearch();'/>
+      <img id="step3" src="images/0.gif" alt="step3" style="position: absolute; top: 45px; margin-left: 210px; width: 70px; height: 60px; z-index: 35; border: solid 0px #ff0000;" onmouseover="this.style.cursor='pointer';" onclick='showCheckOut();'/>
 
 
 
-      <div style="position: relative; top: 80px; float: right; right: 180px; z-index: 61;" onmouseover="this.style.cursor='pointer';" onclick="showProfile();">
+      <div style="position: relative; top: 53px; float: right; right: 180px; z-index: 61;" onmouseover="this.style.cursor='pointer';" onclick="showProfile();">
         <img id="feedback" src="images/feedback.png" alt="FEEDBACK"/>
-        <div id="feedbackCount" style="position: relative; top: -25px; right: -12px; color: #F1FFAF; width: 16px; text-align: center;" onmouseover="this.style.cursor='pointer';">0</div>
+        <div id="feedbackCount" style="position: relative; top: -25px; right: -12px; color: #FFFFFF; width: 16px; text-align: center;" onmouseover="this.style.cursor='pointer';">0</div>
       </div>
 
 
-      <div id="mailContainer" style=" position: relative; top: 84px; float: right; right: 100px; z-index: 61;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail); ellipsizeMailBoxes('mail');" onmouseout="document.getElementById('mail').style.display='none';">
+      <div id="mailContainer" style=" position: relative; top: 60px; float: right; right: 100px; z-index: 61;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail); ellipsizeMailBoxes('mail');" onmouseout="document.getElementById('mail').style.display='none';">
         <img style="z-index: 34; height: 25px;" src="./images/mail.png" alt="mail"/>
-        <div id="mailCount" style="position: relative; top: -27px; right: -5px; color: #F1FFAF; width: 20px; text-align: center; border-radius: 20px; background: #4A5612; border: solid 1px #3B440E; opacity: 0.9; filter: alpha(opacity=90);" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail);" onmouseout="document.getElementById('mail').style.display='none';">0</div>
+        <div id="mailCount" style="position: relative; top: -25px; right: -5px; color: #FFFFFF; width: 20px; text-align: center;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail);" onmouseout="document.getElementById('mail').style.display='none';">0</div>
         <div id="mailNewFlag" style="display: none; position: relative; top: -50px; right: -20px;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail);" onmouseout="document.getElementById('mail').style.display='hidden';"><img src="images/warning.gif"/></div>
         <div id="mailLoading" style="display: none; position: absolute; top: 25px; left: -150px; z-index: 61;"><img src="./images/progressBar.png"/><img id="progressBall" src="./images/ball.png" style="position: absolute; top: 1px; margin-left: 1px;"/></div>
-        <div id="mail" style="display: none; z-index: 60; position:absolute; top:27px; right: 0px; background: #73841D; border: solid 4px #96AF26; width: 316px; color: #CDDF7E; margin: 0px; max-height: 410px; overflow: auto;">
+        <div id="mail" class="gradient-darkGray" style="display: none; z-index: 60; position:absolute; top:27px; right: 0px; width: 316px; color: #CDDF7E; margin: 0px; max-height: 410px; overflow: auto;">
           <!--
           <div style="height: 60px; padding: 10px; border-bottom: solid 2px #CDDF7E; margin: 0px;">
             <img style="float:left;" src="http://s.c.lnkd.licdn.com/scds/common/u/images/themes/katy/ghosts/person/ghost_person_60x60_v1.png"/>
@@ -634,10 +649,10 @@ Ext.create('Ext.fx.Animator', {
           -->
         </div><!--<div id="mail">-->
       </div><!--<div id="mailContainer">-->
-      <div style="z-index: 61; position: relative; top: 84px; float:right; right:20px;" onmouseover="this.style.cursor='pointer';" onclick="showCalendar(this.parentNode);">
+      <div style="z-index: 61; position: relative; top: 59px; float:right; right:20px;" onmouseover="this.style.cursor='pointer';" onclick="showCalendar(this.parentNode);">
         <img style="position: relative; height: 25px; border: solid 0px #000000;" src="./images/calendar.png" alt="calendar"/>
       </div>
-      <div class="cart" style="top: 82px;" onclick="showCheckOut();">
+      <div class="cart" style="top: 56px;" onclick="showCheckOut();">
         <img id="cart" src="images/cart.png" alt="CART">
         <img id="cartItem" src="images/calendar.gif" class="cartItem" style="display: none;" alt="CART ITEM">
       </div>
@@ -646,6 +661,7 @@ Ext.create('Ext.fx.Animator', {
   </div>
 
 
+  <!--<span style="position: absolute; top: 65px; left: 580px; line-height:18px; font-size:18px; color:#11bdc9;">Crowd-Sourced interview experience</span>-->
 
 
   <div id="header2">
@@ -682,7 +698,7 @@ Ext.create('Ext.fx.Animator', {
 	</li>
       </ul>
 -->
-      <div id="searchContainer" style="z-index: 30; position: relative; top: -100px; float: left; left: -220px; background: #96AF26; border-radius: 15px; height: 25px; width: 150px; padding: 5px; border: solid 4px #75891C;">
+      <div id="searchContainer" style="z-index: 30; position: relative; top: -90px; float: left; left: -220px; background: #666666; border-radius: 15px; height: 25px; width: 150px; padding: 5px;">
       <input id="sortInput" style="border-radius: 15px; width: 145px;" type=search results=20 autosave=50 name=s onclick="this.value = '';" onkeyup="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('sortInput').value,2)}, 500);" oninput="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('sortInput').value,2)}, 500);"/>
       </div>
 
@@ -712,47 +728,66 @@ Ext.create('Ext.fx.Animator', {
   <div id="home" class="contents" style="margin-bottom: 0px; border: 0px solid #ff0000;">
     <div id="mainbox">
       <div class="clearfix">
+        <!--
         <img src="images/mainbox4.png" alt="main" width="958" style="position: absolute; top: 0px; z-index: 51;"/>
         <img src="images/mainbox3.png" alt="main" width="958" style="position: absolute; top: 0px; z-index: 51;"/>
-
+        -->
 	<div class="detail" style="border: 0px solid #ff0000;">
           <div style="position: absolute; top: 0px; float: left; left: 50px; width: 400px; height: 200px; z-index: 51;">
             <img src="./images/find_help.png" alt="find help"/>
-            <div style="position: absolute; top: 45px; left: -60px; float:left; width: 300px; height: 230px; line-height:18px; font-size:18px; color:#787c6b; padding: 0px; padding-top: 10px; border: solid 0px #000000;">
+            <div style="position: absolute; top: 65px; left: -60px; float:left; width: 300px; height: 230px; line-height:18px; font-size:18px; color:#787c6b; padding: 0px; padding-top: 10px; border: solid 0px #000000;">
               <ul style="padding: 0px;">
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Interview experience from companies you are interested in</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Use your interviews as references</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Your interviews will help you land a job</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Find Career-Coaches, Interviewing tips and Resume critiques</li>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Connect with interviewers from top companies</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Improve your interview skills with mock interviews</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Get feedback from your interviews and share the results</li><br>
               </ul>
             </div>
           </div>
 
-          <div class="a-button a-button-large" style="position: absolute; top: 0px; float: left; left: 60px; z-index: 56;" onclick='if(!user[0]) {window.role = "find"; IN.User.authorize();} else {showSearch("",2);}'>
-            <span class="a-button-inner">
-              <span class="a-button-text">Find Help</span>
+          <div class="a-button a-button-xlarge" style="position: absolute; top: -20px; left: -30px; z-index: 56;" onclick='if(!user[0]) {window.role = "find"; IN.User.authorize();} else {showSearch("",2);}'>
+            <span class="a-button-inner-find">
+              <span class="a-button-text" style="font-size: 41px;">Find Interview Help</span>
+
+              <ul style="padding: 50px 0 0 0; line-height:18px; font-size:18px; text-align: left; color: #ffffff;">
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Connect with interviewers from top companies</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Improve your interview skills with mock interviews</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Get feedback from your interviews and share the results</li><br>
+              </ul>
+
             </span>
-            <img src="./images/linkedin-logo.png" style="position:absolute; left: 2px; bottom:2px;"/>
+            <img src="./images/linkedin-logo.png" style="position:absolute; bottom:0px; left: 190px;"/>
           </div>
 
           <div style="position: absolute; top: 0px; float: right; right: -350px; width: 400px; height: 200px; z-index: 51;">
             <img src="./images/give_help.png" alt="give help"/>
-            <div style="position: absolute; top: 45px; left: 210px; float:left; width: 300px; height: 230px; line-height:18px; font-size:18px; color:#787c6b; padding: 0px; padding-top: 10px;">
+            <div style="position: absolute; top: 65px; left: 210px; float:left; width: 300px; height: 230px; line-height:18px; font-size:18px; color:#787c6b; padding: 0px; padding-top: 10px;">
               <ul style="padding: 0px;">
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Help your peers who want to work for your company</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Build your network of new talents by interviewing them in-person</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Improve your interviewing skills</li><br>
-                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Get paid to support the next generation of talent</li>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Expand your network with new talents</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Help new talents by interviewing them</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Give feedback to the new talents and then refer and promote them</li><br>
               </ul>
             </div>
           </div>
 
-          <div class="a-button a-button-large" style="position: absolute; top: 0px; float: right; right: -400px; z-index: 56;" onclick='if(!user[0]) {window.role = "give"; IN.User.authorize();} else {showSelectServices(2);}'>
-            <span class="a-button-inner">
-              <span class="a-button-text">Give Help</span>
+          <div class="a-button a-button-xlarge" style="position: absolute; top: -20px; left: 470px; z-index: 56;" onclick='if(!user[0]) {window.role = "give"; IN.User.authorize();} else {showSelectServices(2);}'>
+            <span class="a-button-inner-give">
+              <span class="a-button-text" style="font-size: 41px;">Give Interview Help</span>
+
+              <ul style="padding: 50px 0 0 0; line-height:18px; font-size:18px; text-align: left; color: #ffffff;">
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Expand your network with new talents</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Help new talents by interviewing them</li><br>
+                <li class="benefits2 condensedFont bnfts1 bullets bulletItem">Give feedback to the new talents and then refer and promote them</li><br>
+              </ul>
+
             </span>
-            <img src="./images/linkedin-logo.png" style="position:absolute; right: 2px; bottom:2px;"/>
+            <img src="./images/linkedin-logo.png" style="position:absolute; bottom:0px; left: 190px;"/>
           </div>
+
+          <div id="exploreWrapper" style="position: absolute; top: -50px; left: 130px; z-index: 1000;">
+            <input type="text" id="explore" class="explore" style="height: 48px; width: 635px; position: absolute; top:0px; left:0px;" value="Find interviewers from diverse industries and companies" onclick="this.value='';"></input>
+            <img class="gradient-darkGrey" src="./images/search.png" style="position: absolute; top:0px; left:648px;" onmouseover="this.style.cursor='pointer';" onclick="if(!user[0]) {window.role = 'find'; IN.User.authorize(); waitLoading10(); return true;} else{window.showSearch(document.getElementById('explore').value,2);}"/>
+          </div>
+
         </div><!--detail-->
       </div><!--clearfix-->
 
@@ -774,7 +809,7 @@ Ext.create('Ext.fx.Animator', {
 
 
 
-<div class="next-button" style="margin-top:60px;">
+<div class="next-button" style="margin-top:186px;">
 <div class="site-width">
 <div class="toggle">
 <div class="button">
@@ -799,75 +834,89 @@ Ext.create('Ext.fx.Animator', {
 
 
 
-
-
-  <div id="search" class="contents" style="display: none; margin-bottom: 0px; border: 0px solid #ff0000;">
+  <div id="search" class="contents" style="display: none; margin-bottom: 0px; border: solid 0px #ff0000;">
     <div id="mainbox">
-      <div class="clearfix">
-        <img src="images/mainbox2.png" alt="main" width="958" style="position: absolute; top: 0px;"/>
-	<div id="searchContent" class="detail2">
-          <div id="infoContentsWrapper" style="position: absolute; top: 0px; float: left; left: 50px; width: 400px; height: 200px; border: solid 0px #ff0000; z-index: 52;">
-	    <div id="infoContents" style="z-index: 52;">
-	      <div class="clearfix">
-	        <div class="sidebar">
-		  <div>
-		    <h2>Info</h2>
-                    <div id="providerRating">
-                    </div>
-		    <ul class="contact">
-		      <li>
-		        <p>
-			  <span class="name"></span> <em id="labelName" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></em>
-			</p>
-	              </li>
-		      <li>
-			<p class="company"><span id="labelCompany" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></span>
-			</p>
-		      </li>
-		      <li>
-			<p class="title"><span id="labelProfile" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></span>
-			</p>
-		      </li>
-		      <li>
-			<p class="web"><span id="labelLink" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"><a target="_blank" href="">linkedIn profile</a></span>
-			</p>
-		      </li>
-		    </ul>
-		  </div>
-		</div><!--sidebar-->
-	      </div><!--clearfix-->
-	    </div><!--infoContents-->
-	  </div><!--infoContentsWrapper-->
-
-          <div style="position: absolute; top: -10px; float: right; right: -373px; width: 400px; height: 200px;">
-              <img id="image" width="285" height="285" src="" alt="make appt" frameborder="0" onmouseover="document.getElementById('makeApptBlister').style.display='';"/>
+      <div class="highlight">
+        <div class="clearfix">
+          <div class="featured" style="top: 0px;">
+            <div id="searchItems" class="searchItems"></div>
+            <div style="clear:both;"></div>
+         </div><!--featured-->
+        </div><!--clearfix-->
+        <div class="x-window-default" style="position: absolute; top: -30px; margin-left: 0px; width: 940px; height: 50px;">
+          <div style="position: absolute; top: 0px; margin: 0px auto; width: 675px;">
+            <h2 id="results" style="color: #000000;">Search Results:</h2>
           </div>
-
-          <div style="position: absolute; top: -10px; float: right; right: -468px; z-index: 15;">
-            <img src="images/mainbox-blister.png" alt="main blister" width="958"/>
+          <div style="position: absolute; top: 35px; margin-left: 0px; width: 100px;">
+            <h2 style="color:#F1FFAF;">Sort:</h2>
           </div>
+          <select id="sortSearch" name="sortSearch" onchange="doSearch();" style="position: absolute; top: 35px; margin-left: 70px; width: 100px;">
+            <option value="company">Company</option>
+            <option value="rating">Rating</option>
+            <option value="experience">Experience</option>
+            <option value="price">Price</option>
+          </select>
 
-          <div style="position: absolute; top: -8px; float: right; right: -468px; z-index: 50;">
-            <img src="images/spiral.png" alt="spiral" width="958"/>
+          <div style="position: absolute; top: 35px; margin-left: 300px; width: 100px;">
+            <h2 style="color:#F1FFAF;">Filter:</h2>
           </div>
+          <div style="position: absolute; top: 30px; margin-left: 385px; width: 675px;">
 
-          <div id="slider">
+            <div class="connect">
+              <div class="filter" onclick="showFilter('industry');">Industry
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="industry"></div>
+	    </div>
+            <div class="connect">
+              <div class="filter" onclick="showFilter('company');">Company
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="company"></div>
+	    </div>
+            <div class="connect">
+              <div class="filter" onclick="showFilter('rating');">Rating
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="rating"></div>
+	    </div>
+            <div class="connect">
+              <div class="filter" onclick="showFilter('experience');">Experience
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="experience"></div>
+	    </div>
+            <div class="connect">
+              <div class="filter" onclick="showFilter('services');">Services
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="services"></div>
+	    </div>
+            <div class="connect">
+              <div class="filter" onclick="showFilter('price');">Price
+                <div class="expand-arrow" style="width: 15px; position: relative; top: -24px; float: right; margin-left: -4px;">
+                </div>
+              </div>
+	      <div class="filterSelection" id="price"></div>
+	    </div>
+
           </div>
-
-          <div id="makeApptBlister" style="position: absolute; top: -3px; float: right; right: -374px; z-index: 53;">
-            <img src="images/makeApptBlister-up.png" alt="make appt blister" onmouseover="this.src='images/makeApptBlister-dn.png';  this.style.cursor='pointer';"  onmouseout="this.src='images/makeApptBlister-up.png'" onclick="makeAppt();"/>
-          </div>
-            
-
-        </div><!--searchContent-->
+        </div>
 
 
-        <div id="apptScheduler" class="scheduler-header" style="display: none; width: 320px; z-index: 56; position: absolute; top: -90px; float: right; margin-left: 312px; color: #ffffff; border: solid 4px #2a2a2a;">
+
+
+        <div id="apptScheduler" class="scheduler-header gradient-darkGray" style="display: none; width: 320px; z-index: 56; position: absolute; top: -90px; float: right; margin-left: 312px; color: #ffffff;">
           <div style="position: absolute; float: right; right: 0px; padding: 4px;">
             <div class="close-up" onmouseover="this.style.cursor='pointer'; this.className='close-dn';" onmouseout="this.className='close-up';" onclick="this.parentNode.parentNode.style.display='none'; document.getElementById('scrollbar').style.zIndex = 55; if(document.getElementById('screen')) {document.getElementById('screen').style.display='none';}">
             </div>
           </div>
-          <table style="width: 300px; color: #ffffff; padding: 0px;background-color:#73841D;"><td id="myApptHeader" class="scheduler-header" style="width: 300px; height: 30px;">Choose the hours and services for this appointment</td></table>
+          <table style="width: 300px; color: #ffffff; padding: 0px;"><td id="myApptHeader" class="scheduler-header gradient-grey" style="width: 300px; height: 30px;">Choose the hours and services for this appointment</td></table>
           <table id="myAppts" border="0" cellpadding="0" cellspacing="0" class="tablesorter" style="width: 300px;">
             <thead>
               <tr>
@@ -962,8 +1011,8 @@ Ext.create('Ext.fx.Animator', {
 
           <table style="width: 300px; color: #ffffff; padding: 0px;background-color:#73841D;" border="0" cellpadding="0" cellspacing="0">
             <td>
-              <div class="scheduler-header" style="height: 35px;">
-                <div class="a-button a-button-small" style="position: absolute; right: 24px; height: 35px;" onclick="applySchedule();">
+              <div class="scheduler-header gradient-gray" style="height: 35px;">
+                <div class="a-button a-button-small" style="position: absolute; right: 28px; height: 35px;" onclick="applySchedule();">
                   <span class="a-button-inner" style="padding-top: 2px;">
                     <span class="a-button-text" style="margin-left: -20px;">Apply</span>
                   </span>
@@ -984,13 +1033,94 @@ Ext.create('Ext.fx.Animator', {
 
 
 
+
+
+
+      </div><!--hightlight-->
+    </div><!--mainbox-->
+    <div id="quickLinks" class="quickLinks"></div>
+
+  </div><!--content-->
+
+
+
+
+
+
+
+
+
+  <div id="XXsearchXX" class="contents" style="display: none; margin-bottom: 0px; border: 0px solid #ff0000;">
+    <div id="mainbox">
+      <div class="clearfix">
+        <img src="images/mainbox2.png" alt="main" width="958" style="position: absolute; top: 0px;"/>
+	<div id="searchContent" class="detail2">
+          <div id="infoContentsWrapper" style="position: absolute; top: 0px; float: left; left: 50px; width: 400px; height: 200px; border: solid 0px #ff0000; z-index: 52;">
+	    <div id="infoContents" style="z-index: 52;">
+	      <div class="clearfix">
+	        <div class="sidebar">
+		  <div>
+		    <h2>Info</h2>
+                    <div id="providerRating">
+                    </div>
+		    <ul class="contact">
+		      <li>
+		        <p>
+			  <span class="name"></span> <em id="labelName" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></em>
+			</p>
+	              </li>
+		      <li>
+			<p class="company"><span id="labelCompany" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></span>
+			</p>
+		      </li>
+		      <li>
+			<p class="title"><span id="labelProfile" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"></span>
+			</p>
+		      </li>
+		      <li>
+			<p class="web"><span id="labelLink" style="width: 310px; overflow: hidden; text-overflow:ellipsis; white-space: nowrap;"><a target="_blank" href="">linkedIn profile</a></span>
+			</p>
+		      </li>
+		    </ul>
+		  </div>
+		</div><!--sidebar-->
+	      </div><!--clearfix-->
+	    </div><!--infoContents-->
+	  </div><!--infoContentsWrapper-->
+
+          <div style="position: absolute; top: -10px; float: right; right: -373px; width: 400px; height: 200px;">
+              <img id="image" width="285" height="285" src="" alt="make appt" frameborder="0" onmouseover="document.getElementById('makeApptBlister').style.display='';"/>
+          </div>
+
+          <div style="position: absolute; top: -10px; float: right; right: -468px; z-index: 15;">
+            <img src="images/mainbox-blister.png" alt="main blister" width="958"/>
+          </div>
+
+          <div style="position: absolute; top: -8px; float: right; right: -468px; z-index: 50;">
+            <img src="images/spiral.png" alt="spiral" width="958"/>
+          </div>
+
+          <div id="slider">
+          </div>
+
+          <div id="makeApptBlister" style="position: absolute; top: -3px; float: right; right: -374px; z-index: 53;">
+            <img src="images/makeApptBlister-up.png" alt="make appt blister" onmouseover="this.src='images/makeApptBlister-dn.png';  this.style.cursor='pointer';"  onmouseout="this.src='images/makeApptBlister-up.png'" onclick="makeAppt();"/>
+          </div>
+            
+
+        </div><!--searchContent-->
+
+
+
+
+
       </div><!--clearfix-->
 
 
       <div class="highlight">
         <div class="featured" style="margin-top: 0px; margin-left: 22px; top: 300px;">
           <h2>Services</h2>
-          <ul class="clearfix" id="services">
+          <ul class="clearfix" id="servicesAvailable">
           </ul>
         </div><!--featured-->
       </div><!--highlight-->
@@ -1018,7 +1148,7 @@ Ext.create('Ext.fx.Animator', {
             
             <div id="history" class="history">
             </div>
-            <div id="formPage" class="formPage">
+            <div id="formPage" class="formPage gradient-gray">
               <div style="height: 360px; width: 620px;"><h3 style="text-align: center; vertical-align: middle; line-height: 360px;">Click a service item on the left to see your results</h3></div>
             </div><!--formPage-->
 
@@ -1040,6 +1170,7 @@ Ext.create('Ext.fx.Animator', {
         <div class="clearfix">
           <div class="featured" style="top: 60px;">
             <h1 id="Total">Total: $0.00</h1>
+            <hr>
             <h2>Your Appointments</h2>
             <br>
             <div id="cartItems" class="history"></div>
@@ -1047,9 +1178,13 @@ Ext.create('Ext.fx.Animator', {
          </div><!--featured-->
         </div><!--clearfix-->
         <div style="position: absolute; top: 0px; margin-left: 275px;">
-          <h2 style="color:#F1FFAF; margin-bottom: -10px;">Choose your method of payment</h2>
+          <h2 style="color:#000000; margin-bottom: -10px;">Choose your method of payment</h2>
           <div class="a-button a-button-medium" title="paypal" style="float: left; margin-left: 125px; margin-bottom: -4px; margin-top: 8px;" onclick="makePayment(this.title);"><img class="a-button-inner a-button-text" src="./images/paypal-icon.png" style="height: 50px;"/></div>
           <!--<div style="float: left;"><img src="./images/paypal-icon.png" style="height: 50px; margin-left: 10px;"/></div>-->
+        </div>
+	<div style="position: absolute; top: 0px; left: 50px;">
+	  <span style="position: absolute; top: 2px; left: 20px; color:black; z-index: 9999;">Promo Code?</span>
+          <div id="promoCode"></div>
         </div>
       </div><!--hightlight-->
     </div><!--mainbox-->
@@ -1084,7 +1219,7 @@ Ext.create('Ext.fx.Animator', {
       <div class="highlight">
         <div class="clearfix">
           <div class="featured" style="top: 100px;">
-            <div id="share" class="formPage">
+            <div id="share" class="formPage gradient-grey">
             </div>
           </div><!--featured-->
         </div><!--clearfix-->
@@ -1099,7 +1234,7 @@ Ext.create('Ext.fx.Animator', {
         <div class="clearfix">
           <div class="featured" style="top: 100px;">
             <div id="rateFormImg" class="circular" style="margin-top: 60px;"></div>
-            <div id="rateForm" class="formPage">
+            <div id="rateForm" class="formPage gradient-grey">
             </div>
           </div><!--featured-->
         </div><!--clearfix-->
@@ -1114,7 +1249,7 @@ Ext.create('Ext.fx.Animator', {
         <div class="clearfix">
           <div class="featured" style="top: 100px;">
             <div id="feedbackFormImg" class="circular" style="margin-top: 60px;"></div>
-            <div id="feedbackFormForm" class="formPage">
+            <div id="feedbackFormForm" class="formPage gradient-grey">
             </div>
           </div><!--featured-->
         </div><!--clearfix-->
@@ -1149,7 +1284,7 @@ Ext.create('Ext.fx.Animator', {
           <div class="featured" style="top: 180px;">
 
             <h2>Select the help you are willing & able to provide</h2>
-            <ul class="clearfix" id="services">
+            <ul class="clearfix" id="servicesAvailable">
               <li>
 	        <div class="frame1">
 	          <div class="box">
@@ -1163,21 +1298,21 @@ Ext.create('Ext.fx.Animator', {
               <li>
 	        <div class="frame1">
 	          <div class="box">
-	            <img id="selectCoaching" src="images/Career%20Coaching.jpg" alt="career coaching" height="130" width="197" onmouseover='this.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; this.src="images/Career%20CoachingOver.jpg";' onmouseout='this.parentNode.parentNode.style.backgroundImage="url(images/frames.png)"; this.src="images/Career%20Coaching.jpg";' onclick='serviceClicked(this, true);'>
+	            <img id="selectCoaching" src="images/Interview%20Mentoring.jpg" alt="interview mentoring" height="130" width="197" onmouseover='this.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; this.src="images/Interview%20MentoringOver.jpg";' onmouseout='this.parentNode.parentNode.style.backgroundImage="url(images/frames.png)"; this.src="images/Interview%20Mentoring.jpg";' onclick='serviceClicked(this, true);'>
 	          </div>
 	        </div>
 	        <p>
-	          <b>career coaching</b>
+	          <b>interview mentoring</b>
 	        </p>
               </li>
               <li>
                 <div class="frame1">
                   <div class="box">
-	            <img id="selectCritiquing" src="images/Resume%20Critiquing.jpg" alt="resume critiquing" height="130" width="197" onmouseover='this.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; this.src="images/Resume%20CritiquingOver.jpg";' onmouseout='this.parentNode.parentNode.style.backgroundImage="url(images/frames.png)"; this.src="images/Resume%20Critiquing.jpg";' onclick='serviceClicked(this, true);'>
+	            <img id="selectCritiquing" src="images/Resume%20Review.jpg" alt="resume review" height="130" width="197" onmouseover='this.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; this.src="images/Resume%20ReviewOver.jpg";' onmouseout='this.parentNode.parentNode.style.backgroundImage="url(images/frames.png)"; this.src="images/Resume%20Review.jpg";' onclick='serviceClicked(this, true);'>
 	          </div>
                 </div>
                 <p>
-	          <b>resume critiquing</b>
+	          <b>resume review</b>
                 </p>
               </li>
               <li>
@@ -1252,13 +1387,13 @@ Ext.create('Ext.fx.Animator', {
               </div>
             </div>
 
-            <div id="scheduler" style="width: 220px; z-index: 35; position: absolute; top: -160px; float: left; margin-left: 260px; color: #ffffff; box-shadow: -10px 10px 12px #222222; border: solid 4px #2a2a2a;">
+            <div id="scheduler" class="gradient-darkGrey" style="width: 220px; z-index: 35; position: absolute; top: -160px; float: left; margin-left: 260px; color: #ffffff; box-shadow: -10px 10px 12px #222222;">
 
 
-              <table style="width: 220px; color: #ffffff; padding: 0px;background-color:#73841D;"><tr class="scheduler-header" id="selectedDate" style="width: 220px;"></tr></table>
+              <table style="width: 220px; color: #ffffff; padding: 0px;"><tr class="scheduler-header gradient-darkGrey" id="selectedDate" style="width: 220px; padding: 4px;"></tr></table>
 
               <table id="tAppts" border="0" cellpadding="0" cellspacing="0" class="tablesorter" style="width: 220px;">
-                <thead>
+                <thead class="gradient-paleGreen">
                   <tr>
                     <th style="width: 40px;">TIME</th>
                     <th><input type="checkbox" name="checkAll" value="" onclick="setGroup('checked', this.checked);">AVAILABLE?</th>
@@ -1336,7 +1471,7 @@ Ext.create('Ext.fx.Animator', {
 
               <table style="width: 220px; color: #ffffff; padding: 0px;background-color:#73841D;" border="0" cellpadding="0" cellspacing="0">
                 <td>
-                  <div class="scheduler-header" style="height: 35px;">
+                  <div class="scheduler-header gradient-darkGrey" style="height: 35px;">
                     <div class="a-button a-button-small" style="position: absolute; right: 10px; height: 35px;" onclick="applySelection();">
                       <span class="a-button-inner" style="padding-top: 2px;">
                         <span class="a-button-text" style="margin-left: -20px;">Apply</span>
@@ -1436,51 +1571,14 @@ Ext.create('Ext.fx.Animator', {
   <div id="footer">
     <div id="footnote">
       <div class="clearfix">
-        <span style="position: relative; float: left; margin-left: 285px; margin-top: 30px; color: #75891C;">About Us</span>
+        <span style="position: relative; float: left; margin-left: 295px; margin-top: 30px; color: #ffffff;">About Us</span>
         <img class="socialicon connect" src="images/linkedin-up.png" alt="linkedin" onmouseover="this.src='images/linkedin-dn.png'; this.style.cursor='pointer';"  onmouseout="this.src='images/linkedin-up.png'"/>
         <img class="socialicon connect" src="images/facebook-up.png" alt="facebook" onmouseover="this.src='images/facebook-dn.png'; this.style.cursor='pointer';"  onmouseout="this.src='images/facebook-up.png'"/>
         <img class="socialicon connect" src="images/google-up.png"   alt="google" onmouseover="this.src='images/google-dn.png';   this.style.cursor='pointer';"  onmouseout="this.src='images/google-up.png'"/>
         <img class="socialicon connect" src="images/twitter-up.png"  alt="twitter" onmouseover="this.src='images/twitter-dn.png';  this.style.cursor='pointer';"  onmouseout="this.src='images/twitter-up.png'"/>
-        <span style="position: relative; float: left; margin-top: 30px; color: #75891C;">Contact Us</span>
+        <span style="position: relative; float: left; margin-top: 30px; color: #ffffff;">Contact Us</span>
       </div>
     </div>
-
-    <div class="clearfix">
-      <div class="section">
-	<h4>Latest News</h4>
-	<p style="color: #73841D;">
-          Launch of Interview Ring
-	</p>
-      </div>
-      <div class="section contact">
-        <h4>Contact Us</h4>
-	<p style="color: #73841D;">
-	  <span>Address:</span> Kirkland, WA
-	</p>
-	<p style="color: #73841D;">
-	  <span>Phone:</span> 206.555.5555
-	</p>
-	<p style="color: #73841D;">
-	  <span>Email:</span> info@interviewring.com
-	</p>
-      </div>
-      <div class="section">
-        <h4>SEND US A MESSAGE</h4>
-        <p style="color: #73841D;">
-	  Questions/Comments
-	</p>
-	<a href="http://www.interviewring.com/contact/" >Click to send us an email</a>
-      </div>
-    </div>
-	
-    <div id="footnote">
-      <div class="clearfix">
-	<p>
-	  © Copyright 2013 Interview Ring. All Rights Reserved.
-	</p>
-      </div>
-    </div>
-
   </div>
 
 
@@ -1596,7 +1694,7 @@ $(function()
                   //alert(num);
                   //alert("ITEM: " + prod);
                   //var img = item.get('image');
-                  window.add(time, appt, name);
+                  //window.add(time, appt, name);
                 }
 	      
                 document.getElementById('scheduler').style.display="";

@@ -51,21 +51,21 @@ $mail->Username   = "info@interviewring.com";  // GMAIL username
 $mail->Password   = "ttjozo123";             // GMAIL password
 
 $address = "info@interviewring.com";
-$mail->SetFrom($address, '');
+$mail->SetFrom($address, 'Interviewring Appt.');
 
-$mail->AddReplyTo($address, '');
+$mail->AddReplyTo($address, 'Interviewring Appt.');
 
 $mail->Subject    = "Your Purchase from interviewring.com";
 
 $mail->MsgHTML($body);
 
-$mail->AddAddress($address, "");
+$mail->AddAddress($address, "Interviewring Appt.");
 $address = $payer_email;
-$mail->AddAddress($address, "");
+$mail->AddAddress($address, $first_name);
 
 foreach ($provider_emails as $key => $value) 
 {
-  #$mail->AddAddress($value, "");
+  $mail->AddAddress($value, "");
 }
 
 

@@ -2,6 +2,15 @@
 
 var formItems = {"communication skills":"","technical knowledge":"","Seniority Level":"","overall feedback":""};
 
+var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['Interviewing','Career Coaching','Resume Critiquing','Interview Tips'], "price":['FREE', '$1-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-250/hr', '$250+/hr']};
+
+var filterCounts = {};
+filterCounts.industry = {};
+filterCounts.company = {};
+filterCounts.rating = {};
+filterCounts.experience = {};
+filterCounts.services = {};
+filterCounts.price = {};
 
 var paymentReturn = false;
 var socialShareReturn = false;
@@ -11,6 +20,7 @@ var returnParameters = {};
 
 var gStars = 0;
 var subTotals = {};
+var subTotalsSaved = {};
 var total = 0;
 var curr = 0;
 var initStr = new Array();
@@ -319,6 +329,15 @@ Ext.override(Ext.getCmp('myCal'), {
     else {loadFeedbackCount();}
   }
 
+  function waitLoading10()
+  {
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    {
+      countdown = setTimeout('waitLoading10()', 500);
+    }
+    else {window.showSearch(document.getElementById('explore').value,2);}
+  }
+
 
 var inProfile;
 
@@ -405,7 +424,127 @@ var inProfile;
           company = profile.positions.values[0].company.name;
           industry = profile.positions.values[0].company.industry;
           position = profile.positions.values[0].title;
+
         }
+        //console.log(company);
+
+        var found = 0;
+        if(!filters.industry) {filters.industry = new Array();}
+        for(var i = 0; i < filters.industry.length; i++) {if(filters.industry[i] === industry) found++;}
+        if(!found) {filters.industry.push(industry);}
+
+        found = 0;
+        if(!filters.company)  {filters.company = new Array();}
+        for(var i = 0; i < filters.company.length; i++) {if(filters.company[i] === company) found++;}
+        if(!found) {filters.company.push(company);}
+
+        if(!filterCounts.industry[industry]) filterCounts.industry[industry] = 0;
+        if(!filterCounts.company[company]) filterCounts.company[company] = 0;
+
+        filterCounts.industry[industry]++;
+        filterCounts.company[company]++;
+
+
+        // --Services--
+        var LO = 999999;
+        var HI = 0;
+	var serviceItems = new Array();
+        services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
+        for (var key in services)
+        {
+	  serviceItems.push(key);
+          if(!filterCounts.services[key]) filterCounts.services[key] = 0;
+          filterCounts.services[key]++;
+          if(parseInt(services[key],10) < LO) {LO = parseInt(services[key],10);}
+          if(parseInt(services[key],10) > HI) {HI = parseInt(services[key],10);}
+        }
+
+        // --Rating --
+        var ratingObj =  Ext.JSON.decode(productStore.getById(inID).data.reviews);
+        var rating = Math.ceil(ratingObj.average) || 0;
+
+
+
+
+
+
+        for(var key in filters)
+	{
+
+	  if(key == 'price')
+	  {
+	    //console.log("PRICE");
+	    var items = filters[key];
+	    for(var i = 0; i < items.length; i++)
+	    {
+	      var item = items[i];
+              //console.log(item);
+	      item = item.replace('/hr','');
+	      item = item.replace(/\$/g,'');
+              item = item.replace('FREE', '0');
+              item = item.replace('+', '-999999');
+	      var split = item.split('-');
+	      var priceLO = parseInt(split[0],10);
+              var priceHI = parseInt(split[1],10) || parseInt('0',10);
+              //console.log(LO + "->" + " LO: " + priceLO + " HI: " + priceHI);
+	      if(LO >= priceLO && LO <= priceHI)
+              {
+		productStore.getById(inID).data.price = items[i];
+		if(!filterCounts.price[items[i]]) filterCounts.price[items[i]] = 0;
+		filterCounts.price[items[i]]++;
+	      }
+	    }
+	    //console.log("SET TO: " + productStore.getById(inID).data.price);
+	  }
+	  else if(key == 'rating')
+	  {
+	    //console.log("PRICE");
+	    var items = filters[key];
+	    for(var i = 0; i < items.length; i++)
+	    {
+	      var item = items[i];
+              //console.log(item);
+	      item = item.replace(/\s*star/,'');
+	      var star = parseInt(item,10);
+              //console.log(LO + "->" + " LO: " + priceLO + " HI: " + priceHI);
+	      if(rating == star)
+	      {
+		productStore.getById(inID).data.rating = items[i];
+		if(!filterCounts.rating[items[i]]) filterCounts.rating[items[i]] = 0;
+		filterCounts.rating[items[i]]++;
+	      }
+	    }
+	    //console.log("SET TO: " + productStore.getById(inID).data.rating);
+	  }
+	  else if(key == 'experience')
+	  {
+	    //console.log("EXPERIENCE");
+	    var items = filters[key];
+	    for(var i = 0; i < items.length; i++)
+	    {
+	      var item = items[i];
+              //console.log(item);
+	      item = item.replace(/\s*years/,'');
+	      var split = item.split('-');
+	      var expLO = parseInt(split[0],10);
+              var expHI = parseInt(split[1],10) || parseInt('0',10);
+              var experience = parseInt(totalTenure[industry],10);
+              //console.log(experience + "->" + " LO: " + expLO + " HI: " + expHI);
+	      if(experience >= expLO && experience <= expHI)
+	      {
+		productStore.getById(inID).data.experience = items[i];
+		if(!filterCounts.experience[items[i]]) filterCounts.experience[items[i]] = 0;
+		filterCounts.experience[items[i]]++;
+	      }
+	    }
+	    //console.log("SET TO: " + productStore.getById(inID).data.experience);
+	  }
+
+
+	}
+
+        productStore.getById(inID).data.services = serviceItems;
+
 
         //console.log(inID);
         //console.log(first);
@@ -419,12 +558,13 @@ var inProfile;
         productStore.getById(inID).data.position = position;
         productStore.getById(inID).data.summary = summary;
         productStore.getById(inID).data.image = profile.pictureUrls.values ? profile.pictureUrls.values[0] : "./images/ghost.png";
+        productStore.getById(inID).data.imageSmall = profile.pictureUrl || "./images/ghostSmall.png";
         productStore.getById(inID).data.url = profile.publicProfileUrl;
         productStore.getById(inID).data.isDirty = false;
         
         //console.log(profile.id);
         //console.log(productStore.getById(inID).data.company);
-        console.log(productStore.getById(inID).data.image);
+        //console.log(productStore.getById(inID).data.image);
         loading--;
         //console.log(loading);
       }//for(var key in result.values)
@@ -440,6 +580,10 @@ var inProfile;
           async:false
         });
       }
+
+      //filters['company'].unique();
+      //filters.company.unique();
+
       linkedinLoaded = true;
 
     })//.result(function(result)
@@ -457,7 +601,7 @@ var inProfile;
     function onLinkedInLogin() {
       // we pass field selectors as a single parameter (array of strings)
       IN.API.Profile("me")
-	.fields(["emailAddress", "imAccounts", "phoneNumbers", "id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions"])
+	.fields(["emailAddress", "imAccounts", "phoneNumbers", "id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions", "educations"])
       .result(function(result) {
         inProfile = result.values[0];
         setLoginBadge(result.values[0]);
@@ -482,7 +626,7 @@ var inProfile;
       }
       else {
         var pictureUrl = profile.pictureUrl || "http://static02.linkedin.com/scds/common/u/img/icon/icon_no_photo_80x80.png";
-        profHTML = 'Welcome ' + profile.firstName + ' ' + ' <a href="#" onclick="IN.User.logout(); return true;"><img src="images/logoutLittle-up.png" style="height: 25px;" onmouseover="this.src=\'images/logoutLittle-dn.png\';" onmouseout="this.src=\'images/logoutLittle-up.png\';"/></a><div style="position: absolute; top: 20px; left: 80px;"><div class="gear-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'gear-dn\';" onmouseout="this.className=\'gear-up\';" onclick="showSettings();"></div></div>';
+        profHTML = 'Welcome ' + profile.firstName + ' ' + ' <a href="#" onclick="IN.User.logout(); return true;"><img src="images/logoutLittle-up.png" style="height: 25px;" onmouseover="this.src=\'images/logoutLittle-dn.png\';" onmouseout="this.src=\'images/logoutLittle-up.png\';"/></a><div style="position: absolute; top: 20px; left: 80px;"><div class="dropdown-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'dropdown-dn\';" onmouseout="this.className=\'dropdown-up\';" onclick="showSettings();"></div></div>';
       }
 
       document.getElementById('login').innerHTML = profHTML;
@@ -501,6 +645,16 @@ var inProfile;
       var position = '--';
       var image = profile.pictureUrls.values ? profile.pictureUrls.values[0] : "./images/ghost.png";
       var url = profile.publicProfileUrl;
+      var education = '';
+
+      if(profile.educations.values)
+      {
+        for(var i = 0; i < profile.educations.values.length; i++)
+	{
+	  education += profile.educations.values[i].schoolName + ' [' + profile.educations.values[i].degree + ' ' + profile.educations.values[i].fieldOfStudy + ']' + '<br>';
+	}
+      }
+
 
       if(profile.positions.values)
       {
@@ -546,7 +700,10 @@ var inProfile;
       //document.getElementById("firstName").innerHTML = profile.firstName;
       //createCookie('INID', profile.id);
       //inID = profile.id;
-      user.push({inID: inID, first: first, last: last, company: company, position: position, image: image, url: url, email: email, imAccount: imAccount, phoneNumber: phoneNumber});
+      user.push({inID: inID, first: first, last: last, company: company, position: position, image: image, url: url, email: email, imAccount: imAccount, phoneNumber: phoneNumber, education: education});
+
+
+
       waitLoading8();  //loadMail()
       //loadSchedule();
     }
@@ -595,6 +752,58 @@ var inProfile;
     }
     return aString;
   }
+
+
+
+
+window.back2ascii = function(dat)
+{
+  var i,j,k,len=dat.length
+  var ary3 = new Array ();              // output array (b)
+  j = 0;                              // output array index
+  for (i=0; i<len; i++)
+  {             // hex format
+    k = dat[i];
+    ary3[j++]=B64.charAt(k>>4)+B64.charAt(k&15);
+  }
+  return ary3.join("");               // len-char hash of aray
+}
+
+window.applyDiscount = function (validCode, code)
+{
+  if(!validCode)
+  {
+    if(Object.size(subTotalsSaved))
+    {
+      //console.log(getTotal(subTotalsSaved));
+      subTotals = JSON.parse(JSON.stringify(subTotalsSaved));
+      subTotalsSaved = {};
+    }
+  }
+  else
+  {
+    if(code == 1)
+    {
+    }
+    else if(code == 2)
+    {
+    }
+    else if(code == 3)
+    {
+      if(!Object.size(subTotalsSaved)) {subTotalsSaved = JSON.parse(JSON.stringify(subTotals));}
+      //console.log("SIZE: " + Object.size(subTotalsSaved));
+      subTotals = {};
+    }
+    else
+    {
+    }
+  }
+  total = getTotal(subTotals);
+  document.getElementById("Total").innerHTML = "TOTAL: $" + currencyFormatted(total);
+}
+
+
+
 
 
 
@@ -704,8 +913,59 @@ else if(addr == 'feedback')
 
 
 
+//var val = 'TEST';
+//console.log(back2ascii(Hash2(FixUTF(val),12)));
 
 
+
+var coupons = new Array
+(// place to put coupon codes
+  "1",                         // 1st coupon hash - comma seperated
+  "2",                         // 2nd coupon hash - add all you want
+  "d763de7bebe37b645c595558",  // 3rd coupon hash
+  "d763de7bebe37b645c595558"   // 4th coupon hash
+);
+
+
+Ext.apply(Ext.form.VTypes, {
+
+    validate : function(val, field)
+    {
+      var match = false;
+      var index=99, cv=Hash2(FixUTF(val),12);  // calc hash of input
+      cv = back2ascii(cv);                     // convert to display format
+      for (var i=0; i<coupons.length; i++)
+      {
+	//alert(cv + ' ' + coupons[i]);
+        if (cv == coupons[i]) {match = true; index = i;}
+      }
+      applyDiscount(match, index);
+      return (match);
+    },
+    validateText : 'no match'
+});
+
+
+
+
+Ext.create('Ext.form.Panel', {
+  renderTo: 'promoCode',
+  title: 'Promo Code?',
+  bodyPadding: 5,
+  width: 150,
+  height: 60,
+  defaultType: 'textfield',
+  items: [{
+        fieldLabel: 'Code',
+        labelWidth: 30,
+        name: 'promoForm',
+	id: 'promoForm',
+	value: '',
+        vtype: 'validate'
+  }]
+});
+
+ 
 
 
 
@@ -866,7 +1126,7 @@ else if(addr == 'feedback')
 
       //console.log(first);
       var services;
-      if(item.get('services')) {services = Ext.JSON.decode(item.get('services'));}
+      if(item.get('providedServices')) {services = Ext.JSON.decode(item.get('providedServices'));}
 
       var found = first.match(matchRE);
       found += last.match(matchRE);
@@ -885,13 +1145,93 @@ else if(addr == 'feedback')
       
       if(found)
       {
-        initStr.push({src: image, label: {description: item.get('first') + ' ' + item.get('last'), price: item.get('last'), url: item.get('url'), high: image, id: item.get('inID'), company: item.get('company') || 'Amazon'}});
+        //initStr.push({src: image, label: {description: item.get('first') + ' ' + item.get('last'), price: item.get('last'), url: item.get('url'), high: image, id: item.get('inID'), company: item.get('company') || 'Amazon'}});
+        initStr.push({id: item.get('inID')}); 
       }
     }); //productStore.data.each
+
+    applyFilters();
+    initStr.sort(sortfunction)
+    populateSearchItems();
+
 
     showLabel(curr);
     setSliderPosition(curr);
   } //loadProducts()
+
+
+function sortfunction(a, b)
+{
+  //Compare "a" and "b" in some fashion, and return <0, 0, or >0
+  //Less than 0: Sort "a" to be a lower index than "b"
+  //Zero: "a" and "b" should be considered equal, and no sorting performed.
+  //Greater than 0: Sort "b" to be a lower index than "a".
+
+  var e = document.getElementById("sortSearch");
+  var opt = e.options[e.selectedIndex].value;
+  
+  if(opt == 'company')
+  {
+    if(productStore.getById(a.id).data.company < productStore.getById(b.id).data.company) {return -1;}
+    if(productStore.getById(a.id).data.company > productStore.getById(b.id).data.company) {return 1;}
+    return 0;
+  }
+  else if(opt == 'rating')
+  {
+    var ratingObj =  Ext.JSON.decode(productStore.getById(a.id).data.reviews);
+    var arating = Math.ceil(ratingObj.average) || 0;
+    var areviews = ratingObj.total || 0;
+    var ratingObj =  Ext.JSON.decode(productStore.getById(b.id).data.reviews);
+    var brating = Math.ceil(ratingObj.average) || 0;
+    var breviews = ratingObj.total || 0;
+
+    if(arating == brating)
+    {
+      return (areviews < breviews);
+    }
+    else
+    {
+      return (arating < brating);
+    }
+  }
+  else if(opt == 'experience')
+  {
+    return (productStore.getById(a.id).data.industryTenure < productStore.getById(b.id).data.industryTenure);
+  }
+  else if(opt == 'price')
+  {
+    var aLO = 9999999;
+    var aHI = 0;
+    var bLO = 9999999;
+    var bHI = 0;
+
+
+    // --Services--
+    services = Ext.JSON.decode(productStore.getById(a.id).data.providedServices);
+    for (var key in services)
+    {
+      if(parseInt(services[key],10) < aLO) {aLO = parseInt(services[key],10);}
+      if(parseInt(services[key],10) > aHI) {aHI = parseInt(services[key],10);}
+    }
+    // --Services--
+    services = Ext.JSON.decode(productStore.getById(b.id).data.providedServices);
+    for (var key in services)
+    {
+      if(parseInt(services[key],10) < bLO) {bLO = parseInt(services[key],10);}
+      if(parseInt(services[key],10) > bHI) {bHI = parseInt(services[key],10);}
+    }
+
+    //console.log("aLO: " + aLO + " bLO: " + bLO);
+    return (aLO - bLO);
+  }
+
+
+}
+
+
+
+
+
 
 
   window.prev = function(n)
@@ -991,6 +1331,294 @@ else if(addr == 'feedback')
 
 
 
+
+
+
+
+
+
+
+  function populateSearchItems()
+  {
+    //console.log('populateSearchItems');
+    var services = {};
+    var imgID = '';
+
+    document.getElementById("searchItems").innerHTML = '';
+    document.getElementById("results").innerHTML = 'Search Results: ' + initStr.length;
+
+    for(var index = 0; index < initStr.length; index++)
+    {
+      //var ID = initStr[n].label.id;
+      var ID = initStr[index].id;
+      //console.log(ID);
+
+      //console.log(new Date().getTime());
+
+      // --Rating--
+      var ratingStr = '';
+      var ratingObj =  Ext.JSON.decode(productStore.getById(ID).data.reviews);
+
+      var rating = Math.ceil(ratingObj.average);
+      var rates = ratingObj.total || 0;
+      //console.log(ratingObj.comments);
+      if(!rating) {rating = 0;}
+
+
+
+
+
+      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="window.event.stopPropagation(); window.event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ');"><div style="z-index: 100; height: 35px;">';
+      ratingStr += '<div style="right: -6px;">';
+      for(var i = rating; i < 5; i++)
+      {
+        ratingStr += '<img src="images/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      for(var i = 0; i < rating; i++)
+      {
+        ratingStr += '<img src="images/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      ratingStr += '</div></div><div style="color: #555; text-align: right; position: absolute; top: 15px; right: 0px;">' + rates + ' Reviews</div></div>';
+
+
+
+
+
+
+      // --Name--
+      var first = productStore.getById(ID).data.first;
+      var last = productStore.getById(ID).data.last;
+      var url = productStore.getById(ID).data.url;
+      var link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a href="' + url + '" target="_blank" style="font-size:12px; font-weight:100; text-align: center;">LinkedIn Profile</a><hr></div>';
+      var label = first + ' ' + last;
+
+      // --Services--
+      services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+      //console.log(services);
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444;">';
+      for (var key in services)
+      {
+        //console.log('KEY: ' + key + ' = ' + services[key]);//var s = obj.
+        var split = key.split(' ');
+        imgID = 'service' + split.pop();
+        //console.log("SETTING: " + imgID);
+        //help += '<li><div class="frame1"><div class="box"><img id="' + imgID + '" src="' + 'images/' + key + '.jpg' + '" alt="' + key + '" height="130" width="197" onmouseover=\"this.style.cursor=\'pointer\'; this.parentNode.parentNode.style.backgroundImage=\'url(images/framesHi.png)\'; this.src=\'' + 'images/' + key + 'Over.jpg' + '\';\" onmouseout=\"this.parentNode.parentNode.style.backgroundImage=\'url(images/frames.png)\'; this.src=\'' + 'images/' + key + '.jpg\';\" onclick=\"serviceClicked(this, false);\"/></div><span class="servicePrice">$' + services[key] + '/hr</span></div><p><b>' + key + '</b></p></li>';
+        help += '<div style="width: 200px;"><span style="float: left;">' + key + '</span><span style="float: right;">$' + services[key] + '/hr</span></div><br>';
+      }
+      help += '</div>';
+      //console.log(help);
+
+      // --Company--
+      var company =  productStore.getById(ID).data.company || "";
+      var companyTenure =  productStore.getById(ID).data.companyTenure || 0;
+
+      // --Industry--
+      var indsutry =  productStore.getById(ID).data.industry || "";
+      var industryTenure =  productStore.getById(ID).data.industryTenure || 0;
+
+      // --Position--
+      var position =  productStore.getById(ID).data.position || "";
+
+      var education = productStore.getById(ID).data.education || "";
+      //  Only display most recent education
+      var split = education.split('<br>');
+      education = split[0];
+
+      // --Image--
+      var image = productStore.getById(ID).data.imageSmall || "./images/ghostSmall.png";
+      //var image = productStore.getById(ID).data.image || 'http://m.c.lnkd.licdn.com/mpr/mpr/shrink_200_200/p/2/000/1a8/1fc/3597e0f.jpg';
+
+      if(settings[ID]['identity']) {label = ""; image = "./images/ghostSmall.png"; link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a target="_blank" style="font-size:12px; font-weight:100; text-align: center;">--</a><hr></div>';}
+
+
+      /*
+    }
+    else
+    {
+      // --Name--
+      var first = "--";
+      var last = "--";
+      var url = "#";
+      var link = '--';
+      var label = first + ' ' + last;
+
+      // --Offerings--
+      var services = "";
+      //var help = '<li><div class="frame1"><div class="box"><img src="' + 'images/null.jpg' + '" alt="No Results" height="130" width="197"></div></div><p><b>' + 'No Results' + '</b></p></li>';
+
+      //console.log(help);
+
+      // --Company--
+      var company =  "--";
+      var companyTenure = "--";
+
+      // --Industry--
+      var indsutry =  "--";
+      var industryTenure = "--";
+
+      // --Position--
+      var position =  "--";
+
+      var education = "--";
+
+      // --Image--
+      var image = "images/noresults.png";
+      document.getElementById("providerRating").innerHTML = "";
+
+    }
+      */
+
+    var window = document.createElement("div");
+    window.className = "searchItem";
+    window.id = "searchItem" + index;
+    window.onclick = function() {makeAppt(this.id);};
+
+    var itemImage = document.createElement("div");
+    itemImage.className = "circular-small";
+    itemImage.style.background = 'url(' + image + ') no-repeat center center';
+    //itemImage.style.background = 'url(' + image + ') no-repeat';
+    window.appendChild(itemImage);
+    
+    var itemName = document.createElement("div");
+    itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
+
+    var itemPosition = document.createElement("div");
+    itemPosition.innerHTML = position;
+    window.appendChild(itemPosition);
+
+    var itemCompany = document.createElement("div");
+    itemCompany.innerHTML = company + ' (' + companyTenure + 'yrs, Industry: ' + industryTenure + 'yrs)';
+    window.appendChild(itemCompany);
+
+    var itemEducation = document.createElement("div");
+    itemEducation.innerHTML = education;
+    window.appendChild(itemEducation);
+
+    var itemLink = document.createElement("div");
+    itemLink.innerHTML = link;
+    window.appendChild(itemLink);
+
+    var itemRating = document.createElement("div");
+    itemRating.innerHTML = ratingStr;
+    window.appendChild(itemRating);
+
+    var itemServices = document.createElement("div");
+    itemServices.innerHTML = help;
+    window.appendChild(itemServices);
+
+    document.getElementById("searchItems").appendChild(window);
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+    //var quickLinks = document.createElement("div");
+    //quickLinks.id = "quickLinks";
+    //quickLinks.className = "quickLinks";
+    var quickLinks = document.getElementById("quickLinks");
+
+    if(!quickLinks.innerHTML)
+    {
+
+    
+
+
+
+    var qlIndustry = document.createElement("div");
+    qlIndustry.id = "qlIndustry";
+    qlIndustry.className = "qlHeader";
+    qlIndustry.innerHTML = "<h3>INDUSTRY</h3>";
+
+    var qlCompany = document.createElement("div");
+    qlCompany.id = "qlCompany";
+    qlCompany.className = "qlHeader";
+    qlCompany.innerHTML = "<h3>COMPANY</h3>";
+
+    var qlRating = document.createElement("div");
+    qlRating.id = "qlRating";
+    qlRating.className = "qlHeader";
+    qlRating.innerHTML = "<h3>RATING</h3>";
+
+    var qlExperience = document.createElement("div");
+    qlExperience.id = "qlExperience";
+    qlExperience.className = "qlHeader";
+    qlExperience.innerHTML = "<h3>EXPERIENCE</h3>";
+
+    var qlServices = document.createElement("div");
+    qlServices.id = "qlServices";
+    qlServices.className = "qlHeader";
+    qlServices.innerHTML = "<h3>SERVICES</h3>";
+
+    var qlPrice = document.createElement("div");
+    qlPrice.id = "qlPrice";
+    qlPrice.className = "qlHeader";
+    qlPrice.innerHTML = "<h3>PRICE</h3>";
+
+    quickLinks.appendChild(qlIndustry);
+    quickLinks.appendChild(qlCompany);
+    quickLinks.appendChild(qlRating);
+    quickLinks.appendChild(qlExperience);
+    quickLinks.appendChild(qlServices);
+    quickLinks.appendChild(qlPrice);
+
+
+
+
+
+
+    for(var key in filterCounts)
+    {
+      //console.log("" + key);
+      var elID = 'ql' + key.capitalize(); 
+      //console.log(elID);
+      var el = document.getElementById(elID);
+      var innerHTML = '<div class="qlSection">';
+      for(var item in filterCounts[key])
+      {
+	//console.log("  " + item + " (" + filterCounts[key][item] + ")");
+        innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doQuickLink(\'' + key + '\',\'' + item + '\');">' + '  ' + item + ' (' + filterCounts[key][item] + ')</span><br>';
+      }
+      el.innerHTML += innerHTML + '</div>';
+    }
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   window.showLabel = function(n)
   {
 
@@ -1012,28 +1640,29 @@ else if(addr == 'feedback')
 
     if(initStr.length)
     {
-      var ID = initStr[n].label.id;
+      //var ID = initStr[n].label.id;
+      var ID = initStr[n].id;
       //console.log(ID);
 
       //console.log(new Date().getTime());
 
       // --Rating--
       var ratingStr = '';
-      var ratingObj =  Ext.JSON.decode(productStore.getById(ID).data.rating);
+      var ratingObj =  Ext.JSON.decode(productStore.getById(ID).data.reviews);
 
       var rating = Math.ceil(ratingObj.average);
       var rates = ratingObj.total || 0;
       //console.log(ratingObj.comments);
       if(!rating) {rating = 0;}
 
-      var ratingStr = '<div onmouseover="this.style.cursor=\'pointer\';" onclick="showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\');"><img src="images/starBoard.png" style="z-index: 100; position: absolute; top: 10px; left:150px;"/>';
+      var ratingStr = '<div onmouseover="this.style.cursor=\'pointer\';" onclick="showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\');"><img src="images/starBoard.png" style="z-index: 20; position: absolute; top: 10px; left:150px;"/>';
       for(var i = rating; i < 5; i++)
       {
-        ratingStr += '<img src="images/emptyStar.png" style="z-index: 99; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
+        ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
       }
       for(var i = 0; i < rating; i++)
       {
-        ratingStr += '<img src="images/filledStar.png" style="z-index: 99; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
+        ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
       }
       ratingStr += '<span style="position: absolute; top: 10px; left: 270px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
       document.getElementById("providerRating").innerHTML = ratingStr;
@@ -1050,7 +1679,7 @@ else if(addr == 'feedback')
       var label = first + ' ' + last;
 
       // --Services--
-      services = Ext.JSON.decode(productStore.getById(ID).data.services);
+      services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
       //console.log(services);
       var help = '';
       for (var key in services)
@@ -1125,7 +1754,7 @@ else if(addr == 'feedback')
       Ext.get("labelLink").fadeOut({opacity: 0.3, easing: 'easeIn', duration: 100, callback: function() {document.getElementById('labelLink').innerHTML = link;} });
       Ext.get("image").fadeOut({opacity: 0.3, easing: 'easeIn', duration: 100, callback: function() {document.getElementById('image').src = image;} });
 
-      Ext.get("services").fadeOut({opacity: 0.3, easing: 'easeIn', duration: 100, callback: function() {document.getElementById('services').innerHTML = help;} });
+      Ext.get("servicesAvailable").fadeOut({opacity: 0.3, easing: 'easeIn', duration: 100, callback: function() {document.getElementById('servicesAvailable').innerHTML = help;} });
 
 
       Ext.get("labelName").fadeIn({opacity: 1, easing: 'easeIn', duration: 500});
@@ -1135,7 +1764,7 @@ else if(addr == 'feedback')
       Ext.get("image").fadeIn({opacity: 1, easing: 'easeIn', duration: 500});
 
       //Ext.get("services").fadeIn({opacity: 1, easing: 'easeIn', duration: 500, callback: function() {if(Object.size(services) == 1){var el = document.getElementById(imgID); el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; serviceClicked(el,false);}}   });
-      Ext.get("services").fadeIn({opacity: 1, easing: 'easeIn', duration: 500});
+      Ext.get("servicesAvailable").fadeIn({opacity: 1, easing: 'easeIn', duration: 500});
     }
 
     
@@ -1157,7 +1786,7 @@ window.sort = function(regExp)
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var services;
-  if(productStore.getById(ID).data.services) {services = Ext.JSON.decode(productStore.getById(ID).data.services);}
+  if(productStore.getById(ID).data.providedServices) {services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);}
 
   var found = first.match(matchRE);
   found += last.match(matchRE);
@@ -1273,7 +1902,7 @@ window.sort = function(regExp)
 
 
 
-
+/*
 window.add = function(time, appt, name)
 {
   var el = document.getElementById("tAppts");
@@ -1349,7 +1978,7 @@ window.addAppointment = function()
   }
   
 }
-
+*/
 
 
 
@@ -1422,7 +2051,10 @@ function countdown_clear()
 
 
 
-
+String.prototype.capitalize = function()
+{
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 
 String.prototype.isPrintable=function()
@@ -1749,7 +2381,7 @@ function showServices()
   //if(productStore.getById(user[0].inID).data.role != 'find')
   if(1)
   {
-    var services = Ext.JSON.decode(productStore.getById(user[0].inID).data.services);
+    var services = Ext.JSON.decode(productStore.getById(user[0].inID).data.providedServices);
     //console.log(services);
     for (var key in services)
     {
@@ -1757,10 +2389,10 @@ function showServices()
       var matchRE = new RegExp("Interviewing", "i");
       var interviewing = key.match(matchRE);
 
-      var matchRE = new RegExp("Coaching", "i");
+      var matchRE = new RegExp("Mentor|Coach", "i");
       var coaching = key.match(matchRE);
 
-      var matchRE = new RegExp("Critiquing", "i");
+      var matchRE = new RegExp("Review|Critique", "i");
       var critiquing = key.match(matchRE);
 
       var matchRE = new RegExp("Tips", "i");
@@ -1800,7 +2432,18 @@ function showServices()
 
 
 
-
+function getServices(inID)
+{
+  var servicesClicked = new Array();
+  if(!productStore.getById(inID)) {return;}
+  var services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
+  //console.log(services);
+  for (var key in services)
+  {
+    servicesClicked.push(key);
+  }
+  return servicesClicked;
+}
 
 function getClickedServices(inID, force)
 {
@@ -1809,7 +2452,7 @@ function getClickedServices(inID, force)
   //if(productStore.getById(inID).data.role != 'find')
   if(1)
   {
-    var services = Ext.JSON.decode(productStore.getById(inID).data.services);
+    var services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
     //console.log(services);
     for (var key in services)
     {
@@ -1817,10 +2460,10 @@ function getClickedServices(inID, force)
       var matchRE = new RegExp("Interviewing", "i");
       var interviewing = key.match(matchRE);
 
-      var matchRE = new RegExp("Coaching", "i");
+      var matchRE = new RegExp("Mentor", "i");
       var coaching = key.match(matchRE);
 
-      var matchRE = new RegExp("Critiquing", "i");
+      var matchRE = new RegExp("Review", "i");
       var critiquing = key.match(matchRE);
 
       var matchRE = new RegExp("Tips", "i");
@@ -1858,7 +2501,7 @@ function getClickedServices(inID, force)
         var matchRE = new RegExp("Selected", "i");
         if(file.match(matchRE) || force)
         {
-          servicesClicked.push("Career Coaching");
+          servicesClicked.push("Interview Mentoring");
 	}
       }
       else if(critiquing)
@@ -1875,7 +2518,7 @@ function getClickedServices(inID, force)
         var matchRE = new RegExp("Selected", "i");
         if(file.match(matchRE) || force)
         {
-          servicesClicked.push("Resume Critiquing");
+          servicesClicked.push("Resume Review");
 	}
       }
       else if(tips)
@@ -2018,7 +2661,7 @@ function getNumServices()
 
 function showApptScheduler(sch, selected, oldSch)
 {
-  var r = document.getElementsByName("checkAll");
+  var r = document.getElementsByName("apptTime");
   for (var i = 0; i < r.length; i++)
   {
     r[i].checked = false;
@@ -2059,16 +2702,22 @@ function showApptScheduler(sch, selected, oldSch)
 
 function scheduleThisDay(cal)
 {
-  var ID = initStr[curr].label.id;
+  //console.log(cal.id);
+  
+  curr = parseInt(cal.id.replace("currCalendar",""), 10);
+  //var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   var selected = new Array();
-  var services = Ext.JSON.decode(productStore.getById(ID).data.services);
+  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
   var numServices = Object.size(services);
-  selected = getClickedServices(ID);
+  //selected = getClickedServices(ID);
+  selected = getServices(ID);
   var numSelected = selected.length;
   if(!numSelected)
   {
     var forced = true;
-    selected = getClickedServices(ID,forced);
+    //selected = getClickedServices(ID,forced);
+    selected = getServices(ID);
   }
   //console.log(numSelected);
 
@@ -2142,7 +2791,7 @@ function scheduleThisDay(cal)
 
   //var oldSch = getSchedule(Ext.getCmp('myCalendar'), tDay);
   var oldSch = getSchedule(user[0].inID, tDay);
-
+  //console.log(oldSch);
 
   showApptScheduler(sch, selected, oldSch);
 
@@ -2160,7 +2809,7 @@ function applySchedule()
 {
   var thisAppt = makeApptThisDay(dayIndex, monthIndex, year);
   var apptDay = dayNames[dayNumber] + ' ' + monthNames[monthIndex-1] + ' ' + dayIndex + ', ' + year;
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   var day = dayIndex;
   var month = monthIndex;
   day = pad(day, 2);
@@ -2190,7 +2839,7 @@ function applySchedule()
   if(! document.getElementById("showApptAdded"))
   {
     var window = document.createElement("div");
-    window.className = "show-cal";
+    window.className = "show-cal darkGrey";
     window.id = "showApptAdded";
 
     var close = document.createElement("div");
@@ -2238,35 +2887,25 @@ function applySchedule()
 
 
 
-function makeAppt()
+function makeAppt(id)
 {
 
-
-  var ID = initStr[curr].label.id;
+  //console.log('makeAppt' + "(" + id + ")");
+  var index = parseInt(id.replace("searchItem",''),10);
+  curr = index;
+  var ID = initStr[index].id;
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var name = first + ' ' + last;
 
-  if(document.getElementById("ratingsContainer")) {document.getElementById("ratingsContainer").style.display="none";}
-  if(document.getElementById("infoContents"))
+
+  if(!document.getElementById("calContainer" + index))
   {
-    var el = document.getElementById("infoContents");
-    el.style.display = "none";
-    if(document.getElementById("infoContentsWrapper"))
-    {
-      el = document.getElementById("infoContentsWrapper");
-      //el.style.zIndex = 55;
-      //var cal = document.createElement("div");
-      //cal.id = name;
-      //el.appendChild(cal);
-
-
-      if(!document.getElementById("calContainer"))
-      {
 
     var container = document.createElement("div");
-    container.id = "calContainer";
+    container.id = "calContainer" + index;
+    container.className = "calContainer";
     container.style.marginRight = 0 + "px";
     container.style.marginTop = 0 + "px";
     //container.style.zIndex = 55;
@@ -2275,28 +2914,28 @@ function makeAppt()
     var title = document.createElement("div");
     title.id = "calTitle";
     title.innerHTML = '<div class="sidebar"><ul class="contact"><li><p><span class="name"></span><em id="labelName">' + nameToDisplay + '\'s' + ' calendar</em></p></li></ul></div>';
-    title.style.marginTop = 0 + "px";
-    container.appendChild(title);
+    title.style.marginTop = 20 + "px";
+    //container.appendChild(title);
 
     var dismiss = document.createElement("div");
     dismiss.style.position = "absolute";
     dismiss.style.top = 10 + 'px';
-    dismiss.style.right = 65 + 'px';
+    dismiss.style.right = 10 + 'px';
     dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\';"></div>';
-    container.appendChild(dismiss);
+    //container.appendChild(dismiss);
    
 
     var window = document.createElement("div");
-    window.className = "showCurrCal";
-    window.id = "showCurrCal";
-    window.style.left = 40 + "px";
-    window.style.marginTop = -20 + "px";
+    window.className = "showCurrCal darkGrey";
+    window.id = "showCurrCal" + index;
+    window.style.left = 0 + "px";
+    window.style.marginTop = 0 + "px";
     //window.style.zIndex = 55;
     
 
     // 
     var close = document.createElement("div");
-    close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\';"></div>';
+    close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="window.event.stopPropagation(); window.event.cancelBubble = true; this.parentNode.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\'; return false;"></div>';
     close.style.position = "absolute";
     close.style.zIndex = 100;
     close.style.float = "right";
@@ -2308,27 +2947,27 @@ function makeAppt()
 
     var content = document.createElement("div");
     content.className = "showCalContent";
-    content.id = "showCurrCalContent";
+    content.id = "showCurrCalContent" + index;
     //content.style.zIndex = 100;
     window.appendChild(content);
 
     container.appendChild(window);
-    el.appendChild(container);
+    document.getElementById(id).appendChild(container);
     
 
-	}
-        else
-	{
-          document.getElementById("calTitle").innerHTML = '<div class="sidebar"><ul class="contact"><li><p><span class="name"></span><em id="labelName">' + first + ' ' + last + '\'s' + ' calendar</em></p></li></ul></div>';
-          document.getElementById("calContainer").style.display = "";
-	}
+  }
+  else
+  {
+    //document.getElementById("calTitle").innerHTML = '<div class="sidebar"><ul class="contact"><li><p><span class="name"></span><em id="labelName">' + first + ' ' + last + '\'s' + ' calendar</em></p></li></ul></div>';
+    document.getElementById("calContainer" + index).style.display = "";
+  }
 
 
 
-      loadSelectedSchedule(ID);
+  loadSelectedSchedule(ID);
 
-if(Ext.getCmp('currCalendar')) {Ext.getCmp('currCalendar').destroy();}
-// define the calendar.
+  if(Ext.getCmp('currCalendar' + index)) {Ext.getCmp('currCalendar' + index).destroy();}
+  // define the calendar.
     var currCal = new Ext.DatePicker({
         //renderTo: 'calendar2',
         listeners: {
@@ -2340,14 +2979,14 @@ if(Ext.getCmp('currCalendar')) {Ext.getCmp('currCalendar').destroy();}
               year = date.getFullYear();
 
               var header = document.getElementById("myApptHeader");
-              header.innerHTML = '<span style="font: bold 16px/24px Times, serif; position: absolute; top: -2px;">' + dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '</span>' + '<span style="position: absolute; top: 30px;">Choose the hours and services for this appointment</span>';
+              header.innerHTML = '<span style="font: bold 16px/24px Times, serif; position: absolute; top: 4px;">' + dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '</span>' + '<span style="position: absolute; top: 30px;">Choose the hours and services for this appointment</span>';
 
               scheduleThisDay(date_picker);
               //console.log("SELECTED");
               //console.log(date_picker.isVisible());
            }
         },
-        id: 'currCalendar',
+        id: 'currCalendar' + index,
         style: 'opacity: 1; filter: alpha(opacity=100); color: #666666;',
         format:"d/m/Y",
         disabledDates:["^(?!"+dateArray.join("|")+").*$"],
@@ -2358,7 +2997,7 @@ if(Ext.getCmp('currCalendar')) {Ext.getCmp('currCalendar').destroy();}
 
 
 
-Ext.override(Ext.getCmp('currCalendar'), {
+Ext.override(Ext.getCmp('currCalendar' + index), {
     fullUpdate: function(date){
         var me = this,
             cells = me.cells.elements,
@@ -2478,6 +3117,12 @@ Ext.override(Ext.getCmp('currCalendar'), {
 
         me.monthBtn.setText(Ext.Date.format(date, me.monthYearFormat));
         //console.log("HERE");
+        //console.log(me.id);
+        var index = parseInt(me.id.replace("currCalendar",""),10);
+        curr = index;
+        var ID = initStr[index].id;
+        //console.log(ID);
+        loadSelectedSchedule(ID);
         for (var day in currSelectedSchedule)
         {
 	  //console.log(day);
@@ -2492,10 +3137,8 @@ Ext.override(Ext.getCmp('currCalendar'), {
     dateArray = [tDay];
 
     currCal.setDisabledDates(["^(?!"+dateArray.join("|")+").*$"]);
-    currCal.render('showCurrCalContent');
+    currCal.render('showCurrCalContent' + index);
 
-    }
-  }
 }
 
 
@@ -2503,35 +3146,41 @@ Ext.override(Ext.getCmp('currCalendar'), {
 
 
 
-function showRatings(JSONStr)
+function showRatings(JSONStr, index)
 {
 
+  //console.log(index);
+  curr = index;
   JSONStr = decodeURI(JSONStr);
   var comments = Ext.JSON.decode(JSONStr);
 
 
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var name = first + ' ' + last;
 
 
-  if(document.getElementById("infoContents"))
+  if(document.getElementById("searchItem" + curr))
   {
-    var el = document.getElementById("infoContents");
-    el.style.display = "none";
-    if(document.getElementById("infoContentsWrapper"))
+    var el = document.getElementById("searchItem" + curr);
+    if(document.getElementById("searchItem" + curr))
     {
-      el = document.getElementById("infoContentsWrapper");
+      el = document.getElementById("searchItem" + curr).parentNode;
 
       if(!document.getElementById("ratingsContainer"))
       {
 
         var container = document.createElement("div");
         container.id = "ratingsContainer";
-        container.style.marginRight = 0 + "px";
-        container.style.marginTop = 0 + "px";
+        container.className = "x-window-default";
+        container.style.position = "absolute";
+        container.style.width = 360 + "px";
+        container.style.height = 260 + "px";
+        container.style.left = (index % 4) * 175 + "px";
+        container.style.marginTop = 100 + "px";
+        //container.style.margin = "0px auto";
         //container.style.zIndex = 55;
 
         var nameToDisplay = settings[ID]['identity'] ? 'Confidential' : name;
@@ -2545,7 +3194,7 @@ function showRatings(JSONStr)
         var dismiss = document.createElement("div");
         dismiss.style.position = "absolute";
         dismiss.style.top = 10 + 'px';
-        dismiss.style.right = 65 + 'px';
+        dismiss.style.right = 10 + 'px';
         dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\';"></div>';
         container.appendChild(dismiss);
 
@@ -2553,7 +3202,7 @@ function showRatings(JSONStr)
         var window = document.createElement("div");
         window.className = "showCurrRating";
         window.id = "showCurrRating";
-        window.style.left = -10 + "px";
+        window.style.left = 10 + "px";
         window.style.marginTop = -20 + "px";
         //window.style.zIndex = 55;
     
@@ -2567,7 +3216,7 @@ function showRatings(JSONStr)
         close.style.right = 0 + "px";
         close.style.marginRight = 0 + "px";
         close.style.padding = 4 + "px";
-        window.appendChild(close);
+        //window.appendChild(close);
 
 
         var content = document.createElement("div");
@@ -2584,6 +3233,7 @@ function showRatings(JSONStr)
       else
       {
         document.getElementById("ratingsTitle").innerHTML = '<div class="sidebar"><ul class="contact"><li><p><span class="name"></span><em id="labelName">' + name + '\'s' + ' ratings</em></p></li></ul></div>';
+        document.getElementById("ratingsContainer").style.left = (index % 4) * 175 + "px";
         document.getElementById("ratingsContainer").style.display = "";
       }
     }
@@ -2630,7 +3280,7 @@ function showRatings(JSONStr)
 
 
 
-      innerHTML += '<br><div class="ratingComment"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+      innerHTML += '<br><div class="ratingComment gradient-grey"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
     document.getElementById("showCurrRatingContent").innerHTML = innerHTML;
@@ -2716,9 +3366,11 @@ function getGroupSelections(checkbox, combobox, controlValue)
 
   for (var i = 0; i < check.length; i++)
   {
-    if(check[i].checked == controlValue) {itemStr += check[i].value + ' -- ' + combo[i].options[combo[i].selectedIndex].text + '<br>';}
+    //console.log(check[i].value);
+    if((check[i].checked == controlValue) && (!check[i].disabled)) {itemStr += check[i].value + ' -- ' + combo[i].options[combo[i].selectedIndex].text + '<br>';}
   }
-  return itemStr ? itemStr : '';
+  //console.log("ITEMSTR: " + itemStr);
+  return itemStr;
 }
 
 
@@ -2727,11 +3379,11 @@ function getSubTotal()
 {
 
   var subTotal = 0;
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   //console.log(ID);
 
   // --Services--
-  var services = Ext.JSON.decode(productStore.getById(ID).data.services);
+  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
 
   var sch = getGroupSelections('apptTime', 'selectService', true);
   var split = sch.split('<br>');
@@ -2763,7 +3415,7 @@ function getSubTotalFromSch(sch, ID)
   //console.log(ID);
 
   // --Services--
-  var services = Ext.JSON.decode(productStore.getById(ID).data.services);
+  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
 
   //var sch = getGroupSelections('apptTime', 'selectService', true);
   var split = sch.split('<br>');
@@ -2925,11 +3577,13 @@ function setGroupsFromSchedule(checkbox, combobox, schedule)
   var isAPPT = false;
   var isAVAIL = false;
   var provider = "";
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
+  //console.log(ID);
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var name = first + ' ' + last;
+  //console.log(name);
 
   //console.log('DAY: ' + dayIndex + ' MONTH: ' + monthIndex + ' YEAR: ' + year);
   //enableGroup(checkbox);
@@ -2957,8 +3611,10 @@ function setGroupsFromSchedule(checkbox, combobox, schedule)
 
         if(appt) {isAPPT = true; provider = split[i].split(/\:\s*/)[1];}
         else if(avail) {isAppt = false;}
+        //console.log(name + '==' + provider);
         if(!isAPPT || name != provider) {continue;}
 
+        //console.log(name + '==' + provider);
         for (var j = 0; j < check.length; j++)
         {
           var value = split[i].split(' ')[0];
@@ -2995,7 +3651,7 @@ function disableGroupsFromSchedule(checkbox, combobox, schedule)
   var isAPPT = false;
   var isAVAIL = false;
   var provider = "";
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
@@ -3026,6 +3682,7 @@ function disableGroupsFromSchedule(checkbox, combobox, schedule)
 
         if(appt) {isAPPT = true; provider = split[i].split(/\:\s*/)[1];}
         else if(avail) {isAppt = false;}
+        //console.log(name + '==' + provider);
         if(!isAPPT || name == provider) {continue;}
 
         for (var j = 0; j < check.length; j++)
@@ -3034,7 +3691,7 @@ function disableGroupsFromSchedule(checkbox, combobox, schedule)
           var service = split[i].split(' -- ')[1];
           //console.log(check[j].value + " <-> " + value + " : " + name);
           //if(check[j].value == value) {check[j].checked = true;}//combo[i].options[combo[i].selectedIndex].text
-          if(check[j].value == value) {check[j].disabled = true; combo[j].disabled = true;}
+          if(check[j].value == value) {check[j].checked = true; check[j].disabled = true; combo[j].disabled = true;}
         }
       }
     }
@@ -3075,7 +3732,7 @@ function applySelection()
   if(! document.getElementById("showApptAdded"))
   {
     var window = document.createElement("div");
-    window.className = "show-cal";
+    window.className = "show-cal darkGrey";
     window.id = "showApptAdded";
 
     var close = document.createElement("div");
@@ -3231,7 +3888,7 @@ function addSchedule(me, day, title)
       //title = title.replace(/^\n\n/, '');
       if(0 && cellDay == '26/12/2013')
       {
-        console.log("NEW TITLE: " + title);
+        //console.log("NEW TITLE: " + title);
       }
       cellItems[c].title = title ? title : me.disabledDatesText;
       cellItems[c].className = title ? me.cellCls : me.disabledCellCls + ' ' + me.cellCls;
@@ -3581,6 +4238,7 @@ function makeApptThisDay(day, month, year, cal)
   //var regExp = ["^(?!"+dateArray.join("|")+").*$"];
   //console.log(regExp);
   var sch = getGroupSelections('apptTime', 'selectService', true);
+  //console.log("NEW: " + sch);
   //TO DELETE
   //sch = "7am";  
   //console.log("PREVIOUS TXT: " + getSchedule(Ext.getCmp('myCalendar'), tDay));
@@ -3588,7 +4246,7 @@ function makeApptThisDay(day, month, year, cal)
 
 
 
-  var ID = initStr[curr].label.id;
+  var ID = initStr[curr].id;
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
@@ -3608,6 +4266,7 @@ function makeApptThisDay(day, month, year, cal)
     var nameToDisplay = settings[ID]['identity'] ? 'Confidential' : name;
     thisAppt = 'APPT: ' + nameToDisplay + '<br>' + sch;
     providersSch = sch;
+    //console.log("OLD: " + oldSch + " NEW: " + sch);
     temp = removeOldSchByName(oldSch, name);
     oldSch = temp.sch;
     removed = temp.removed;
@@ -3639,7 +4298,7 @@ function makeApptThisDay(day, month, year, cal)
     deleteCookie(tDay);
     addSchedule(calendar, tDay, '');
   }
-
+  productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
   return thisAppt;
 }
 
@@ -3810,7 +4469,7 @@ function showCalendar(parent)
   if(! document.getElementById("showCal"))
   {
     var window = document.createElement("div");
-    window.className = "show-cal";
+    window.className = "show-cal darkGrey";
     window.id = "showCal";
     var close = document.createElement("div");
     close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.style.display=\'none\';"></div>';
@@ -4027,15 +4686,16 @@ function loadUsers()
 
       var inID;
       var email;
+      var education;
       var role;
-      var services;
+      var providedServices;
       var calendar;
       var mail;
       var privacy;
       var cart;
       var history;
       var feedback;
-      var rating;
+      var reviews;
 
 
       for(var i=0;i < obj.length;i++)
@@ -4043,43 +4703,34 @@ function loadUsers()
 	//console.log(obj[i].id);
         inID = obj[i].id;
         email = obj[i].email;
+        education = obj[i].education;
         role = obj[i].role;
-        services = obj[i].services;
+        providedServices = obj[i].services;
         calendar = obj[i].calendar;
         mail = obj[i].mail;
         privacy = obj[i].privacy;
         cart = obj[i].cart;
         history = obj[i].history;
         feedback = obj[i].feedback;
-        rating = obj[i].rating;
+        reviews = obj[i].rating;
 
         settings[inID] = Ext.JSON.decode(privacy);
         
 
-	/*
-        if(obj[i].services)
-        {
-	  //console.log(obj[i].services);
-          var services = Ext.JSON.decode(obj[i].services);
-          for (var key in services)
-          {
-            //console.log('KEY: ' + key + ' = ' + services[key]);
-  	  }
-        }
-        */
         var myNewRecord = [
         {
           inID: inID,
           email: email,
+          education: education,
           role: role,
-          services: services,
+          providedServices: providedServices,
           calendar: calendar,
           mail: mail,
           privacy: privacy,
           cart: cart,
           history: history,
           feedback: feedback,
-          rating: rating
+          reviews: reviews
         }];
         productStore.loadData(myNewRecord, true);
         //console.log("LOADED ID: " + inID);
@@ -4221,7 +4872,7 @@ function updateSchedule(id, day, name, sch)
   //For Provider ONLY
   currSelectedSchedule[day] = sch;
   
-  var calEl = Ext.getCmp('currCalendar');
+  var calEl = Ext.getCmp('currCalendar' + curr);
   if(calEl) {calEl.update(calEl.activeDate, true);}
 
 }
@@ -4317,7 +4968,7 @@ function loadMail()
 
 
     var search = /\(ID=([0-9a-zA-Z^)]+)\)/;
-    ID = ID[0].match(new RegExp(search))[1];
+    if(ID) {ID = ID[0].match(new RegExp(search))[1];}
     //ID = ID[0].replace('ID=', ''); 
 
     //console.log("ID: " + ID);
@@ -4395,7 +5046,7 @@ function addMailMessage(sender, msg, flag)
   //mail[decodeURI(key)] = messages[key];
   //console.log(mail[key]);
   var container = document.createElement("div");
-  container.className = "mailWrapper";
+  container.className = "mailWrapper gradient-paleGreen";
   container.id = id;
   mailContainer.appendChild(container);
 
@@ -4411,7 +5062,7 @@ function addMailMessage(sender, msg, flag)
   container.appendChild(content);
   var close = document.createElement("div");
   close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode); removeMail(this.parentNode.parentNode.id); document.getElementById(\'mailCount\').innerHTML = parseInt(document.getElementById(\'mailCount\').innerHTML,10)-1;"></div>';
-  close.style.right = 2 + "px";
+  close.style.right = 6 + "px";
   close.style.marginRight = 0 + "px";
   close.style.marginTop = -8 + "px";
   //close.style.padding = -2 + "px";
@@ -4541,18 +5192,26 @@ function loadCartItems(id, isReturn)
     //console.log("KEY: " + key + " ITEM: " + cartItems[key]);
 
 
+    // --Name--
+    var first = productStore.getById(ID) ? productStore.getById(ID).data.first : '--';
+    var last = productStore.getById(ID) ? productStore.getById(ID).data.last : '--';
+    var name = first + ' ' + last;
+
+    var myFirst = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.first : '--';
+    var myLast = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.last : '--';
+    var myName = myFirst + ' ' + myLast;
 
 
 
     if(!isReturn)
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;"><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a><hr>' + cartItems[key] + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
     }
     else
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;"><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a><hr>' + cartItems[key] + '</div></li>';
 
-      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div><div><a>' + ID + '</a></div></div>';
+      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '<hr><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a></div><div><a>' + ID + '</a></div></div>';
     }
   }
   document.getElementById(elID).innerHTML = help;
@@ -4715,8 +5374,8 @@ function sendNotificationEmail()
   tmp = getEmailList(document.getElementById("hiddenEmailBody").innerHTML);
   emails = tmp.emails;
   innerHTML = tmp.updatedEmail;
-  console.log(document.getElementById("hiddenEmailBody").innerHTML);
-  console.log(innerHTML);
+  //console.log(document.getElementById("hiddenEmailBody").innerHTML);
+  //console.log(innerHTML);
   document.getElementById("hiddenEmailBody").innerHTML = innerHTML;
 
   $.ajax({url:"./saveServices.php", 
@@ -4823,6 +5482,7 @@ function removeCartItem(key, ID)
     deleteCookie(tDay);
     addSchedule(calendar, tDay, '');
   }
+  productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
 
   //console.log("SUB: " + subTotals[ID+tDay]);
   subTotals[ID+tDay] -= getSubTotalFromSch(removedSch, ID);
@@ -4981,15 +5641,15 @@ function historyClicked(JSONStr, JSONKey, ID, share)
     if(!rating) {rating = 3;}
     ratingSum += parseInt(rating,10);
 
-    var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 100; position: relative; top: -40px; left:109px;"/>';
+    var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: relative; top: -40px; left:109px;"/>';
     for(var i = rating; i < 5; i++)
     {
-      ratingStr += '<img src="images/emptyStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+      ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     }
-    ratingStr += '<img src="images/filledStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+    ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     for(var i = 0; i < rating-1; i++)
     {
-      ratingStr += '<img src="images/emptyStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+      ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     }
     ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
 
@@ -4999,15 +5659,15 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   ratingAvg = Math.ceil(ratingSum/Object.size(form));
   //console.log(ratingAvg);
   var comment = (ratingAvg < 3) ? "Needs Improvement" : (ratingAvg == 3) ? "Meets Expectations" : "Exceeds All Expectations";
-  var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 100; position: relative; top: -40px; left:109px;"/>';
+  var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: relative; top: -40px; left:109px;"/>';
   for(var i = rating; i < 5; i++)
   {
-    ratingStr += '<img src="images/emptyStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+    ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   }
-  ratingStr += '<img src="images/filledStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+  ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   for(var i = 0; i < rating-1; i++)
   {
-    ratingStr += '<img src="images/emptyStar.png" style="z-index: 99; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+    ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   }
   ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
 
@@ -5043,7 +5703,7 @@ function socialShare(type, elID, description)
 
   //var myParams = 'share=' + 'STR=' + encodeURI(JSONStr) + '&KEY=' + encodeURI(JSONKey) + '&ID=' + encodeURI(ID) + '&desc=' + encodeURI(description) + '&pinit=0';
   var myParams = '';
-  console.log(myParams);
+  //console.log(myParams);
 
 
   var fbLink = 'http://www.facebook.com/share.php?u=' + encodeURI('http://www.interviewring.com/images/share.png' + myParams) + '&t=www.interviewring.com';
@@ -5149,7 +5809,7 @@ function populateRateForm()
   if(productStore.getById(ID))
   {
     rateFormImg.style.background = 'url(' + productStore.getById(ID).data.image + ') no-repeat center center';
-    ratingObj = Ext.JSON.decode(productStore.getById(ID).data.rating);
+    ratingObj = Ext.JSON.decode(productStore.getById(ID).data.reviews);
     // --Name--
     var first = productStore.getById(ID).data.first;
     var last = productStore.getById(ID).data.last;
@@ -5165,18 +5825,18 @@ function populateRateForm()
     if(!rating || !showPrevious) {rating = 0;}
 
 
-    var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 100; position: absolute; top: 50px; left:270px;"/>';
+    var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: absolute; top: 50px; left:270px;"/>';
     for(var i = rating; i < 5; i++)
     {
       var starID = 'rate' + 'Star' + i;
       ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -6px; left: -280px; margin-right: -4px; height: 14px;"/>';
-      ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 99; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
+      ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 19; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
     }
     for(var i = 0; i < rating; i++)
     {
       var starID = 'rate' + 'Star' + i;
       ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -6px; left: -280px; margin-right: -4px; height: 14px;"/>';
-      ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 99; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
+      ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
     }
     //ratingStr += '<span style="width: 640px; position: absolute; top: 85px; text-align: center; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
 
@@ -5231,7 +5891,7 @@ function populateRateForm()
 
 
 
-      innerHTML += '<br><div class="ratingComment"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+      innerHTML += '<br><div class="ratingComment gradient-grey"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
     rateForm.innerHTML = '<div style="display: block; margin: 10px auto;" ><h2 style="text-align: center;">Rate: ' + name + '</h2>' + ratingStr + '<form id="myRating" name="myRating" style="position: absolute; top: 84px; left: 50px;"><textarea name="comment" placeholder="After rating this provider you can enter your comments here" style="height: 80px; width: 566px; resize: none;"></textarea><div class="a-button a-button-large" style="position: absolute; top: 90px; float: left; left: 140px; z-index: 51;" onclick="rateSubmit(this.parentNode.name,\'' + ID +'\');"><span class="a-button-inner" style="padding-top: 15px;"><span class="a-button-text">Submit</span></span></div></form>' + '<div style="position: absolute; bottom: 10px; left: 50px; height: 150px; width: 570px; overflow: auto; border: 1px solid; border-color: #73841D #C7E520 #73841D #4A5612; border-radius: 3px;">' + innerHTML + '</div></div>';
@@ -5287,18 +5947,18 @@ function populateFeedbackForm()
       //console.log("KEY: " + key + " VAL: " + form[key]['rating'] + form[key]['comment']);
       var rating = 0;
 
-      var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 100; position: relative; top: -40px; left:109px;"/>';
+      var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: relative; top: -40px; left:109px;"/>';
       for(var i = rating; i < 5; i++)
       {
         var starID = key + 'Star' + i;
         ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999;  position: relative; top: -30px; left: 208px; margin-right: -4px; height: 14px;"/>';
-        ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 99;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
+        ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 19;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
       }
       for(var i = 0; i < rating; i++)
       {
         var starID = key + 'Star' + i;
         ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999;  position: relative; top: -30px; left: 208px; margin-right: -4px; height: 14px;"/>';
-        ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 99;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
+        ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
       }
       ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
 
@@ -5458,8 +6118,8 @@ function feedbackSubmit(fID, JSONKey)
     var rating = getStars(currStar);
     var currComment = key + 'Comment';
     var comment = document.getElementById(currComment).value;
-    console.log(rating);
-    console.log(comment);
+    //console.log(rating);
+    //console.log(comment);
     myFeedback[key] = {};
     myFeedback[key]['rating'] = rating;
     myFeedback[key]['comment'] = comment;
@@ -5527,12 +6187,12 @@ function getDateIndexes(longDateStr)
 
 function makePayment(vendor)
 {
-  console.log("makePayment: " + vendor);
+  //console.log("makePayment: " + vendor);
   
   var itemStr = '';
   var idx = 1;
 
-  var returnUrl = "http://www.interviewring.com/index.php?return=";
+  var returnUrl = "http://www.interviewring.com/index.php?return=ID=" + user[0].inID;
 
   var currentDate = new Date();
   var year = currentDate.getFullYear();
@@ -5573,7 +6233,7 @@ function makePayment(vendor)
     itemStr += '<input type="hidden" name="item_name_' + idx + '" value="' + desc + '"><input type="hidden" name="amount_' + idx + '" value="' + unitPrice + '"><input type="hidden" name="quantity_' + idx + '" value="' + quantity + '"><input type="hidden" name="discount_amount_' + idx + '" value="' + discounted + '">';
 
 
-    returnUrl += encodeURI(key) + "=" + encodeURI(cartItems[key]) + "&";
+    //returnUrl += encodeURI(key) + "=" + encodeURI(cartItems[key]) + "&";
 
     // add item might be called for every item in the shopping cart
     // where your ecommerce engine loops through each item in the cart and
@@ -5598,6 +6258,22 @@ function makePayment(vendor)
 
   if(! total)
   {
+    
+    var pre = '<form name="paymentSubmit" action="' + returnUrl + '" method="post">';
+    var disc = '<input type="hidden" name="custom" value="' + customStr + '">';
+    var post = '<input class="submitDummy" type="image" name="submit" border="0" src="./images/0.gif" onclick="ga(\'send\', \'event\', \'button\', \'click\', \'submit\');"/></form>';
+
+
+    var form = document.createElement("div");
+    form.id = "paymentForm";
+    form.innerHTML = pre + itemStr + disc + post;
+    document.body.appendChild(form);
+
+    //document.getElementById('paymentForm').innerHTML = pre + itemStr + disc + post;
+  
+    ga('ecommerce:send');   //submits transaction to the Analytics servers
+    document.paymentSubmit.submit();
+
     return;
   }
 
@@ -5609,7 +6285,7 @@ function makePayment(vendor)
   
   var post = '<input class="submitDummy" type="image" name="submit" border="0" src="./images/0.gif" onclick="ga(\'send\', \'event\', \'button\', \'click\', \'submit\');"/></form>';
 
-  console.log(returnUrl);
+  //console.log(returnUrl);
   //console.log(pre + itemStr + disc + post);
 
   var form = document.createElement("div");
@@ -5620,7 +6296,7 @@ function makePayment(vendor)
   //document.getElementById('paymentForm').innerHTML = pre + itemStr + disc + post;
   
   ga('ecommerce:send');   //submits transaction to the Analytics servers
-  //document.paymentSubmit.submit();
+  document.paymentSubmit.submit();
 
 }
 
@@ -5679,7 +6355,7 @@ function updateRating(inID, myRating, myComment)
 
   var ratingObj;
 
-  if(productStore.getById(inID)) {ratingObj =  Ext.JSON.decode(productStore.getById(inID).data.rating);}
+  if(productStore.getById(inID)) {ratingObj =  Ext.JSON.decode(productStore.getById(inID).data.reviews);}
   if(!ratingObj) {return;}
 
   if(!ratingObj.total) {ratingObj.total = 0;}
@@ -5697,7 +6373,7 @@ function updateRating(inID, myRating, myComment)
   }
   rating += myRating;
   var average = rating/rates;
-  console.log(average);
+  //console.log(average);
 
   ratingObj.average = average;
 
@@ -5706,7 +6382,7 @@ function updateRating(inID, myRating, myComment)
   comments[key] = myRating + ':' + myComment;
   ratingObj.comments = comments;
 
-  productStore.getById(inID).data.rating = JSON.stringify(ratingObj);
+  productStore.getById(inID).data.reviews = JSON.stringify(ratingObj);
 
   $.ajax({url:"./saveRating.php", 
        data: {id: inID, rating: JSON.stringify(ratingObj) },
@@ -5735,11 +6411,11 @@ function updateRating(inID, myRating, myComment)
 
 function updateFeedback(inID, JSONKey, myFeedback)
 {
-  console.log("updateFeedback");
+  //console.log("updateFeedback");
   var rating = 0;
 
   var feedbackObj;
-  console.log(JSONKey);
+  //console.log(JSONKey);
 
   if(productStore.getById(user[0].inID)) {feedbackObj =  Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback);}
   if(!feedbackObj) {return;}
@@ -5771,10 +6447,10 @@ function updateFeedback(inID, JSONKey, myFeedback)
 
   var size = Object.size(msgs);
   var id = 'mail' + parseInt(parseInt(size,10)+0,10);
-  console.log(id);
+  //console.log(id);
   msgs[id] = '(ID=' + sender + ')' + msg;
-  console.log(msgs[id]);
-  console.log(inID);
+  //console.log(msgs[id]);
+  //console.log(inID);
   saveMail(inID, true, msgs);
 
 
@@ -5808,7 +6484,7 @@ function showSettings()
   if(! document.getElementById("showSettings"))
   {
     var window = document.createElement("div");
-    window.className = "show-settings";
+    window.className = "show-settings gradient-gray";
     window.id = "showSettings";
 
     var close = document.createElement("div");
@@ -5867,7 +6543,221 @@ function showSettings()
 
 
 
+function doQuickLink(key, item)
+{
+  clearAllFilters();
+  setFilter(key, item);
+  doSearch();
+}
 
+
+function clearAllFilters()
+{
+  for(var key in filters)
+  {
+    var filterName = key + 'Filter';
+    setGroup(filterName, false);
+  }
+}
+
+function collapseOtherFilters(filter)
+{
+  for(var key in filters)
+  {
+    if(key != filter)
+    {
+      var el = document.getElementById(key);
+      var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+      el.style.display = 'none';
+      elImg.className = "expand-arrow";
+    }
+  }
+}
+
+
+function populateFilters()
+{
+  for(var key in filters)
+  {
+    var obj = filters[key];
+    var filterName = key + 'Filter';
+    var el = document.getElementById(key);
+    var innerHTML = '';
+    //console.log(obj);
+    for(var key in obj)
+    {
+      //console.log(key + obj[key]);
+      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch();"/>' + obj[key] + '<br>';
+    }
+    el.innerHTML = innerHTML;
+  }
+
+
+
+
+
+}
+
+
+function showFilter(filter)
+{
+  var obj = filters[filter];
+  var filterName = filter + 'Filter';
+  var el = document.getElementById(filter);
+  var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+  collapseOtherFilters(filter);
+  //console.log(elImg.className);
+  //console.log(el.style.zIndex);
+  if(!el.style.display || el.style.display == 'none')
+  {
+    elImg.className = "implode-arrow";
+    //console.log(">"+el.innerHTML+"<");
+    if(!el.innerHTML)
+    {
+      var innerHTML = '';
+      //console.log(obj);
+      for(var key in obj)
+      {
+        //console.log(key + obj[key]);
+        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch();"/>' + obj[key] + '<br>';
+    
+      }
+      el.innerHTML = innerHTML;
+    }
+    el.style.display = 'block';
+  }
+  else
+  {
+    el.style.display = 'none';
+    elImg.className = "expand-arrow";
+  }
+}
+
+
+
+
+function setFilter(key, item)
+{
+  //console.log(key + " " + item);
+  var filterName = key + 'Filter';
+  var r = document.getElementsByName(filterName);
+  for (var i = 0; i < r.length; i++)
+  {
+    //console.log("'" + r[i].value + "'=='" + item + "'");
+    if(r[i].value == item) {r[i].checked = true;}
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function applyFilters()
+{
+  var filterType = 'and';
+
+  var checkedFilters = {};
+  var toSave = {};
+  var atLeastOneChecked = false;
+  var filtered = new Array();
+
+  for(var key in filters)
+  {
+    //console.log("FILTER: " + key);
+    var filterName = key + 'Filter';
+    if(!checkedFilters[key]) {checkedFilters[key] = {};}
+    var r = document.getElementsByName(filterName);
+    for (var i = 0; i < r.length; i++)
+    {
+      var value = r[i].value;
+      checkedFilters[key][value] = r[i].checked;
+      //console.log("ADDING -> KEY: " + key + " VALUE: " + value + " = " + checkedFilters[key][value]);
+      atLeastOneChecked |= r[i].checked;
+    }
+  }
+
+  if(!atLeastOneChecked) {return;}
+
+  if(filterType == 'and')
+  {
+    for(var key in filters)
+    {
+      atLeastOneChecked = false;
+      for(var value in checkedFilters[key])
+      {
+        //console.log("--KEY: " + key + " VALUE: " + value + " = " + checkedFilters[key][value]);
+	atLeastOneChecked |= checkedFilters[key][value];
+      }
+      if(!atLeastOneChecked)
+      {
+        for(var value in checkedFilters[key])
+        {
+	  checkedFilters[key][value] = true;
+        }
+      }
+    }
+  }
+
+  for(var j = 0; j < initStr.length; j++)
+  {
+    var ID = initStr[j].id;
+    toSave[ID] = (filterType == 'and') ? true : false;
+    //console.log("\n\nID: " + ID);
+    for(var key in filters)
+    {
+      //console.log("--KEY: " + key);
+      var value = productStore.getById(ID).data[key];
+      var found = false;
+      var currValue = (key != 'services') ? value : 'services';
+      //console.log("CURRVALUE: " + currValue);
+      if(key == 'services')
+      {
+        var services;
+        if(productStore.getById(ID)) {services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);}
+
+        for (var service in services)
+        {
+          //console.log("REGEX: " + regExp + " KEY: " + key);
+          for(var checked in checkedFilters[key])
+          {
+	    if(checkedFilters[key][checked])
+	    {
+	      //console.log("OFFERED: " + service + " CHECKED: " + checked);
+              if(service == checked) {found = true;}
+	    }
+	  }
+        }
+	checkedFilters[key][currValue] = found;
+      }
+
+
+
+      //console.log("--VALUE: " + currValue);
+      if(typeof checkedFilters[key][currValue] !== "undefined")
+      {
+        //console.log("----KEY: " + key + " VALUE: " + currValue + " = " + checkedFilters[key][currValue]);
+        if(filterType == 'and')
+          toSave[ID] &= checkedFilters[key][currValue];
+        else
+          toSave[ID] |= checkedFilters[key][currValue];
+      }
+      //console.log("--TO SAVE: " + ID + "->" + toSave[ID]);
+    }
+  }
+
+  for(var key in toSave)
+  {
+    if(toSave[key]) {filtered.push({id: key})};
+  }
+  initStr = filtered;
+}
 
 
 
@@ -5907,6 +6797,25 @@ Object.size = function(obj) {
 
     return size;
 };
+
+/*
+// Return new array with duplicate values removed
+Array.prototype.unique =
+  function() {
+    var a = [];
+    var l = this.length;
+    for(var i=0; i<l; i++) {
+      //console.log(this[i]);
+      for(var j=i+1; j<l; j++) {
+        // If this[i] is found later in the array
+        if (this[i] === this[j])
+          j = ++i;
+      }
+      a.push(this[i]);
+    }
+    return a;
+  };
+*/
 
 
 window.onbeforeunload = function(e) {

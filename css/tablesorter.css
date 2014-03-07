@@ -8,13 +8,24 @@ table.tablesorter {
 	text-align: left;
 }
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
-	background-color: #DAFF38;
-	border: 1px solid #FFF;
 	font-size: 8pt;
 	padding: 0px;
 
-        background-image:none;background-color:#DAFF38;background-image:-webkit-gradient(linear,50% 0,50% 100%,color-stop(0%,#DAFF38),color-stop(100%,#879921));background-image:-webkit-linear-gradient(top,#DAFF38,#879921);background-image:-moz-linear-gradient(top,#DAFF38,#879921);background-image:-o-linear-gradient(top,#DAFF38,#879921);background-image:linear-gradient(top,#DAFF38,#879921)
-
+    border: 1px solid;
+    border-color: #73841D #63740D #4A5612;
+    background: #94c947;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdeb8e), color-stop(100%, #a5c956));
+    background: -webkit-linear-gradient(top,  #94c947, #77A039);
+    background: -moz-linear-gradient(top,  #94c947, #77A039);
+    background: -o-linear-gradient(top,  #94c947, #77A039);
+    background: linear-gradient(to bottom,  #94c947, #77A039);
+    background: -ms-linear-gradient(top,  #94c947, #77A039);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#94c947', endColorstr='#77A039',GradientType=0 );
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
 }
 table.tablesorter thead tr .header {
 	background-image: url(bg.gif);

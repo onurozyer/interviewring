@@ -10,7 +10,9 @@ require './connect.php';
 
 
 $inID = $_POST['id'];
+$tzOffset = $_POST['tzOffset'];
 $email = $_POST['email'];
+$education = $_POST['education'];
 $role = $_POST['role'];
 $services = json_encode(json_decode($_POST['services']));
 $calendar = json_encode(json_decode($_POST['calendar']));
@@ -48,7 +50,9 @@ else
 #$services = $oldServices . $services;
 #$calendar = $oldCalendar . $calendar;
 
+mysql_query("UPDATE users set tzOffset ='".$tzOffset."' WHERE id='$inID'");
 mysql_query("UPDATE users set email ='".$email."' WHERE id='$inID'");
+mysql_query("UPDATE users set education ='".$education."' WHERE id='$inID'");
 mysql_query("UPDATE users set role ='".$role."' WHERE id='$inID'");
 mysql_query("UPDATE users set services ='".$services."' WHERE id='$inID'");
 mysql_query("UPDATE users set calendar ='".$calendar."' WHERE id='$inID'");

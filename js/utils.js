@@ -2,7 +2,10 @@
 
 var formItems = {"communication skills":"","technical knowledge":"","Seniority Level":"","overall feedback":""};
 
-var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['Interviewing','Career Coaching','Resume Critiquing','Interview Tips'], "price":['FREE', '$1-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-250/hr', '$250+/hr']};
+var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['Interviewing','Interview Mentoring','Resume Review'], "price":['FREE', '$1-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-250/hr', '$250+/hr']};
+
+linkedINlogin = false;
+
 
 var filterCounts = {};
 filterCounts.industry = {};
@@ -246,6 +249,16 @@ Ext.override(Ext.getCmp('myCal'), {
 
 
 
+  function waitUsersLoaded()
+  {
+    if(!usersLoaded || !linkedINlogin)
+    {
+      countdown = setTimeout('waitUsersLoaded()', 500);
+    }
+    else {loadInfoFromLinkedIn();}
+  }
+
+  
 
 
   function waitLoading()
@@ -343,7 +356,7 @@ var inProfile;
 
 //<!-- NOTE: be sure to set onLoad: onLinkedInLoad -->
     function onLinkedInLoad() {
-      IN.Event.on(IN, "auth", function() {onLinkedInLogin(); loadUsers(); loadInfoFromLinkedIn(); if(window.role == 'find') {waitLoading();} else if(window.role == 'give') {waitLoading2();} document.getElementById("headercontent").style.display=''; document.getElementById("header2content").style.display=''; document.getElementById("login").style.display=''; document.getElementById("getStarted").style.display='none'; document.getElementById("returnLogin").style.display='none'; waitLoading3();  });
+      IN.Event.on(IN, "auth", function() {onLinkedInLogin(); waitUsersLoaded(); if(window.role == 'find') {waitLoading();} else if(window.role == 'give') {waitLoading2();} document.getElementById("headercontent").style.display=''; document.getElementById("header2content").style.display=''; document.getElementById("login").style.display=''; document.getElementById("getStarted").style.display='none'; document.getElementById("returnLogin").style.display='none'; waitLoading3();  });
       IN.Event.on(IN, "logout", function() {onLinkedInLogout();});
     }
 
@@ -353,10 +366,20 @@ var inProfile;
     //console.log('loadInfoFromLinkedIn');
     loading = productStore.getCount();
     //console.log(loading);
+    var data = {};
+    data.values = {};
     productStore.data.each(function(item, index, totalItems)
     {
       currUserID.push(item.get('inID'));
       userList[item.get('inID')] = true;
+      if(productStore.getById(item.get('inID')))
+      {
+        if(productStore.getById(item.get('inID')).data.linkedINprofile)
+	{
+          data.values[item.get('inID')] = productStore.getById(item.get('inID')).data.linkedINprofile ? Ext.JSON.decode(productStore.getById(item.get('inID')).data.linkedINprofile) : {};
+	}
+      }
+      
 
       //console.log(item.get('inID'));
       //console.log(productStore.getById(item.get('inID')).data.inID);
@@ -364,10 +387,37 @@ var inProfile;
 
     if(!currUserID.length) {return;}
 
-    IN.API.Profile(currUserID)
-      .fields(["id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions"])
-      .result(function(result) {
+    //console.log("LOGGED IN: " + linkedINlogin);
+    if(linkedINlogin)
+    {
+      IN.API.Profile(currUserID)
+        .fields(["id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions"])
+        .result(function(result) {loadUserData(result); })
+        .error(function(err) {
+        alert('LinkedIn API error<br>' + err + '<br>Please reload the page');
+      });//.error(function(err)
+    }
+    else
+    {
+      //console.log("DATA: " + data.values + "SIZE: " + Object.size(data.values));
+      if(Object.size(data.values)) {loadUserData(data);}
+    }
 
+  } //loadInfoFromLinkedIn()
+
+
+
+
+  function loadUserData(result) 
+  {
+    //console.log('loadUserData');
+
+    filterCounts.industry = {};
+    filterCounts.company = {};
+    filterCounts.rating = {};
+    filterCounts.experience = {};
+    filterCounts.services = {};
+    filterCounts.price = {};
     	    //for(var key in result.values) {console.log("KEY: " + key + " = " + result.values[key]); console.log(result.values[key]);}
     	    //console.log("TOTAL: " + result['_total']);
     	    //for(var i = 0; i < result['_total']; i++) {console.log(result.values[i].headline);}
@@ -393,6 +443,8 @@ var inProfile;
 
         if(profile.summary) {summary = JSON.stringify(profile.summary);}
 
+        
+        //console.log(profile.positions);
         if(profile.positions.values)
         {
           //console.log(profile);
@@ -433,6 +485,7 @@ var inProfile;
         for(var i = 0; i < filters.industry.length; i++) {if(filters.industry[i] === industry) found++;}
         if(!found) {filters.industry.push(industry);}
 
+
         found = 0;
         if(!filters.company)  {filters.company = new Array();}
         for(var i = 0; i < filters.company.length; i++) {if(filters.company[i] === company) found++;}
@@ -449,7 +502,7 @@ var inProfile;
         var LO = 999999;
         var HI = 0;
 	var serviceItems = new Array();
-        services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
+        services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
         for (var key in services)
         {
 	  serviceItems.push(key);
@@ -460,7 +513,7 @@ var inProfile;
         }
 
         // --Rating --
-        var ratingObj =  Ext.JSON.decode(productStore.getById(inID).data.reviews);
+        var ratingObj = productStore.getById(inID).data.reviews ? Ext.JSON.decode(productStore.getById(inID).data.reviews) : {};
         var rating = Math.ceil(ratingObj.average) || 0;
 
 
@@ -544,7 +597,7 @@ var inProfile;
 	}
 
         productStore.getById(inID).data.services = serviceItems;
-
+        if(!serviceItems.length) {filterCounts.price = {};}
 
         //console.log(inID);
         //console.log(first);
@@ -572,26 +625,23 @@ var inProfile;
       //Delete any invalid id's
       for(var key in userList)
       {
-        //console.log("Removing record: " + key);
+        console.log("Removing record: " + key);
+        if(0)
+	  {
         productStore.remove(productStore.getById(key));
         $.ajax({url:"./deleteUser.php", 
           data: {id: key},
           type:'post',
           async:false
         });
+	  }
       }
 
-      //filters['company'].unique();
-      //filters.company.unique();
+      filters.industry = filters.industry ? filters.industry.sort() : {};
+      filters.company = filters.company ? filters.company.sort() : {};
 
       linkedinLoaded = true;
-
-    })//.result(function(result)
-    .error(function(err) {
-      alert('LinkedIn API error<br>' + err + '<br>Please reload the page');
-    });//.error(function(err)
-
-  } //loadInfoFromLinkedIn()
+  }
 
 
     function onLinkedInLogout() {
@@ -611,7 +661,9 @@ var inProfile;
       });
     }
 
-    function setLoginBadge(profile) {
+    function setLoginBadge(profile)
+    {
+      linkedINlogin = true;
       if (!profile) {
         profHTML = '<a href="#" onclick="IN.User.authorize(); return true;">login/create account</a>';
         services = {};
@@ -700,7 +752,8 @@ var inProfile;
       //document.getElementById("firstName").innerHTML = profile.firstName;
       //createCookie('INID', profile.id);
       //inID = profile.id;
-      user.push({inID: inID, first: first, last: last, company: company, position: position, image: image, url: url, email: email, imAccount: imAccount, phoneNumber: phoneNumber, education: education});
+      //console.log("PUSHING");
+      user.push({inID: inID, linkedINprofile: profile, first: first, last: last, company: company, position: position, image: image, url: url, email: email, imAccount: imAccount, phoneNumber: phoneNumber, education: education});
 
 
 
@@ -1091,14 +1144,16 @@ Ext.create('Ext.form.Panel', {
     {
       var inID = item.get('inID');
       //console.log(inID);
-      if(inID == user[0].inID && item.get('role') == 'find') {return true;}
+      //if(inID == user[0].inID && item.get('role') == 'find') {return true;}
       //console.log(inID);
-      var first = item.get('first');
-      var last = item.get('last');
-      var company = item.get('company');
-      var position = item.get('position');
-      var industry = item.get('industry');
-      var summary = item.get('summary');
+      var first = item.get('first') || '';
+      var last = item.get('last') || '';
+      var company = item.get('company') || '';
+      var position = item.get('position') || '';
+      var industry = item.get('industry') || '';
+      var summary = item.get('summary') || '';
+
+      //if(!first || !last || !company || !industry || !summary) {return;}
       //var summary = "Mixed Signal Design SAR ADC IP for next-gen touch screen controller PSoC 3 and PSoC 5 Chip Integration Test Vector Development and Fault Grading Developed system ROM firmware in M8C assembly for extending the life of flash memory and performed mixed Signal Verification";
 
       var preps = /(\s|^|>)((aboard|about|above|across|after|against|along|amid|among|anti|around|before|behind|below|beneath|beside|besides|between|beyond|concerning|considering|despite|down|during|except|excepting|excluding|following|from|inside|into|like|minus|near|onto|opposite|outside|over|past|plus|regarding|round|save|since|than|that|this|through|toward|towards|under|underneath|unlike|until|upon|versus|with|within|without)\s)+/gi;
@@ -1120,13 +1175,12 @@ Ext.create('Ext.form.Panel', {
      // replace small words
      //summary = summary.replace(smallwords, function(contents, p1, p2) {return p1 + p2.replace(/\s/g, '');});
      summary = summary.replace(smallwords, ' ');
-
      //console.log(summary);
 
 
       //console.log(first);
       var services;
-      if(item.get('providedServices')) {services = Ext.JSON.decode(item.get('providedServices'));}
+      if(item.get('providedServices')) {services = item.get('providedServices') ? Ext.JSON.decode(item.get('providedServices')) : {};}
 
       var found = first.match(matchRE);
       found += last.match(matchRE);
@@ -1178,10 +1232,10 @@ function sortfunction(a, b)
   }
   else if(opt == 'rating')
   {
-    var ratingObj =  Ext.JSON.decode(productStore.getById(a.id).data.reviews);
+    var ratingObj = productStore.getById(a.id).data.reviews ? Ext.JSON.decode(productStore.getById(a.id).data.reviews) : {};
     var arating = Math.ceil(ratingObj.average) || 0;
     var areviews = ratingObj.total || 0;
-    var ratingObj =  Ext.JSON.decode(productStore.getById(b.id).data.reviews);
+    var ratingObj = productStore.getById(b.id).data.reviews ? Ext.JSON.decode(productStore.getById(b.id).data.reviews) : {};
     var brating = Math.ceil(ratingObj.average) || 0;
     var breviews = ratingObj.total || 0;
 
@@ -1207,14 +1261,14 @@ function sortfunction(a, b)
 
 
     // --Services--
-    services = Ext.JSON.decode(productStore.getById(a.id).data.providedServices);
+    services = productStore.getById(a.id).data.providedServices ? Ext.JSON.decode(productStore.getById(a.id).data.providedServices) : {};
     for (var key in services)
     {
       if(parseInt(services[key],10) < aLO) {aLO = parseInt(services[key],10);}
       if(parseInt(services[key],10) > aHI) {aHI = parseInt(services[key],10);}
     }
     // --Services--
-    services = Ext.JSON.decode(productStore.getById(b.id).data.providedServices);
+    services = productStore.getById(b.id).data.providedServices ? Ext.JSON.decode(productStore.getById(b.id).data.providedServices) : {};
     for (var key in services)
     {
       if(parseInt(services[key],10) < bLO) {bLO = parseInt(services[key],10);}
@@ -1357,7 +1411,7 @@ function sortfunction(a, b)
 
       // --Rating--
       var ratingStr = '';
-      var ratingObj =  Ext.JSON.decode(productStore.getById(ID).data.reviews);
+      var ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
 
       var rating = Math.ceil(ratingObj.average);
       var rates = ratingObj.total || 0;
@@ -1368,7 +1422,7 @@ function sortfunction(a, b)
 
 
 
-      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="window.event.stopPropagation(); window.event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ');"><div style="z-index: 100; height: 35px;">';
+      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ');"><div style="z-index: 100; height: 35px;">';
       ratingStr += '<div style="right: -6px;">';
       for(var i = rating; i < 5; i++)
       {
@@ -1393,7 +1447,7 @@ function sortfunction(a, b)
       var label = first + ' ' + last;
 
       // --Services--
-      services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+      services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
       //console.log(services);
       var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444;">';
       for (var key in services)
@@ -1576,7 +1630,6 @@ function sortfunction(a, b)
 
 
 
-
     for(var key in filterCounts)
     {
       //console.log("" + key);
@@ -1584,8 +1637,10 @@ function sortfunction(a, b)
       //console.log(elID);
       var el = document.getElementById(elID);
       var innerHTML = '<div class="qlSection">';
-      for(var item in filterCounts[key])
+      var sorted_keys = Object.keys(filterCounts[key]).sort(sortFilters);
+      for(var i = 0; i < sorted_keys.length; i++)
       {
+	var item = sorted_keys[i];
 	//console.log("  " + item + " (" + filterCounts[key][item] + ")");
         innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doQuickLink(\'' + key + '\',\'' + item + '\');">' + '  ' + item + ' (' + filterCounts[key][item] + ')</span><br>';
       }
@@ -1596,7 +1651,22 @@ function sortfunction(a, b)
   }
 
 
+function sortFilters(a, b)
+{
+  //Compare "a" and "b" in some fashion, and return <0, 0, or >0
+  //Less than 0: Sort "a" to be a lower index than "b"
+  //Zero: "a" and "b" should be considered equal, and no sorting performed.
+  //Greater than 0: Sort "b" to be a lower index than "a".
 
+  var reFREE = new RegExp("FREE", "i");
+  var reSTAR = new RegExp("Star", "i");
+
+  if(a.match(reFREE)) {return -1;}
+  if(b.match(reFREE)) {return 1;}
+  if(a.match(reSTAR)) {return a - b;}
+  return a > b;
+
+}
 
 
 
@@ -1648,7 +1718,7 @@ function sortfunction(a, b)
 
       // --Rating--
       var ratingStr = '';
-      var ratingObj =  Ext.JSON.decode(productStore.getById(ID).data.reviews);
+      var ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
 
       var rating = Math.ceil(ratingObj.average);
       var rates = ratingObj.total || 0;
@@ -1679,7 +1749,7 @@ function sortfunction(a, b)
       var label = first + ' ' + last;
 
       // --Services--
-      services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+      services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
       //console.log(services);
       var help = '';
       for (var key in services)
@@ -1786,7 +1856,7 @@ window.sort = function(regExp)
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var services;
-  if(productStore.getById(ID).data.providedServices) {services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);}
+  if(productStore.getById(ID).data.providedServices) {services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
 
   var found = first.match(matchRE);
   found += last.match(matchRE);
@@ -2009,6 +2079,9 @@ window.addAppointment = function()
   //showLabel(curr);
   //setSliderPosition(curr);
 
+  loadUsers();
+  loadInfoFromLinkedIn();
+
   waitLoading9();
 
   windowResize();
@@ -2101,8 +2174,8 @@ function ellipsizeCartItems(id, email)
       setTimeout(function(contentEl) {
         return function()
         {
-          if(email) {ellipsizeTextBox(contentEl[1].id);}
-          else      {ellipsizeTextBox(contentEl[3].id);}
+          if(email) {if(contentEl[1]) {ellipsizeTextBox(contentEl[1].id);}}
+          else      {if(contentEl[3]) {ellipsizeTextBox(contentEl[3].id);}}
         }
       }(contentEl), 0);
       child = child.nextSibling;
@@ -2377,11 +2450,12 @@ function doSearch(arg)
 function showServices()
 {
   if(servicesLoaded) {return;}
+  //console.log(user[0].inID);
   if(!productStore.getById(user[0].inID)) {return;}
   //if(productStore.getById(user[0].inID).data.role != 'find')
   if(1)
   {
-    var services = Ext.JSON.decode(productStore.getById(user[0].inID).data.providedServices);
+    var services = productStore.getById(user[0].inID).data.providedServices ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providedServices) : {};
     //console.log(services);
     for (var key in services)
     {
@@ -2436,7 +2510,7 @@ function getServices(inID)
 {
   var servicesClicked = new Array();
   if(!productStore.getById(inID)) {return;}
-  var services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
+  var services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
   //console.log(services);
   for (var key in services)
   {
@@ -2452,7 +2526,7 @@ function getClickedServices(inID, force)
   //if(productStore.getById(inID).data.role != 'find')
   if(1)
   {
-    var services = Ext.JSON.decode(productStore.getById(inID).data.providedServices);
+    var services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
     //console.log(services);
     for (var key in services)
     {
@@ -2601,7 +2675,7 @@ function serviceClicked(el, getPrice, price)
     {
       var mbox = Ext.MessageBox.show({
         title:    'Charge for this Service?',
-        msg:      'Please enter the amount you will charge, in U.S. Dollars, per hour for this service (Enter 0 for no charge).<br /><br />$<input id="price" type="textbox"/> U.S. Dollars',
+        msg:      'Please enter the amount you will charge, in U.S. Dollars, per hour for this service (Enter 0 for no charge).<br /><br />$<input id="servicepricetext" type="textbox"/> U.S. Dollars',
         buttons:  Ext.MessageBox.OKCANCEL,
         icon: Ext.Msg.QUESTION,
 	defaultFocus: 'price', 
@@ -2609,12 +2683,14 @@ function serviceClicked(el, getPrice, price)
         {
           if( btn == 'ok')
           {
-            var price = currencyFormatted(Ext.get('price').getValue());
+            var price = currencyFormatted(Ext.get('servicepricetext').getValue());
+            //console.log(price);
             var servicePrice = document.createElement("span");
             servicePrice.id = file + "_servicePrice";
             servicePrice.className = "servicePrice";
             servicePrice.innerHTML = '$' + price + '/hr';
             servicePrice.style.marginTop = 0 + "px";
+            if(document.getElementById(servicePrice)) {el.parentNode.parentNode.removeChild(servicePrice);}
             el.parentNode.parentNode.appendChild(servicePrice);
             services[decodeURI(file)] = price;
           }
@@ -2681,12 +2757,12 @@ function showApptScheduler(sch, selected, oldSch)
 
   //Show previously selected options
   //setGroupsFromSchedule("apptTime", "selectService", schedule);
-  setGroupsFromSchedule("apptTime", "selectService", Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar));
+  setGroupsFromSchedule("apptTime", "selectService", productStore.getById(user[0].inID).data.calendar ? Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar) : {});
 
 
   //Disable previously scheduled hours from other providers
   //disableGroupsFromSchedule("apptTime", "selectService", schedule);
-  disableGroupsFromSchedule("apptTime", "selectService", Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar));
+  disableGroupsFromSchedule("apptTime", "selectService", productStore.getById(user[0].inID).data.calendar ? Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar) : {});
 
   getSubTotal();
 
@@ -2708,7 +2784,7 @@ function scheduleThisDay(cal)
   //var ID = initStr[curr].label.id;
   var ID = initStr[curr].id;
   var selected = new Array();
-  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+  var services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
   var numServices = Object.size(services);
   //selected = getClickedServices(ID);
   selected = getServices(ID);
@@ -2935,7 +3011,7 @@ function makeAppt(id)
 
     // 
     var close = document.createElement("div");
-    close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="window.event.stopPropagation(); window.event.cancelBubble = true; this.parentNode.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\'; return false;"></div>';
+    close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; this.parentNode.parentNode.parentNode.style.display=\'none\'; document.getElementById(\'apptScheduler\').style.display=\'none\'; document.getElementById(\'scrollbar\').style.zIndex = 55; if(document.getElementById(\'screen\')) {document.getElementById(\'screen\').style.display=\'none\';} document.getElementById(\'infoContents\').style.display=\'\'; return false;"></div>';
     close.style.position = "absolute";
     close.style.zIndex = 100;
     close.style.float = "right";
@@ -3383,7 +3459,7 @@ function getSubTotal()
   //console.log(ID);
 
   // --Services--
-  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+  var services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
 
   var sch = getGroupSelections('apptTime', 'selectService', true);
   var split = sch.split('<br>');
@@ -3415,7 +3491,7 @@ function getSubTotalFromSch(sch, ID)
   //console.log(ID);
 
   // --Services--
-  var services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);
+  var services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
 
   //var sch = getGroupSelections('apptTime', 'selectService', true);
   var split = sch.split('<br>');
@@ -3901,7 +3977,7 @@ function addSchedule(me, day, title)
 
 function getSchedule(ID, day)
 {
-  var calendar = Ext.JSON.decode(productStore.getById(ID).data.calendar);
+  var calendar = productStore.getById(ID).data.calendar ? Ext.JSON.decode(productStore.getById(ID).data.calendar) : {};
   //console.log(calendar);
   return calendar[day];
 }
@@ -4685,6 +4761,8 @@ function loadUsers()
 
 
       var inID;
+      var linkedINprofile;
+      var tzOffset;
       var email;
       var education;
       var role;
@@ -4702,6 +4780,8 @@ function loadUsers()
       {
 	//console.log(obj[i].id);
         inID = obj[i].id;
+        linkedINprofile = obj[i].linkedINprofile;
+        tzOffset = obj[i].tzOffset;
         email = obj[i].email;
         education = obj[i].education;
         role = obj[i].role;
@@ -4714,12 +4794,15 @@ function loadUsers()
         feedback = obj[i].feedback;
         reviews = obj[i].rating;
 
-        settings[inID] = Ext.JSON.decode(privacy);
+        //console.log(privacy);
+        settings[inID] = privacy ? Ext.JSON.decode(privacy) : {};
         
-
+        //console.log("LOADING: " + inID);
         var myNewRecord = [
         {
           inID: inID,
+          linkedINprofile: linkedINprofile,
+          tzOffset: tzOffset,
           email: email,
           education: education,
           role: role,
@@ -4751,7 +4834,7 @@ function loadSchedule()
   //if(productStore.getById(user[0].inID).data.role != 'find')
   if(1)
   {
-    var calendar = Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar);
+    var calendar = productStore.getById(user[0].inID).data.calendar ? Ext.JSON.decode(productStore.getById(user[0].inID).data.calendar) : {};
     //console.log(calendar);
     for (var key in calendar)
     {
@@ -4799,7 +4882,7 @@ function loadSelectedSchedule(inID)
   {
     //console.log(productStore.getById(inID).data.email);
     currSelectedSchedule = {};
-    var calendar = Ext.JSON.decode(productStore.getById(inID).data.calendar);
+    var calendar = productStore.getById(inID).data.calendar ? Ext.JSON.decode(productStore.getById(inID).data.calendar) : {};
     //console.log(calendar);
     for (var key in calendar)
     {
@@ -4841,7 +4924,7 @@ function loadSelectedSchedule(inID)
 function updateSchedule(id, day, name, sch)
 {
   //console.log("SCH: " + sch);
-  var calendar = Ext.JSON.decode(productStore.getById(id).data.calendar);
+  var calendar = productStore.getById(id).data.calendar ? Ext.JSON.decode(productStore.getById(id).data.calendar) : {};
   var oldSch = calendar[day];
   var removed;
   var temp;
@@ -4954,7 +5037,7 @@ function loadMail()
   if(!productStore.getById(user[0].inID)) {return;}
 
   //var messages = Ext.JSON.decode(productStore.getById(user[0].inID).data.mail);
-  var mailObj = Ext.JSON.decode(productStore.getById(user[0].inID).data.mail);
+  var mailObj = productStore.getById(user[0].inID).data.mail ? Ext.JSON.decode(productStore.getById(user[0].inID).data.mail) : {};
   newMail = mailObj.anyNew;
   var msgs = mailObj.mail;
   //console.log(messages);
@@ -5013,6 +5096,19 @@ function saveMail(inID, flag, mailMsgs)
 
 
 
+function showMail()
+{
+  if(parseInt(document.getElementById('mailCount').innerHTML,10))
+  {
+    document.getElementById('mail').style.display='';
+    document.getElementById('mailNewFlag').style.display ='none';
+    newMail = false;
+    saveMail(user[0].inID, newMail, mail);
+    ellipsizeMailBoxes('mail');
+  }
+}
+
+
 
 function addMailMessage(sender, msg, flag)
 {
@@ -5061,7 +5157,7 @@ function addMailMessage(sender, msg, flag)
   content.innerHTML = msg;
   container.appendChild(content);
   var close = document.createElement("div");
-  close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode); removeMail(this.parentNode.parentNode.id); document.getElementById(\'mailCount\').innerHTML = parseInt(document.getElementById(\'mailCount\').innerHTML,10)-1;"></div>';
+  close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode); removeMail(this.parentNode.parentNode.id); document.getElementById(\'mailCount\').innerHTML = parseInt(document.getElementById(\'mailCount\').innerHTML,10)-1; if(!parseInt(document.getElementById(\'mailCount\').innerHTML,10)) {document.getElementById(\'mail\').style.display=\'none\';}"></div>';
   close.style.right = 6 + "px";
   close.style.marginRight = 0 + "px";
   close.style.marginTop = -8 + "px";
@@ -5164,7 +5260,7 @@ function loadCartItems(id, isReturn)
       var result = productStore.getById(returnParameters.ID).data.cart;
       if(result.length > 2)
       {
-        cartItems = Ext.JSON.decode(productStore.getById(returnParameters.ID).data.cart);
+        cartItems = productStore.getById(returnParameters.ID).data.cart ? Ext.JSON.decode(productStore.getById(returnParameters.ID).data.cart) : {};
       }
     }
   }
@@ -5504,7 +5600,7 @@ function historyAvailable()
     var result = productStore.getById(user[0].inID).data.history;
     if(result.length > 2)
     {
-      historyItems = Ext.JSON.decode(productStore.getById(user[0].inID).data.history);
+      historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
     }
   }
 
@@ -5528,7 +5624,7 @@ function historyAvailable()
       var result = productStore.getById(ID).data.feedback;
       if(result.length > 2)
       {
-        feedback = Ext.JSON.decode(productStore.getById(ID).data.feedback);
+        feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
       }
     }
     var fbKey = user[0].inID + ':' + day;
@@ -5557,7 +5653,7 @@ function loadHistory()
   var help = '';
   var idx = 0;
   var historyItems = {};
-  historyItems = Ext.JSON.decode(productStore.getById(user[0].inID).data.history);
+  historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
 
 
   for (var key in historyItems)
@@ -5574,7 +5670,7 @@ function loadHistory()
     var image = productStore.getById(ID).data.image || "./images/ghost.png";
 
     //console.log(ID);
-    var feedback = Ext.JSON.decode(productStore.getById(ID).data.feedback);
+    var feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
     var fbKey = user[0].inID + ':' + day;
     //console.log(fbKey);
     //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
@@ -5761,7 +5857,7 @@ function populateShareElement()
 
   if(productStore.getById(ID))
   {
-    feedback = Ext.JSON.decode(productStore.getById(ID).data.feedback);
+    feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
     JSONStr = Ext.JSON.encode(feedback[JSONKey]);
     //console.log(JSONKey);
   }
@@ -5809,7 +5905,7 @@ function populateRateForm()
   if(productStore.getById(ID))
   {
     rateFormImg.style.background = 'url(' + productStore.getById(ID).data.image + ') no-repeat center center';
-    ratingObj = Ext.JSON.decode(productStore.getById(ID).data.reviews);
+    ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
     // --Name--
     var first = productStore.getById(ID).data.first;
     var last = productStore.getById(ID).data.last;
@@ -6355,7 +6451,7 @@ function updateRating(inID, myRating, myComment)
 
   var ratingObj;
 
-  if(productStore.getById(inID)) {ratingObj =  Ext.JSON.decode(productStore.getById(inID).data.reviews);}
+  if(productStore.getById(inID)) {ratingObj =  productStore.getById(inID).data.reviews ? Ext.JSON.decode(productStore.getById(inID).data.reviews) : {};}
   if(!ratingObj) {return;}
 
   if(!ratingObj.total) {ratingObj.total = 0;}
@@ -6397,7 +6493,7 @@ function updateRating(inID, myRating, myComment)
 
   var sender = user[0].inID;
   var msg = 'You got rated by ' + myName + '<br>Rating: ' + myRating + '/5<br>Comment: ' + myComment;
-  var mailObj = Ext.JSON.decode(productStore.getById(inID).data.mail);
+  var mailObj = productStore.getById(inID).data.mail ? Ext.JSON.decode(productStore.getById(inID).data.mail) : {};
   var msgs = mailObj.mail;
 
   var size = Object.size(msgs);
@@ -6417,7 +6513,7 @@ function updateFeedback(inID, JSONKey, myFeedback)
   var feedbackObj;
   //console.log(JSONKey);
 
-  if(productStore.getById(user[0].inID)) {feedbackObj =  Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback);}
+  if(productStore.getById(user[0].inID)) {feedbackObj = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};}
   if(!feedbackObj) {return;}
 
   feedbackObj[JSONKey] = myFeedback;
@@ -6441,7 +6537,7 @@ function updateFeedback(inID, JSONKey, myFeedback)
 
   var sender = user[0].inID;
   var msg = 'You got feedback from ' + myName + '<br>Click on Step3 View Results to see your feedback';
-  var mailObj = Ext.JSON.decode(productStore.getById(inID).data.mail);
+  var mailObj = productStore.getById(inID).data.mail ? Ext.JSON.decode(productStore.getById(inID).data.mail) : {};
   var msgs = mailObj.mail;
 
 
@@ -6582,8 +6678,10 @@ function populateFilters()
     var obj = filters[key];
     var filterName = key + 'Filter';
     var el = document.getElementById(key);
+    //console.log("INNER: " + el.innerHTML);
     var innerHTML = '';
     //console.log(obj);
+    if(!obj) {continue;}
     for(var key in obj)
     {
       //console.log(key + obj[key]);
@@ -6612,13 +6710,13 @@ function showFilter(filter)
   {
     elImg.className = "implode-arrow";
     //console.log(">"+el.innerHTML+"<");
-    if(!el.innerHTML)
+    if(!el.innerHTML && obj)
     {
       var innerHTML = '';
-      //console.log(obj);
+      //console.log("OBJ: " + obj);
       for(var key in obj)
       {
-        //console.log(key + obj[key]);
+        //console.log("FILTER: " + filter + "KEY:" + key + "=" + obj[key]);
         innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch();"/>' + obj[key] + '<br>';
     
       }
@@ -6720,7 +6818,7 @@ function applyFilters()
       if(key == 'services')
       {
         var services;
-        if(productStore.getById(ID)) {services = Ext.JSON.decode(productStore.getById(ID).data.providedServices);}
+        if(productStore.getById(ID)) {services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
 
         for (var service in services)
         {
@@ -6789,14 +6887,33 @@ function windowResize()
 
 
 
-Object.size = function(obj) {
+Object.size = function(obj)
+{
     var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key) && obj[key]) size++;
+    for (key in obj)
+    {
+      if (obj.hasOwnProperty(key) && obj[key]) size++;
     }
 
     return size;
 };
+
+
+if (!Object.keys)
+{
+  Object.keys = function (obj)
+  {
+    var op, result = [];
+    for (op in obj)
+    {
+      if (obj.hasOwnProperty(op)) { result.push(op); }
+    }
+    return result;
+  };
+}
+
+
+
 
 /*
 // Return new array with duplicate values removed

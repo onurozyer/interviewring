@@ -14,7 +14,7 @@
 Ext.define('Interviewer', {
     extend: 'Ext.data.Model',
     idProperty: 'inID',
-	       fields: ['inID', 'email', 'education', 'role', 'providedServices', 'calendar', 'mail', 'privacy', 'cart', 'history', 'feedback', 'reviews']
+	       fields: ['inID', 'linkedINprofile', 'tzOffset', 'email', 'education', 'role', 'providedServices', 'calendar', 'mail', 'privacy', 'cart', 'history', 'feedback', 'reviews']
 });
 
 var productStore = Ext.create('Ext.data.Store', {

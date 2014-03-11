@@ -10,6 +10,7 @@ require './connect.php';
 
 
 $inID = $_POST['id'];
+$linkedINprofile = $_POST['linkedINprofile'];
 $tzOffset = $_POST['tzOffset'];
 $email = $_POST['email'];
 $education = $_POST['education'];
@@ -26,6 +27,11 @@ $cart = json_encode(json_decode($_POST['cart']));
 
 #$mail = mysql_real_escape_string(stripslashes($mail));
 $mail = mysql_real_escape_string($mail);
+$linkedINprofile = mysql_real_escape_string($linkedINprofile);
+
+
+$linkedINprofile = preg_replace('/^\"\"$/', '', $linkedINprofile);
+
 
 $oldRole = '';
 #$oldServices = '';
@@ -50,6 +56,7 @@ else
 #$services = $oldServices . $services;
 #$calendar = $oldCalendar . $calendar;
 
+mysql_query("UPDATE users set linkedINprofile ='".$linkedINprofile."' WHERE id='$inID'");
 mysql_query("UPDATE users set tzOffset ='".$tzOffset."' WHERE id='$inID'");
 mysql_query("UPDATE users set email ='".$email."' WHERE id='$inID'");
 mysql_query("UPDATE users set education ='".$education."' WHERE id='$inID'");

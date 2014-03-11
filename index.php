@@ -33,7 +33,7 @@ session_start();
   <link href='https://fonts.googleapis.com/css?family=Short+Stack|Arvo:400,700,400italic,700italic|Montserrat:400,700' rel='stylesheet' type='text/css'>
 -->
 
-
+  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 
   <script type="text/javascript" src="http://platform.linkedin.com/in.js?async=true">
   </script>
@@ -79,7 +79,7 @@ session_start();
   <script type="text/javascript" src="js/randlib.js"></script>
   <script type="text/javascript" src="js/utils.js"></script>
   <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
-  <link rel="stylesheet" href="css/style.710C28.css" type="text/css">
+  <link rel="stylesheet" href="css/style.css" type="text/css">
 
 
 
@@ -442,7 +442,13 @@ session_start();
       document.getElementById("step2").onclick=function() {showSelectServices();};
       document.getElementById("step3").onclick=function() {showSelectAvailability();};
 
-      setGroup("infoConfidential", settings[user[0].inID]['identity']);
+      if(user[0].inID)
+      {
+        if(settings[user[0].inID])
+        {
+          setGroup("infoConfidential", settings[user[0].inID]['identity']);
+        }
+      }
 
     }
 
@@ -522,7 +528,7 @@ session_start();
 
 
       $.ajax({url:"./saveData.php", 
-              data: {id: user[0].inID, tzOffset: tzOffset, email: user[0].email, education: user[0].education, role: 'give', services: JSON.stringify(services), calendar: JSON.stringify(schedule), mail: JSON.stringify(mailObj), cart: JSON.stringify(cartItems) },
+              data: {id: user[0].inID, linkedINprofile: Ext.JSON.encode(user[0].linkedINprofile), tzOffset: tzOffset, email: user[0].email, education: user[0].education, role: 'give', services: JSON.stringify(services), calendar: JSON.stringify(schedule), mail: JSON.stringify(mailObj), cart: JSON.stringify(cartItems) },
               type:'post',
               async:false
       });
@@ -609,7 +615,7 @@ Ext.create('Ext.fx.Animator', {
   <div id="header">
     <div id="headerClearfix" class="clearfix">
       <div class="logo">
-        <a onclick="showHome();"><img src="images/logo6.png" alt="LOGO" style="height: 90px; margin-left: -50px; margin-top: -10px;"></a>
+        <a onclick="showHome();"><img src="images/logo.png" alt="LOGO" style="height: 80px; margin-left: -80px; margin-top: -0px;"></a>
         <!--<a onclick="showHome();"><img src="images/huddle.png" alt="LOGO" style="height: 200px; margin-left: -30px; margin-top: 0px;"></a>-->
         <!--<a><img src="images/logo-ring.png" alt="LOGO" style="height: 130px;"</a>-->
         <!--<span style="margin-left: -90px; top: -20px;color:white;font-family: 'Merriweather Sans', sans-serif;font-size:20px;">The Career Services Marketplace</span>-->
@@ -631,10 +637,10 @@ Ext.create('Ext.fx.Animator', {
       </div>
 
 
-      <div id="mailContainer" style=" position: relative; top: 60px; float: right; right: 100px; z-index: 61;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail); ellipsizeMailBoxes('mail');" onmouseout="document.getElementById('mail').style.display='none';">
+      <div id="mailContainer" style=" position: relative; top: 60px; float: right; right: 100px; z-index: 61;" onmouseover="this.style.cursor='pointer'; showMail();" onmouseout="document.getElementById('mail').style.display='none';">
         <img style="z-index: 34; height: 25px;" src="./images/mail.png" alt="mail"/>
-        <div id="mailCount" style="position: relative; top: -25px; right: -5px; color: #FFFFFF; width: 20px; text-align: center;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail);" onmouseout="document.getElementById('mail').style.display='none';">0</div>
-        <div id="mailNewFlag" style="display: none; position: relative; top: -50px; right: -20px;" onmouseover="this.style.cursor='pointer'; document.getElementById('mail').style.display=''; document.getElementById('mailNewFlag').style.display ='none'; newMail = false; saveMail(user[0].inID, newMail, mail);" onmouseout="document.getElementById('mail').style.display='hidden';"><img src="images/warning.gif"/></div>
+        <div id="mailCount" style="position: relative; top: -25px; right: -5px; color: #FFFFFF; width: 20px; text-align: center;" onmouseover="this.style.cursor='pointer'; showMail();" onmouseout="document.getElementById('mail').style.display='none';">0</div>
+        <div id="mailNewFlag" style="display: none; position: relative; top: -50px; right: -20px;" onmouseover="this.style.cursor='pointer'; showMail();" onmouseout="document.getElementById('mail').style.display='hidden';"><img src="images/warning.gif"/></div>
         <div id="mailLoading" style="display: none; position: absolute; top: 25px; left: -150px; z-index: 61;"><img src="./images/progressBar.png"/><img id="progressBall" src="./images/ball.png" style="position: absolute; top: 1px; margin-left: 1px;"/></div>
         <div id="mail" class="gradient-darkGray" style="display: none; z-index: 60; position:absolute; top:27px; right: 0px; width: 316px; color: #CDDF7E; margin: 0px; max-height: 410px; overflow: auto;">
           <!--
@@ -783,9 +789,9 @@ Ext.create('Ext.fx.Animator', {
             <img src="./images/linkedin-logo.png" style="position:absolute; bottom:0px; left: 190px;"/>
           </div>
 
-          <div id="exploreWrapper" style="position: absolute; top: -50px; left: 130px; z-index: 1000;">
-            <input type="text" id="explore" class="explore" style="height: 48px; width: 635px; position: absolute; top:0px; left:0px;" value="Find interviewers from diverse industries and companies" onclick="this.value='';"></input>
-            <img class="gradient-darkGrey" src="./images/search.png" style="position: absolute; top:0px; left:648px;" onmouseover="this.style.cursor='pointer';" onclick="if(!user[0]) {window.role = 'find'; IN.User.authorize(); waitLoading10(); return true;} else{window.showSearch(document.getElementById('explore').value,2);}"/>
+          <div id="exploreWrapper" style="position: absolute; top: -50px; left: 130px; z-index: 56;">
+            <input type="text" id="explore" class="explore" style="height: 48px; width: 655px; position: absolute; top:0px; left:0px;" value="Find interviewers from diverse industries and companies" onclick="this.value='';"></input>
+            <img class="gradient-darkGrey" src="./images/search.png" style="position: absolute; top:0px; left:668px;" onmouseover="this.style.cursor='pointer';" onclick="if(0) {window.role = 'find'; IN.User.authorize(); waitLoading10(); return true;} else{window.showSearch(document.getElementById('explore').value,2);}"/>
           </div>
 
         </div><!--detail-->
@@ -1314,16 +1320,6 @@ Ext.create('Ext.fx.Animator', {
                 <p>
 	          <b>resume review</b>
                 </p>
-              </li>
-              <li>
-	        <div class="frame1">
-	          <div class="box">
-	            <img id="selectTips" src="images/Interview%20Tips.jpg" alt="interview tips" height="130" width="197" onmouseover='this.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)"; this.src="images/Interview%20TipsOver.jpg";' onmouseout='this.parentNode.parentNode.style.backgroundImage="url(images/frames.png)"; this.src="images/Interview%20Tips.jpg";' onclick='serviceClicked(this, true);'>
-	          </div>
-	        </div>
-                <p>
-	          <b>interview tips</b>
-	        </p>
               </li>
             </ul>
 

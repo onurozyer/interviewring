@@ -48,7 +48,7 @@ $mail->SMTPSecure = "ssl";                 // sets the prefix to the servier
 $mail->Host       = "smtp.gmail.com";      // sets GMAIL as the SMTP server
 $mail->Port       = 465;                   // set the SMTP port for the GMAIL server
 $mail->Username   = "info@interviewring.com";  // GMAIL username
-$mail->Password   = "ttjozo123";             // GMAIL password
+$mail->Password   = "";             // GMAIL password
 
 $address = "info@interviewring.com";
 $mail->SetFrom($address, 'Interviewring Appt.');

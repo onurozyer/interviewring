@@ -3316,7 +3316,7 @@ function localizeApptScheduler(inID)
   {
 
     var localTime = localizeTime(inID, row.cells[0].innerHTML);
-    row.cells[0].innerHTML = localTime;
+    //row.cells[0].innerHTML = localTime;
     //row.cells[1].firstChild.value = localTime;
     for (var j = 0, col; col = row.cells[j]; j++)
     {

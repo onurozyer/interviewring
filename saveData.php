@@ -11,7 +11,7 @@ require './connect.php';
 
 $inID = $_POST['id'];
 $linkedINprofile = $_POST['linkedINprofile'];
-$tzOffset = $_POST['tzOffset'];
+$tzName = $_POST['tzName'];
 $email = $_POST['email'];
 $education = $_POST['education'];
 $role = $_POST['role'];
@@ -52,12 +52,16 @@ else
   mysql_query("INSERT INTO users(id) VALUES('".$inID."')");
 }
 
-#if($role != $oldRole) {$role = "both";}
+if($oldRole)
+{
+  if($role != $oldRole) {$role = "both";}
+}
+
 #$services = $oldServices . $services;
 #$calendar = $oldCalendar . $calendar;
 
 mysql_query("UPDATE users set linkedINprofile ='".$linkedINprofile."' WHERE id='$inID'");
-mysql_query("UPDATE users set tzOffset ='".$tzOffset."' WHERE id='$inID'");
+mysql_query("UPDATE users set tzName ='".$tzName."' WHERE id='$inID'");
 mysql_query("UPDATE users set email ='".$email."' WHERE id='$inID'");
 mysql_query("UPDATE users set education ='".$education."' WHERE id='$inID'");
 mysql_query("UPDATE users set role ='".$role."' WHERE id='$inID'");

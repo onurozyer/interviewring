@@ -1,8 +1,10 @@
 //Need to bulletproof productStore.getById and document.getElementById like in 'loadCartItems'
 
-var formItems = {"communication skills":"","technical knowledge":"","Seniority Level":"","overall feedback":""};
+var formItems = {"communication skills":"","technical knowledge":"","seniority level":"","overall feedback":""};
 
-var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['Interviewing','Interview Mentoring','Resume Review'], "price":['FREE', '$1-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-250/hr', '$250+/hr']};
+var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['In-person Interview','Remote Interview','Interview Mentoring','Resume Review'], "price":['FREE', '$0.01-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-249/hr', '$250+/hr']};
+
+var historyFilters = {"status":['Completed','Scheduled','Waiting Feedback'], "date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago'], "companyH":""};
 
 linkedINlogin = false;
 
@@ -27,6 +29,7 @@ var subTotalsSaved = {};
 var total = 0;
 var curr = 0;
 var initStr = new Array();
+var historyItemKeyArray = new Array();
 var scrolled = 0;
 var scrollHeight = 200;
 
@@ -44,7 +47,7 @@ var schedule = {};
 var mail = {};
 var newMail = false;
 var settings = {};
-var history = {};
+//var history = {};
 var mailMessage = new Array();
 
 var currUserID = new Array();
@@ -62,11 +65,12 @@ var dayArray = [];
 var dayNumber;
 var dayIndex;
 var monthIndex;
+var year;
 
 
 window.isDirty = false;
 window.role = '';
-
+window.newUser;
 
 var dayNames = [
 		   "Sunday",
@@ -263,7 +267,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading()', 500);
     }
@@ -272,7 +276,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading2()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading2()', 500);
     }
@@ -281,16 +285,25 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading3()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading3()', 500);
     }
-    else {var role = productStore.getById(user[0].inID).data.role; if(paymentReturn || socialShareReturn || rateReturn || feedbackReturn) {return false;} if(role=='find') {showSearch("",2);} else if(role=='give') {showSelectServices(2);}}
+    else
+    {
+      var role = productStore.getById(user[0].inID).data.role;
+      //console.log("ROLE: " + role + " CURR: " + window.role);
+      if(paymentReturn || socialShareReturn || rateReturn || feedbackReturn) {return false;}
+      if(window.role == 'find')      {showSearch("",2);}
+      else if(window.role == 'give') {showSelectServices(2);}
+      else if (role == 'find')       {showSearch("",2);}
+      else if( role == 'give')       {showSelectServices(2);}
+    }
   }
 
   function waitLoading4()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading4()', 500);
     }
@@ -299,7 +312,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading5()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!usersLoaded)
     {
       countdown = setTimeout('waitLoading5()', 500);
     }
@@ -308,7 +321,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading6()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading6()', 500);
     }
@@ -317,7 +330,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading7()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading7()', 500);
     }
@@ -326,8 +339,9 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading8()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
+      //console.log("user[0]: " + user[0] + " user[0].inID: " + user[0].inID + " productStore.getById(user[0].inID): " + productStore.getById(user[0].inID) + " usersLoaded: " + usersLoaded + " linkedinLoaded: " + linkedinLoaded + " linkedINlogin: " + linkedINlogin);
       countdown = setTimeout('waitLoading8()', 500);
     }
     else {loadMail();}
@@ -335,7 +349,7 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading9()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading9()', 500);
     }
@@ -344,19 +358,55 @@ Ext.override(Ext.getCmp('myCal'), {
 
   function waitLoading10()
   {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded)
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
     {
       countdown = setTimeout('waitLoading10()', 500);
     }
     else {window.showSearch(document.getElementById('explore').value,2);}
   }
 
+  function waitLoading11()
+  {
+    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
+    {
+      countdown = setTimeout('waitLoading11()', 500);
+    }
+    else
+    {
+      window.showProfile();
+
+      var JSONKey = returnParameters.KEY ;
+      var ID = returnParameters.ID;
+
+      var feedback = {};
+      var JSONStr = '';
+
+      if(productStore.getById(ID))
+      {
+        feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
+        JSONStr = Ext.JSON.encode(feedback[JSONKey]);
+        //console.log(JSONKey);
+      }
+
+      if(feedback[JSONKey])
+      {
+        historyClicked(JSONStr,JSONKey,ID,false);
+      }
+    }
+  }
+
 
 var inProfile;
 
 //<!-- NOTE: be sure to set onLoad: onLinkedInLoad -->
+/*
     function onLinkedInLoad() {
       IN.Event.on(IN, "auth", function() {onLinkedInLogin(); waitUsersLoaded(); if(window.role == 'find') {waitLoading();} else if(window.role == 'give') {waitLoading2();} document.getElementById("headercontent").style.display=''; document.getElementById("header2content").style.display=''; document.getElementById("login").style.display=''; document.getElementById("getStarted").style.display='none'; document.getElementById("returnLogin").style.display='none'; waitLoading3();  });
+      IN.Event.on(IN, "logout", function() {onLinkedInLogout();});
+    }
+*/
+    function onLinkedInLoad() {
+      IN.Event.on(IN, "auth", function() {onLinkedInLogin(); waitUsersLoaded(); document.getElementById("headercontent").style.display=''; document.getElementById("header2content").style.display=''; document.getElementById("login").style.display=''; document.getElementById("getStarted").style.display='none'; document.getElementById("returnLogin").style.display='none'; waitLoading3();  });
       IN.Event.on(IN, "logout", function() {onLinkedInLogout();});
     }
 
@@ -367,9 +417,11 @@ var inProfile;
     loading = productStore.getCount();
     //console.log(loading);
     var data = {};
+    data._total = 0;
     data.values = {};
     productStore.data.each(function(item, index, totalItems)
     {
+      //console.log("PUSHING: " + item.get('inID'));
       currUserID.push(item.get('inID'));
       userList[item.get('inID')] = true;
       if(productStore.getById(item.get('inID')))
@@ -377,6 +429,7 @@ var inProfile;
         if(productStore.getById(item.get('inID')).data.linkedINprofile)
 	{
           data.values[item.get('inID')] = productStore.getById(item.get('inID')).data.linkedINprofile ? Ext.JSON.decode(productStore.getById(item.get('inID')).data.linkedINprofile) : {};
+          data._total++;
 	}
       }
       
@@ -388,14 +441,12 @@ var inProfile;
     if(!currUserID.length) {return;}
 
     //console.log("LOGGED IN: " + linkedINlogin);
-    if(linkedINlogin)
+    if(linkedINlogin && 0)
     {
       IN.API.Profile(currUserID)
         .fields(["id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions"])
         .result(function(result) {loadUserData(result); })
-        .error(function(err) {
-        alert('LinkedIn API error<br>' + err + '<br>Please reload the page');
-      });//.error(function(err)
+        .error(function(err) {alert('LinkedIn API error<br>' + err + '<br>Please reload the page');});//.error(function(err)
     }
     else
     {
@@ -418,9 +469,13 @@ var inProfile;
     filterCounts.experience = {};
     filterCounts.services = {};
     filterCounts.price = {};
-    	    //for(var key in result.values) {console.log("KEY: " + key + " = " + result.values[key]); console.log(result.values[key]);}
-    	    //console.log("TOTAL: " + result['_total']);
-    	    //for(var i = 0; i < result['_total']; i++) {console.log(result.values[i].headline);}
+
+    filters.industry = new Array();
+    filters.company = new Array();
+
+    //console.log(result);
+    //console.log("TOTAL: " + result['_total']);
+
       for(var key in result.values)
       {
         //console.log("KEY: " + key + " = " + result.values[key]); console.log(result.values[key]);
@@ -440,6 +495,75 @@ var inProfile;
         var company = '--';
         var position = '--';
         var industry = '--';
+        var email = profile.emailAddress;
+        var imAccount = '';
+        var phoneNumber = '';
+        var summary = '--';
+        var tenure = 0;
+        var company = '--';
+        var position = '--';
+        var image = profile.pictureUrls.values ? profile.pictureUrls.values[0] : "./images/ghost.png";
+        var url = profile.publicProfileUrl;
+        var education = '';
+
+        if(profile.educations.values)
+        {
+          for(var i = 0; i < profile.educations.values.length; i++)
+	  {
+	    education += profile.educations.values[i].schoolName + ' [' + profile.educations.values[i].degree + ' ' + profile.educations.values[i].fieldOfStudy + ']' + '<br>';
+	  }
+        }
+
+
+        if(profile.positions.values)
+        {
+	  summary = JSON.stringify(profile.positions.values[0].summary) || '--';
+          summary = summary.replace(/\\n/g, '<br />');
+          summary = summary.replace(/\\t/g, '  ');
+
+          var d = new Date();
+          var c = d.getFullYear();
+          if(profile.positions.values[0].startDate) {tenure = c - (profile.positions.values[0].startDate.year || d.getFullYear());}
+
+          company = profile.positions.values[0].company.name || '--';
+          position = profile.positions.values[0].title || '--';
+ 
+          //for(var i = 0; i < profile.positions.values.length; i++) {console.log(profile.positions.values[i].company.name);}
+        }
+        if(profile.imAccounts.values)
+        {
+          for(var i = 0; i < profile.imAccounts.values.length; i++)
+	  {
+	    //console.log(profile.imAccounts.values[i].type.name);
+            if(profile.imAccounts.values[i].type == 'skype') {imAccount = profile.imAccounts.values[i].type.name;}
+	  }
+          if(!imAccount) {imAccount = profile.imAccounts.values[0].type.name;}
+        }
+        if(profile.phoneNumbers.values)
+        {
+          for(var i = 0; i < profile.phoneNumbers.values.length; i++)
+	  {
+	    //console.log(profile.phoneNumbers.values[i].type.number);
+            if(profile.phoneNumbers.values[i].type == 'mobile') {phoneNumber = profile.phoneNumbers.values[i].type.number;}
+	  }
+          if(!phoneNumber) {phoneNumber = profile.phoneNumbers.values[0].type.number;}
+        }
+
+        //document.getElementById("loginbadge").innerHTML = '';
+        //document.getElementById("companyBox").innerHTML = profile.positions.values[0].company.name;
+        //document.getElementById("titleBox").innerHTML = profile.positions.values[0].title;
+        //document.getElementById("bioBox").innerHTML = summary;
+        //document.getElementById("tenureBox").innerHTML = tenure + ' years';
+
+        //document.getElementById("picture-url").style.backgroundImage="url(\'" + pictureUrl + "\')";
+        //document.getElementById("firstName").innerHTML = profile.firstName;
+        //createCookie('INID', profile.id);
+        //inID = profile.id;
+        //console.log("PUSHING");
+
+
+
+
 
         if(profile.summary) {summary = JSON.stringify(profile.summary);}
 
@@ -455,7 +579,7 @@ var inProfile;
             var endDate = {};
             endDate.year = c;
             if(profile.positions.values[i].endDate) {endDate.year = profile.positions.values[i].endDate.year;}
-            tenure = endDate.year - profile.positions.values[i].startDate.year;
+            if(profile.positions.values[i].startDate) {tenure = endDate.year - profile.positions.values[i].startDate.year;}
 
             if(!totalTenure[profile.positions.values[i].company.name]) {totalTenure[profile.positions.values[i].company.name] = 0;} totalTenure[profile.positions.values[i].company.name] += parseInt(tenure,10);
             if(!totalTenure[profile.positions.values[i].company.industry]) {totalTenure[profile.positions.values[i].company.industry] = 0;} totalTenure[profile.positions.values[i].company.industry] += parseInt(tenure,10);
@@ -471,14 +595,22 @@ var inProfile;
 
           var d = new Date();
           var c = d.getFullYear();
-          tenure = c - profile.positions.values[0].startDate.year;
+          if(profile.positions.values[0].startDate) {tenure = c - profile.positions.values[0].startDate.year;} else {tenure = 0;}
 
-          company = profile.positions.values[0].company.name;
-          industry = profile.positions.values[0].company.industry;
-          position = profile.positions.values[0].title;
+          company = profile.positions.values[0].company.name || '--';
+          industry = profile.positions.values[0].company.industry || '--';
+          position = profile.positions.values[0].title || '--';
 
         }
         //console.log(company);
+
+
+        //TODO: NEED TO MOVE TO POST FILTER
+        var services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
+        var numServices = Object.size(services);
+
+	if(numServices && (productStore.getById(inID).data.role === 'give' || productStore.getById(inID).data.role === 'both'))
+	{
 
         var found = 0;
         if(!filters.industry) {filters.industry = new Array();}
@@ -501,15 +633,15 @@ var inProfile;
         // --Services--
         var LO = 999999;
         var HI = 0;
-	var serviceItems = new Array();
-        services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
+	//var serviceItems = new Array();
+        //services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
         for (var key in services)
         {
-	  serviceItems.push(key);
+	  //serviceItems.push(key);
           if(!filterCounts.services[key]) filterCounts.services[key] = 0;
           filterCounts.services[key]++;
-          if(parseInt(services[key],10) < LO) {LO = parseInt(services[key],10);}
-          if(parseInt(services[key],10) > HI) {HI = parseInt(services[key],10);}
+          if(parseFloat(services[key].price) < LO) {LO = parseFloat(services[key].price);}
+          if(parseFloat(services[key].price) > HI) {HI = parseFloat(services[key].price);}
         }
 
         // --Rating --
@@ -537,8 +669,8 @@ var inProfile;
               item = item.replace('FREE', '0');
               item = item.replace('+', '-999999');
 	      var split = item.split('-');
-	      var priceLO = parseInt(split[0],10);
-              var priceHI = parseInt(split[1],10) || parseInt('0',10);
+	      var priceLO = parseFloat(split[0]);
+              var priceHI = parseFloat(split[1]) || parseFloat('0');
               //console.log(LO + "->" + " LO: " + priceLO + " HI: " + priceHI);
 	      if(LO >= priceLO && LO <= priceHI)
               {
@@ -579,9 +711,9 @@ var inProfile;
               //console.log(item);
 	      item = item.replace(/\s*years/,'');
 	      var split = item.split('-');
-	      var expLO = parseInt(split[0],10);
-              var expHI = parseInt(split[1],10) || parseInt('0',10);
-              var experience = parseInt(totalTenure[industry],10);
+	      var expLO = parseFloat(split[0]);
+              var expHI = parseFloat(split[1]) || parseFloat('0');
+              var experience = parseInt(totalTenure[industry],10) || 0;
               //console.log(experience + "->" + " LO: " + expLO + " HI: " + expHI);
 	      if(experience >= expLO && experience <= expHI)
 	      {
@@ -596,8 +728,22 @@ var inProfile;
 
 	}
 
+        //if(!serviceItems.length) {filterCounts.price = {};}
+	}
+
+
+	/*
+	var serviceItems = new Array();
+        services = productStore.getById(inID).data.providedServices ? Ext.JSON.decode(productStore.getById(inID).data.providedServices) : {};
+        for (var key in services)
+        {
+	  serviceItems.push(key);
+	}
         productStore.getById(inID).data.services = serviceItems;
-        if(!serviceItems.length) {filterCounts.price = {};}
+	*/
+
+
+
 
         //console.log(inID);
         //console.log(first);
@@ -610,6 +756,10 @@ var inProfile;
         productStore.getById(inID).data.industryTenure = totalTenure[industry];
         productStore.getById(inID).data.position = position;
         productStore.getById(inID).data.summary = summary;
+	productStore.getById(inID).data.email = email;
+	productStore.getById(inID).data.education = education;
+        productStore.getById(inID).data.imAccount = imAccount;
+        productStore.getById(inID).data.phoneNumber = phoneNumber;
         productStore.getById(inID).data.image = profile.pictureUrls.values ? profile.pictureUrls.values[0] : "./images/ghost.png";
         productStore.getById(inID).data.imageSmall = profile.pictureUrl || "./images/ghostSmall.png";
         productStore.getById(inID).data.url = profile.publicProfileUrl;
@@ -625,7 +775,19 @@ var inProfile;
       //Delete any invalid id's
       for(var key in userList)
       {
-        console.log("Removing record: " + key);
+	if(linkedINlogin)
+        {
+          //console.log("Removing record: " + key);
+	  if(productStore.getById(key)) {productStore.remove(productStore.getById(key));}
+	}
+        for(var index = 0; index < initStr.length; index++)
+        {
+ 
+          var ID = initStr[index].id;
+          //console.log("ID: " + ID);
+
+          if(ID === key) {delete initStr[index];}
+	}
         if(0)
 	  {
         productStore.remove(productStore.getById(key));
@@ -640,12 +802,20 @@ var inProfile;
       filters.industry = filters.industry ? filters.industry.sort() : {};
       filters.company = filters.company ? filters.company.sort() : {};
 
-      linkedinLoaded = true;
+      linkedinLoaded = true & linkedINlogin;
   }
+
+
+
+
+
+
+
 
 
     function onLinkedInLogout() {
       setLoginBadge(false);
+      window.location="index.php";
     }
 
     function onLinkedInLogin() {
@@ -665,7 +835,7 @@ var inProfile;
     {
       linkedINlogin = true;
       if (!profile) {
-        profHTML = '<a href="#" onclick="IN.User.authorize(); return true;">login/create account</a>';
+        profHTML = '<a href="#" onclick="IN.User.authorize(); return true;">login</a>';
         services = {};
         schedule = {};
         mail = {};
@@ -676,12 +846,15 @@ var inProfile;
         productStore.removeAll(true);
         window.location.href = "";
       }
-      else {
+      else
+      {
         var pictureUrl = profile.pictureUrl || "http://static02.linkedin.com/scds/common/u/img/icon/icon_no_photo_80x80.png";
-        profHTML = 'Welcome ' + profile.firstName + ' ' + ' <a href="#" onclick="IN.User.logout(); return true;"><img src="images/logoutLittle-up.png" style="height: 25px;" onmouseover="this.src=\'images/logoutLittle-dn.png\';" onmouseout="this.src=\'images/logoutLittle-up.png\';"/></a><div style="position: absolute; top: 20px; left: 80px;"><div class="dropdown-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'dropdown-dn\';" onmouseout="this.className=\'dropdown-up\';" onclick="showSettings();"></div></div>';
+
+        //profHTML = 'Welcome ' + profile.firstName + ' ' + ' <div onclick="IN.User.logout();"><img src="images/logoutLittle-up.png" style="height: 25px;" onmouseover="this.src=\'images/logoutLittle-dn.png\';" onmouseout="this.src=\'images/logoutLittle-up.png\';"/></div><div style="position: absolute; top: 0px; left: 80px;"><div class="dropdown-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'dropdown-dn\';" onmouseout="this.className=\'dropdown-up\';" onclick="showSettings();"></div></div>';
+        profHTML = 'Welcome ' + profile.firstName + ' ';
       }
 
-      document.getElementById('login').innerHTML = profHTML;
+      document.getElementById("login").innerHTML = profHTML;
 
       //console.log(profile);
       //console.log("EMAIL: " + profile.emailAddress);
@@ -710,16 +883,16 @@ var inProfile;
 
       if(profile.positions.values)
       {
-	summary = JSON.stringify(profile.positions.values[0].summary);
+	summary = JSON.stringify(profile.positions.values[0].summary) || '--';
         summary = summary.replace(/\\n/g, '<br />');
         summary = summary.replace(/\\t/g, '  ');
 
         var d = new Date();
         var c = d.getFullYear();
-        tenure = c - profile.positions.values[0].startDate.year;
+        if(profile.positions.values[0].startDate) {tenure = c - (profile.positions.values[0].startDate.year || d.getFullYear());}
 
-        company = profile.positions.values[0].company.name;
-        position = profile.positions.values[0].title;
+        company = profile.positions.values[0].company.name || '--';
+        position = profile.positions.values[0].title || '--';
  
         //for(var i = 0; i < profile.positions.values.length; i++) {console.log(profile.positions.values[i].company.name);}
       }
@@ -753,9 +926,54 @@ var inProfile;
       //createCookie('INID', profile.id);
       //inID = profile.id;
       //console.log("PUSHING");
+
+
+
+      $.ajax({
+        url: "./isNewUser.php",
+	data: {id: inID},
+        cache: false,
+	type:'post',
+	async:false,
+	success: function(response){window.newUser = (response==='true') ? true : false;}
+      });
+
+      //console.log("NEW USER: " + window.newUser);
+
+      if(window.newUser)
+      {
+        var d = new Date()
+        var tzOffset = d.getTimezoneOffset();
+        //var tzName = get_timezone_id();
+
+        var tzName = jstz.determine().name(); // Determines the time zone of the browser client
+        //console.log(tzName);
+
+
+        var mailObj = {};
+        mailObj.anyNew = newMail;
+        mailObj.mail = mail;
+
+
+        $.ajax({url:"./saveData.php", 
+              data: {id: inID, linkedINprofile: Ext.JSON.encode(profile), tzName: tzName, role: window.role, services: JSON.stringify(services), calendar: JSON.stringify(schedule), mail: JSON.stringify(mailObj), cart: JSON.stringify(cartItems) },
+              type:'post',
+	      async:false,
+	      success: function(response){var myNewRecord = [{ inID: inID,linkedINprofile: JSON.stringify(profile),tzName: tzName,role: window.role}]; productStore.loadData(myNewRecord, true);}
+        });
+      }
+      else
+      {
+        $.ajax({url:"./updateData.php", 
+	      data: {id: inID, linkedINprofile: Ext.JSON.encode(profile) },
+              type:'post',
+              async:true
+        });
+      }
+
       user.push({inID: inID, linkedINprofile: profile, first: first, last: last, company: company, position: position, image: image, url: url, email: email, imAccount: imAccount, phoneNumber: phoneNumber, education: education});
 
-
+      if(!settings[inID]) {settings[inID] = {};}
 
       waitLoading8();  //loadMail()
       //loadSchedule();
@@ -853,6 +1071,39 @@ window.applyDiscount = function (validCode, code)
   }
   total = getTotal(subTotals);
   document.getElementById("Total").innerHTML = "TOTAL: $" + currencyFormatted(total);
+
+  if(total != 0)
+  {
+    Ext.get("promoCodeContainer").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Choose your method of payment';
+    document.getElementById("checkOutCallToActionConfirm").style.display = 'none';
+    document.getElementById("checkOutCallToActionButtons").style.display = '';
+  }
+  else                       
+  {
+    Ext.get("promoCodeContainer").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Confirm your appointment(s)';
+    document.getElementById("checkOutCallToActionConfirm").style.display = '';
+    document.getElementById("checkOutCallToActionButtons").style.display = 'none';
+  }
+  if(Object.size(cartItems))
+  {
+    Ext.get("cartItem").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium";
+    document.getElementById("checkOutCallToAction").style.display = '';
+    document.getElementById("Total").style.visibility = '';
+  }
+  else
+  {
+    Ext.get("cartItem").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium inactive";
+    document.getElementById("checkOutCallToAction").style.display = 'none';
+    document.getElementById("Total").style.visibility = 'hidden';
+    document.getElementById("cartItems").innerHTML = '<h1 class="clearfix" style="margin-top: 100px; text-align: center;">Your Cart is Empty</h1>';
+  }
+
+
+
 }
 
 
@@ -869,11 +1120,17 @@ Ext.onReady(function()
 var hash = decodeURI((window.location.href.split("?")[1] || ""));
 //console.log("HASH: " + hash);
 
-
+/*
 var temp = hash.split("=") || "";
 var addr = temp.shift();
 var temp = temp.join("=");
 var tag = temp.split("&") || "";
+*/
+
+var tag = hash.split("&") || "";
+var addr = tag.shift();
+
+
 
 //console.log("ADDR: " + addr);
 //console.log("TAG: " + tag);
@@ -912,6 +1169,8 @@ else if(addr == 'share')
     if(!tag[i]) {continue;}
     key = decodeURI(tag[i].split("=")[0]);
     item = decodeURI(tag[i].split("=")[1]);
+    item = decodeURIComponent((item+'').replace(/\+/g, '%20'));
+    //console.log(item);
 
     if(key == 'KEY') {JSONKey = item;}
     else if(key == 'ID') {ID = item;}
@@ -960,6 +1219,31 @@ else if(addr == 'feedback')
   returnParameters.KEY = JSONKey;
 
   window.showFeedbackForm();
+}
+else if(addr == 'showFeedback')
+{
+  var key;
+  var item;
+
+  var JSONKey;
+  var ID;
+
+  for(var i = 0; i < tag.length; i++)
+  {
+    if(!tag[i]) {continue;}
+    key = decodeURI(tag[i].split("=")[0]);
+    item = decodeURI(tag[i].split("=")[1]);
+    item = decodeURIComponent((item+'').replace(/\+/g, '%20'));
+    //console.log(item);
+
+    if(key == 'KEY') {JSONKey = item;}
+    else if(key == 'ID') {ID = item;}
+  }
+  socialShareReturn = true;
+  returnParameters.KEY = JSONKey;
+  returnParameters.ID = ID;
+
+  waitLoading11();
 }
 
       
@@ -1124,14 +1408,14 @@ Ext.create('Ext.form.Panel', {
 
 
 
-  window.loadProducts = function (exp)
+  window.loadSearchItems = function (exp)
   {
 
     //console.log(productStore.getById(user[0].inID).data.role);
     //if(!productStore.getById(user[0].inID).data.role) {exp = '--NULL--';}
     //if(productStore.getById(user[0].inID).data.role != 'give') {exp = '--NULL--';}
 
-    //console.log('loadProducts');
+    //console.log('loadSearchItems');
     var regExp = exp || ".";
     regExp = regExp.replace(/\s+/g, "|");
     var matchRE = new RegExp(regExp, "i");
@@ -1142,6 +1426,11 @@ Ext.create('Ext.form.Panel', {
 
     productStore.data.each(function(item, index, totalItems)
     {
+
+      //console.log(item.get('linkedINprofile'));
+      //console.log((!item.get('linkedINprofile') && !linkedINlogin));
+      if(item.get('role') !== 'give' && item.get('role') !== 'both' || (!item.get('linkedINprofile') && !linkedINlogin)) {return;}
+
       var inID = item.get('inID');
       //console.log(inID);
       //if(inID == user[0].inID && item.get('role') == 'find') {return true;}
@@ -1153,6 +1442,7 @@ Ext.create('Ext.form.Panel', {
       var industry = item.get('industry') || '';
       var summary = item.get('summary') || '';
 
+      //console.log(first);
       //if(!first || !last || !company || !industry || !summary) {return;}
       //var summary = "Mixed Signal Design SAR ADC IP for next-gen touch screen controller PSoC 3 and PSoC 5 Chip Integration Test Vector Development and Fault Grading Developed system ROM firmware in M8C assembly for extending the life of flash memory and performed mixed Signal Verification";
 
@@ -1197,7 +1487,9 @@ Ext.create('Ext.form.Panel', {
       image = './images/ghost.png';
       image = 'http://m.c.lnkd.licdn.com/mpr/mpr/shrink_200_200/p/2/000/1a8/1fc/3597e0f.jpg';
       
-      if(found)
+      var numServices = Object.size(services);
+      if(found && numServices)
+      //if(found)
       {
         //initStr.push({src: image, label: {description: item.get('first') + ' ' + item.get('last'), price: item.get('last'), url: item.get('url'), high: image, id: item.get('inID'), company: item.get('company') || 'Amazon'}});
         initStr.push({id: item.get('inID')}); 
@@ -1207,11 +1499,11 @@ Ext.create('Ext.form.Panel', {
     applyFilters();
     initStr.sort(sortfunction)
     populateSearchItems();
-
-
-    showLabel(curr);
-    setSliderPosition(curr);
-  } //loadProducts()
+			   //populateFilters();
+    if(exp) {pruneFilters();}
+			   //showLabel(curr);
+			   //setSliderPosition(curr);
+  } //loadSearchItems()
 
 
 function sortfunction(a, b)
@@ -1264,15 +1556,15 @@ function sortfunction(a, b)
     services = productStore.getById(a.id).data.providedServices ? Ext.JSON.decode(productStore.getById(a.id).data.providedServices) : {};
     for (var key in services)
     {
-      if(parseInt(services[key],10) < aLO) {aLO = parseInt(services[key],10);}
-      if(parseInt(services[key],10) > aHI) {aHI = parseInt(services[key],10);}
+      if(parseFloat(services[key].price) < aLO) {aLO = parseFloat(services[key].price);}
+      if(parseFloat(services[key].price) > aHI) {aHI = parseFloat(services[key].price);}
     }
     // --Services--
     services = productStore.getById(b.id).data.providedServices ? Ext.JSON.decode(productStore.getById(b.id).data.providedServices) : {};
     for (var key in services)
     {
-      if(parseInt(services[key],10) < bLO) {bLO = parseInt(services[key],10);}
-      if(parseInt(services[key],10) > bHI) {bHI = parseInt(services[key],10);}
+      if(parseFloat(services[key].price) < bLO) {bLO = parseFloat(services[key].price);}
+      if(parseFloat(services[key].price) > bHI) {bHI = parseFloat(services[key].price);}
     }
 
     //console.log("aLO: " + aLO + " bLO: " + bLO);
@@ -1384,10 +1676,71 @@ function sortfunction(a, b)
   }
 
 
+  window.showServiceInfo = function(JSONStr, elID)
+  {
+    //console.log("showServiceInfo");
+    
+    JSONStr = decodeURI(JSONStr);
+    var service = Ext.JSON.decode(JSONStr);
+    var parent = document.getElementById(elID);
+    var childID = "serviceInfo_" + elID;
+
+    if(!document.getElementById(childID))
+    {
+      var infoStr = '<div class="serviceInfoPopup">';
+      var post = '';
+      var pre = '';
+      for (var info in service)
+      {
+	pre = (info == 'price') ? '$' : '';
+	post = (info == 'price') ? ' /hr' : (info == 'radius') ? ' miles' : '';
+        infoStr += '<label>' + info + ': </label><span>' + pre + service[info] + post + '</span>';
+        //console.log(infoStr);
+      }
+      infoStr += '</div>';
+
+      var window = document.createElement("div");
+      window.className = "gradient-darkGrey";
+      window.style.position = 'absolute';
+      window.style.top = 96 + 'px';
+      window.style.width = 198 + 'px';
+      window.style.height = 100 + 'px';
+      window.id = childID;
+      window.innerHTML = infoStr;
+
+      parent.appendChild(window);
+    }
+    else
+    {
+      if(document.getElementById(childID).style.display == 'none') {document.getElementById(childID).style.display='';}
+      else                                                         {document.getElementById(childID).style.display='none';}
+    }
+  }
 
 
+  window.showServiceInfo2 = function(ID, key, elID)
+  {
+    console.log("showServiceInfo");
+    
+    var parent = document.getElementById(elID);
+    var infoStr = '<div class="serviceDetails">';
+    var services = {};
+    if(productStore.getById(ID)) {services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
+    for (var info in services[key])
+    {
+      infoStr += '<label>' + info + '</label><span>' + services[key][info] + '</span><br>';
+      console.log(infoStr);
+    }
+    infoStr += '</div>';
 
+    var window = document.createElement("div");
+    window.className = "x-window-default";
+    window.id = "serviceInfo";
+    window.innerHTML = infoStr;
 
+    parent.appendChild(window);
+    
+  }
 
 
 
@@ -1399,7 +1752,7 @@ function sortfunction(a, b)
     var imgID = '';
 
     document.getElementById("searchItems").innerHTML = '';
-    document.getElementById("results").innerHTML = 'Search Results: ' + initStr.length;
+    document.getElementById("resultsSearch").innerHTML = 'Search Results: ' + initStr.length;
 
     for(var index = 0; index < initStr.length; index++)
     {
@@ -1408,6 +1761,12 @@ function sortfunction(a, b)
       //console.log(ID);
 
       //console.log(new Date().getTime());
+
+
+      var feedbackObj = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
+      var numFeedbacks = Object.size(feedbackObj);
+      var interviewsStr = '<div style="position: absolute; top: 6px; width: 200px; color: #555;">Interviews: ' + numFeedbacks + '</div>';
+
 
       // --Rating--
       var ratingStr = '';
@@ -1422,7 +1781,7 @@ function sortfunction(a, b)
 
 
 
-      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ');"><div style="z-index: 100; height: 35px;">';
+      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
       ratingStr += '<div style="right: -6px;">';
       for(var i = rating; i < 5; i++)
       {
@@ -1443,13 +1802,13 @@ function sortfunction(a, b)
       var first = productStore.getById(ID).data.first;
       var last = productStore.getById(ID).data.last;
       var url = productStore.getById(ID).data.url;
-      var link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a href="' + url + '" target="_blank" style="font-size:12px; font-weight:100; text-align: center;">LinkedIn Profile</a><hr></div>';
+      var link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a href="' + url + '" target="_blank" style="font-size:12px; font-weight:700; text-align: center;">LinkedIn Profile</a><hr></div>';
       var label = first + ' ' + last;
 
       // --Services--
       services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
       //console.log(services);
-      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444;">';
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #333; font-weight: 600;">';
       for (var key in services)
       {
         //console.log('KEY: ' + key + ' = ' + services[key]);//var s = obj.
@@ -1457,7 +1816,21 @@ function sortfunction(a, b)
         imgID = 'service' + split.pop();
         //console.log("SETTING: " + imgID);
         //help += '<li><div class="frame1"><div class="box"><img id="' + imgID + '" src="' + 'images/' + key + '.jpg' + '" alt="' + key + '" height="130" width="197" onmouseover=\"this.style.cursor=\'pointer\'; this.parentNode.parentNode.style.backgroundImage=\'url(images/framesHi.png)\'; this.src=\'' + 'images/' + key + 'Over.jpg' + '\';\" onmouseout=\"this.parentNode.parentNode.style.backgroundImage=\'url(images/frames.png)\'; this.src=\'' + 'images/' + key + '.jpg\';\" onclick=\"serviceClicked(this, false);\"/></div><span class="servicePrice">$' + services[key] + '/hr</span></div><p><b>' + key + '</b></p></li>';
-        help += '<div style="width: 200px;"><span style="float: left;">' + key + '</span><span style="float: right;">$' + services[key] + '/hr</span></div><br>';
+	//TODO
+        var matchRE = new RegExp("In-person", "i");
+        var inPerson = key.match(matchRE);
+        if(inPerson)
+	{
+          //var fnParams = '\'' + ID + '\',\'' + key + '\',\'' + 'searchItem' + index + '\'';
+          var fnParams = '\'' + encodeURI(Ext.JSON.encode(services[key])) + '\',\'' + 'searchItem' + index + '\'';
+          //var fnParams = '\'' + (Ext.JSON.encode(services[key])) + '\',\"' + 'searchItem' + index + '\"';
+          //console.log(fnParams);
+          help += '<div style="width: 200px;" onmouseover="showServiceInfo(' + fnParams + ');" onmouseout="showServiceInfo(' + fnParams + ');"><span style="float: left;">' + key + '*</span><span style="float: right;">$' + services[key].price + '/hr</span></div><br>';
+	}
+        else
+	{
+          help += '<div style="width: 200px;"><span style="float: left;">' + key + '</span><span style="float: right;">$' + services[key].price + '/hr</span></div><br>';
+	}
       }
       help += '</div>';
       //console.log(help);
@@ -1539,20 +1912,28 @@ function sortfunction(a, b)
     window.appendChild(itemName);
 
     var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
     itemPosition.innerHTML = position;
     window.appendChild(itemPosition);
 
     var itemCompany = document.createElement("div");
-    itemCompany.innerHTML = company + ' (' + companyTenure + 'yrs, Industry: ' + industryTenure + 'yrs)';
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
     window.appendChild(itemCompany);
 
     var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
     itemEducation.innerHTML = education;
     window.appendChild(itemEducation);
 
     var itemLink = document.createElement("div");
     itemLink.innerHTML = link;
     window.appendChild(itemLink);
+
+    var numInterviews = document.createElement("div");
+    numInterviews.innerHTML = interviewsStr;
+    numInterviews.style.textAlign = 'left';
+    window.appendChild(numInterviews);
 
     var itemRating = document.createElement("div");
     itemRating.innerHTML = ratingStr;
@@ -1575,7 +1956,7 @@ function sortfunction(a, b)
 
 
 
-
+    //if(!initStr.length) {return;}
 
     //var quickLinks = document.createElement("div");
     //quickLinks.id = "quickLinks";
@@ -1642,7 +2023,7 @@ function sortfunction(a, b)
       {
 	var item = sorted_keys[i];
 	//console.log("  " + item + " (" + filterCounts[key][item] + ")");
-        innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doQuickLink(\'' + key + '\',\'' + item + '\');">' + '  ' + item + ' (' + filterCounts[key][item] + ')</span><br>';
+        innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doQuickLink(\'' + key + '\',\'' + item + '\'); addFilterTypeToList(\'' + key + "Filter" + '\', \'' + "searchFilterList" + '\');">' + '  ' + item + ' (' + filterCounts[key][item] + ')</span><br>';
       }
       el.innerHTML += innerHTML + '</div>';
     }
@@ -1725,7 +2106,7 @@ function sortFilters(a, b)
       //console.log(ratingObj.comments);
       if(!rating) {rating = 0;}
 
-      var ratingStr = '<div onmouseover="this.style.cursor=\'pointer\';" onclick="showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\');"><img src="images/starBoard.png" style="z-index: 20; position: absolute; top: 10px; left:150px;"/>';
+      var ratingStr = '<div onmouseover="this.style.cursor=\'pointer\';" onclick="showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + ',this.parentNode.parentNode.id)' + ',\'' + ID + '\');"><img src="images/starBoard.png" style="z-index: 20; position: absolute; top: 10px; left:150px;"/>';
       for(var i = rating; i < 5; i++)
       {
         ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
@@ -1734,7 +2115,7 @@ function sortFilters(a, b)
       {
         ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -28px; left: -30px; margin-right: 4px; height: 15px;"/>';
       }
-      ratingStr += '<span style="position: absolute; top: 10px; left: 270px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
+      ratingStr += '<span style="position: absolute; top: 10px; left: 270px; font-size:9px; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
       document.getElementById("providerRating").innerHTML = ratingStr;
 
 
@@ -1745,7 +2126,7 @@ function sortFilters(a, b)
       var first = productStore.getById(ID).data.first;
       var last = productStore.getById(ID).data.last;
       var url = productStore.getById(ID).data.url;
-      var link = '<a href="' + url + '" target="_blank" style="color: #75891C; font-size:12px; font-weight:100;">LinkedIn Profile</a>';
+      var link = '<a href="' + url + '" target="_blank" style="color: #75891C; font-size:12px; font-weight:700;">LinkedIn Profile</a>';
       var label = first + ' ' + last;
 
       // --Services--
@@ -2066,7 +2447,7 @@ window.addAppointment = function()
 
   
   
-  //loadProducts();
+  //loadSearchItems();
 
   //loadSchedule();
   showCalendar(document.getElementById("headerClearfix"));
@@ -2433,10 +2814,10 @@ function doSearch(arg)
   //console.log(hash);
   //console.log(tag);
 
-  arg = arg || document.getElementById('sortInput').value;
-  document.getElementById('sortInput').value = arg;
-  loadProducts(arg);
-  document.getElementById('sortInput').focus();
+  arg = arg || document.getElementById('explore').value;
+  document.getElementById('explore').value = arg;
+  loadSearchItems(arg);
+  document.getElementById('explore').focus();
 
   searchResults.innerHTML = initStr.length + ' Results Found';
   Ext.get("searchResults").fadeIn({opacity: 1.0, easing: 'easeIn', duration: 1000});
@@ -2460,8 +2841,11 @@ function showServices()
     for (var key in services)
     {
       //console.log(key);
-      var matchRE = new RegExp("Interviewing", "i");
-      var interviewing = key.match(matchRE);
+      var matchRE = new RegExp("In-person", "i");
+      var interview = key.match(matchRE);
+
+      var matchRE = new RegExp("Remote", "i");
+      var remote = key.match(matchRE);
 
       var matchRE = new RegExp("Mentor|Coach", "i");
       var coaching = key.match(matchRE);
@@ -2474,29 +2858,35 @@ function showServices()
 
 
       
-      if(interviewing)
+      if(interview)
       {
-        var el = document.getElementById('selectInterviewing');
+        var el = document.getElementById('selectInPersonInterview');
         el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)";
-        serviceClicked(el,false,services[key]);
+        serviceClicked(el,false,services[key].price);
+      }
+      else if(remote)
+      {
+        var el = document.getElementById('selectRemoteInterview');
+	el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)";
+	serviceClicked(el,false,services[key].price);
       }
       else if(coaching)
       {
         var el = document.getElementById('selectCoaching');
 	el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)";
-	serviceClicked(el,false,services[key]);
+	serviceClicked(el,false,services[key].price);
       }
       else if(critiquing)
       {
 	var el = document.getElementById('selectCritiquing');
 	el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)";
-	serviceClicked(el,false,services[key]);
+	serviceClicked(el,false,services[key].price);
       }
       else if(tips)
       {
 	var el = document.getElementById('selectTips');
 	el.parentNode.parentNode.style.backgroundImage="url(images/framesHi.png)";
-	serviceClicked(el,false,services[key]);
+	serviceClicked(el,false,services[key].price);
       }
       
     }
@@ -2531,8 +2921,11 @@ function getClickedServices(inID, force)
     for (var key in services)
     {
       //console.log(key);
-      var matchRE = new RegExp("Interviewing", "i");
-      var interviewing = key.match(matchRE);
+      var matchRE = new RegExp("In-person", "i");
+      var interview = key.match(matchRE);
+
+      var matchRE = new RegExp("Remote", "i");
+      var remote = key.match(matchRE);
 
       var matchRE = new RegExp("Mentor", "i");
       var coaching = key.match(matchRE);
@@ -2543,9 +2936,9 @@ function getClickedServices(inID, force)
       var matchRE = new RegExp("Tips", "i");
       var tips = key.match(matchRE);
 
-      if(interviewing)
+      if(interview)
       {
-        var el = document.getElementById('serviceInterviewing');
+        var el = document.getElementById('serviceInPersonInterview');
         var file = decodeURI(el.src);
         var img = file.split(/\//);
         file = img.pop();
@@ -2557,7 +2950,25 @@ function getClickedServices(inID, force)
         var matchRE = new RegExp("Selected", "i");
         if(file.match(matchRE) || force)
         {
-          servicesClicked.push("Interviewing");
+          servicesClicked.push("Interview");
+	}
+      }
+      else if(remote)
+      {
+        var el = document.getElementById('serviceRemoteInterview');
+        var file = decodeURI(el.src);
+        //console.log(file);
+        var img = file.split(/\//);
+        file = img.pop();
+        img = file.split(/\./);
+        file = img.shift();
+        file = file.replace(/Over/, "");
+        //console.log(file);
+
+        var matchRE = new RegExp("Selected", "i");
+        if(file.match(matchRE) || force)
+        {
+          servicesClicked.push("Remote Interview");
 	}
       }
       else if(coaching)
@@ -2619,7 +3030,11 @@ function getClickedServices(inID, force)
 
 
 
-
+function updateRadiusConversion(mi)
+{
+  var km = (mi * 1.60934).toFixed(1);
+  document.getElementById("radiusConversion").innerHTML = mi + ' miles = ' + km +' kilometers';
+}
 
 function serviceClicked(el, getPrice, price)
 {
@@ -2641,6 +3056,10 @@ function serviceClicked(el, getPrice, price)
     if(getPrice) {delete services[decodeURI(file)];}
     var servicePrice = document.getElementById(file + "_servicePrice");
     if(servicePrice && getPrice) {el.parentNode.parentNode.removeChild(servicePrice);}
+
+    if(document.getElementById(file + "_serviceInfo")) {el.parentNode.parentNode.removeChild(document.getElementById(file + "_serviceInfo"));}
+
+
     if(document.getElementById("makeApptBlister") && !getNumServices())
     {
       var blister = document.getElementById("makeApptBlister");
@@ -2659,7 +3078,10 @@ function serviceClicked(el, getPrice, price)
     el.onmouseover=function() {} ;
     //services[decodeURI(file)] = true;
     //console.log(el.src);
+    var matchRE = new RegExp("In-person", "i");
+    var inPerson = file.match(matchRE);
     
+
     if(price)
     {
       var servicePrice = document.createElement("span");
@@ -2668,31 +3090,88 @@ function serviceClicked(el, getPrice, price)
       servicePrice.innerHTML = '$' + price + '/hr';
       servicePrice.style.marginTop = 0 + "px";
       el.parentNode.parentNode.appendChild(servicePrice);
-      services[decodeURI(file)] = price;
+      if(!services[decodeURI(file)]) {services[decodeURI(file)] = {};}
+      services[decodeURI(file)].price = price;
     }
+    if(inPerson)
+    {
+      var providedServices = productStore.getById(user[0].inID).data.providedServices ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providedServices) : {};
+      var locality = providedServices[decodeURI(file)].locality || '';
+      var province = providedServices[decodeURI(file)].province || '';
+      var postalCode = providedServices[decodeURI(file)].postalCode || '';
+      var radius = providedServices[decodeURI(file)].radius || 0;
+
+      var serviceInfo = document.createElement("span");
+      serviceInfo.id = file + "_serviceInfo";
+      serviceInfo.className = "serviceInfo";
+      serviceInfo.innerHTML = 'Within ' + radius + ' miles of<br>' + locality + ', ' + province + ' ' + postalCode + '<br>';
+      el.parentNode.parentNode.appendChild(serviceInfo);
+    }
+
 
     if(getPrice)
     {
-      var mbox = Ext.MessageBox.show({
+      var matchRE = new RegExp("In-person", "i");
+      var inPerson = file.match(matchRE);
+      var msg = '<div class="serviceDetails">Please enter the amount you will charge, in U.S. Dollars, per hour for this service (Enter 0 for no charge).<br /><br /><label for="servicePriceText">US Dollars $:</label><input id="servicePriceText" name="servicePriceText" type="textbox"/>';
+      if(inPerson)
+      {
+	msg += '<br><label for="serviceLocalityText">City/Locality:</label><input id="serviceLocalityText" name="serviceLocalityText" type="textbox"/>';
+	msg += '<br><label for="serviceProvinceText">State/Province/Region:</label><input id="serviceProvinceText" name="serviceProvinceText" type="textbox"/>';
+	msg += '<br><label for="servicePostalCodeText">Zip/Postal Code:</label><input id="servicePostalCodeText" name="servicePostalCodeText" type="textbox"/>';
+	msg += '<br><label for="serviceRadiusText">Service Radius:</label><select id="serviceRadiusText" name="serviceRadiusText" onclick="updateRadiusConversion(this.value);"><option value="0">0 miles</option><option value="5">5 miles</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option><option value="100">100 miles</option></select><span id="radiusConversion">1 mile = 1.6 kilometers</span>';
+      }
+      msg += '</div>';
+
+
+      var mbox = Ext.Msg.show({
         title:    'Charge for this Service?',
-        msg:      'Please enter the amount you will charge, in U.S. Dollars, per hour for this service (Enter 0 for no charge).<br /><br />$<input id="servicepricetext" type="textbox"/> U.S. Dollars',
+        msg:      msg,
         buttons:  Ext.MessageBox.OKCANCEL,
         icon: Ext.Msg.QUESTION,
 	defaultFocus: 'price', 
-        fn: function(btn)
+	callback: function(btn, text, cfg )
         {
           if( btn == 'ok')
           {
-            var price = currencyFormatted(Ext.get('servicepricetext').getValue());
+            var price = currencyFormatted(Math.abs(Ext.get('servicePriceText').getValue()));
             //console.log(price);
+            if(!services[decodeURI(file)]) {services[decodeURI(file)] = {};}
+            if(inPerson)
+	    {
+              var locality = Ext.get('serviceLocalityText').getValue();
+              var province = Ext.get('serviceProvinceText').getValue();
+              var postalCode = Ext.get('servicePostalCodeText').getValue();
+              var radius = Ext.get('serviceRadiusText').getValue();
+
+              if(!locality || !province || !postalCode)
+	      {
+                var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'You must completely fill out all items' + '</span>' + '<br><br>' + cfg.msg;
+                Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
+	      }
+
+              if(document.getElementById(file + "_serviceInfo")) {el.parentNode.parentNode.removeChild(document.getElementById(file + "_serviceInfo"));}
+              var serviceInfo = document.createElement("span");
+              serviceInfo.id = file + "_serviceInfo";
+              serviceInfo.className = "serviceInfo";
+              serviceInfo.innerHTML = 'Within ' + radius + ' miles of<br>' + locality + ', ' + province + ' ' + postalCode + '<br>';
+              el.parentNode.parentNode.appendChild(serviceInfo);
+
+
+              services[decodeURI(file)].locality = locality;
+              services[decodeURI(file)].province = province;
+              services[decodeURI(file)].postalCode = postalCode;
+              services[decodeURI(file)].radius = radius;
+	    }
             var servicePrice = document.createElement("span");
             servicePrice.id = file + "_servicePrice";
             servicePrice.className = "servicePrice";
             servicePrice.innerHTML = '$' + price + '/hr';
             servicePrice.style.marginTop = 0 + "px";
-            if(document.getElementById(servicePrice)) {el.parentNode.parentNode.removeChild(servicePrice);}
+            services[decodeURI(file)].price = price;
+
+            if(document.getElementById(file + "_servicePrice")) {el.parentNode.parentNode.removeChild(document.getElementById(file + "_servicePrice"));}
             el.parentNode.parentNode.appendChild(servicePrice);
-            services[decodeURI(file)] = price;
           }
           else {serviceClicked(el, true);}
         }
@@ -2731,7 +3210,123 @@ function getNumServices()
   return num;
 }
 
+function convertTimeTo24(time)
+{
+  //console.log("CONVERT TIME: " + time);
+  var hours = Number(time.match(/^(\d+)/)[1]);
+  var minutes = Number(time.match(/:(\d+)/)[1]);
+  var AMPM = time.match(/\s(.*)$/)[1].toUpperCase();
+  if(AMPM == "PM" && hours<12) hours = hours+12;
+  if(AMPM == "AM" && hours==12) hours = hours-12;
+  var sHours = pad(hours.toString(),2);
+  var sMinutes = pad(minutes.toString(),2);
+  //console.log(sHours + ":" + sMinutes);
+  return {hour: sHours, minute: sMinutes};
+}
 
+
+function convertTimeTo12(time)
+{
+  //console.log("CONVERT TIME: " + time);
+  var hours = Number(time.match(/^(\d+)/)[1]);
+  var minutes = Number(time.match(/:(\d+)/)[1]);
+  var AMPM = '';
+  if(hours<12) {AMPM = 'am';}
+  else if(hours==24) {AMPM = 'am'; hours = hours-12;}
+  else if(hours==12) {AMPM = 'pm';}
+  else {AMPM = 'pm'; hours = hours-12;}
+  var sHours = pad(hours.toString(),2);
+  var sMinutes = pad(minutes.toString(),2);
+  //console.log(sHours + ":" + sMinutes);
+  return {hour: sHours, minute: sMinutes, ampm: AMPM};
+}
+
+
+function localizeTime(inID, time)
+{
+  //console.log("LOCALIZETIME: " + time);
+
+  var tzPRV = productStore.getById(inID).data.tzName;
+  var tzUSR = productStore.getById(user[0].inID).data.tzName;
+
+  //console.log(tzPRV);
+  //console.log(tzUSR);
+
+  var day = parseInt(dayIndex,10);
+  var month = parseInt(monthIndex,10);
+  day = pad(dayIndex, 2);
+  month = pad(monthIndex, 2);
+  //console.log(year);
+  //var year = parseInt(year);
+
+  var timeStr = Number(time.match(/^(\d+)/)[1]) + ':00' + ' ' + time.match(/([ap]m)/);
+  timeStr = timeStr.replace(/\,[ap]m$/,'');
+  //console.log(timeStr);
+  var timeObj = convertTimeTo24(timeStr);
+  var hour = timeObj.hour;
+  var minute = timeObj.minute;
+  
+  //console.log(year + ' ' + month + ' ' + day + ' ' + hour + ' ' + minute);
+
+  var dtA = new timezoneJS.Date(year, month, day, hour, minute, tzPRV);
+  var dtB = new timezoneJS.Date(year, month, day, hour, minute, tzUSR);
+
+  var localDayStr = dayNames[dtB.getDay()] + '  ' + monthNames[dtB.getMonth()-1] + ' ' + dtB.getDate() + ', ' + dtB.getFullYear();
+  var localTimeStr = dtB.getHours() + ':' + dtB.getMinutes();
+  //console.log(localDayStr);
+  //console.log(localTimeStr);
+  var localDayStr = dayNames[dtA.getDay()] + '  ' + monthNames[dtA.getMonth()-1] + ' ' + dtA.getDate() + ', ' + dtA.getFullYear();
+  var localTimeStr = dtA.getHours() + ':' + dtA.getMinutes();
+  //console.log(localDayStr);
+  //console.log(localTimeStr);
+
+  var offsetPRV = dtA.getTimezoneOffset();
+  var offsetUSR = dtB.getTimezoneOffset();
+  var diff = parseInt(offsetUSR,10) - parseInt(offsetPRV,10);
+  //console.log("DIFF: " + diff);
+  //console.log("DIV: " + diff/60);
+
+  var localHour = pad(parseInt(hour,10) + (diff/60),2);
+  var localMinutes = pad(parseInt(minute,10) + (diff%60),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  //console.log(localHour + ':' + localMinutes);
+
+  //console.log(offsetPRV + ' ' + offsetUSR);
+
+  // Same timestamp
+  dtA.getTime(); //=> 1193855400000
+  dtB.getTime(); //=> 1193855400000
+
+  var timeObj = convertTimeTo12(localTimeStr);
+  var hour = timeObj.hour;
+  var minute = timeObj.minute;
+  var ampm = timeObj.ampm;
+  localTimeStr = hour + ':' + minute + ampm;
+  //console.log(hour + ':' + minute + ampm);
+  return localTimeStr;
+
+  
+}
+
+
+function localizeApptScheduler(inID)
+{
+  var table = document.getElementById("myAppts");
+  for (var i = 1, row; row = table.rows[i]; i++)
+  {
+
+    var localTime = localizeTime(inID, row.cells[0].innerHTML);
+    row.cells[0].innerHTML = localTime;
+    //row.cells[1].firstChild.value = localTime;
+    for (var j = 0, col; col = row.cells[j]; j++)
+    {
+      //iterate through columns
+      //columns would be accessed using the "col" variable assigned in the for loop
+      if(j==0) {console.log("ROW[" + i + "]COL[" + j + "] = " + col.innerHTML);}
+      if(j==1) {console.log("ROW[" + i + "]COL[" + j + "] = " + col.firstChild.value);}
+    }  
+  }
+}
 
 
 
@@ -2743,6 +3338,8 @@ function showApptScheduler(sch, selected, oldSch)
     r[i].checked = false;
   }
 
+  var inID = initStr[curr].id;
+  localizeApptScheduler(inID);
 
   var controlValue = {};
   //var split = sch.split('\n');
@@ -2779,6 +3376,21 @@ function showApptScheduler(sch, selected, oldSch)
 function scheduleThisDay(cal)
 {
   //console.log(cal.id);
+
+
+  if(!linkedINlogin || !user[0])
+  {
+    Ext.MessageBox.show({
+      title:    'Login Required',
+      msg:      '<span>You must first login before making appointments</span><br><br><span class="pointer" onclick="IN.User.authorize();">Login using your linkedIN account</span>',
+      buttons:  Ext.MessageBox.OK,
+      icon:     Ext.Msg.WARNING
+    });
+    return;
+  }
+
+
+
   
   curr = parseInt(cal.id.replace("currCalendar",""), 10);
   //var ID = initStr[curr].label.id;
@@ -2945,18 +3557,53 @@ function applySchedule()
   if(thisAppt)
   {
     document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Appointment made</span><br><br>' + '<span style="color:#DAFF38; font: bold 11px/11px Arial, Helvetica, sans-serif;">' + thisAppt + '</span>';
-    addMailMessage(ID, 'YOU HAVE AN APPOINTMENT FOR:<br>' + apptDay + '<br>' + thisAppt, true);
+    addMailMessage(ID, 'YOU HAVE AN APPOINTMENT FOR:<br>' + apptDay + '<br>' + thisAppt, true, true);
   }
   else
   {
     document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Appointment cleared</span><br><br>' + '<span style="color:#DAFF38; font: bold 11px/11px Arial, Helvetica, sans-serif;">' + thisAppt + '</span>';
-    addMailMessage(ID, 'YOU CLEARED YOUR APPOINTMENT FOR:<br>' + apptDay + '<br>' + thisAppt, true);
+    addMailMessage(ID, 'YOU CLEARED YOUR APPOINTMENT FOR:<br>' + apptDay + '<br>' + thisAppt, true, true);
   }
   Ext.get("showApptAdded").fadeIn({opacity: 1.0, easing: 'easeIn', duration: 100});
   Ext.get("showApptAdded").fadeOut({opacity: 0.0, easing: 'easeIn', duration: 1000});
+
+
   //TTJ
-  if(total != 0) {Ext.get("cartItem").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});}
-  else           {Ext.get("cartItem").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});}
+  if(total != 0)
+  {
+    Ext.get("promoCodeContainer").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Choose your method of payment';
+    document.getElementById("checkOutCallToActionConfirm").style.display = 'none';
+    document.getElementById("checkOutCallToActionButtons").style.display = '';
+  }
+  else                       
+  {
+    Ext.get("promoCodeContainer").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Confirm your appointment(s)';
+    document.getElementById("checkOutCallToActionConfirm").style.display = '';
+    document.getElementById("checkOutCallToActionButtons").style.display = 'none';
+  }
+  if(Object.size(cartItems))
+  {
+    Ext.get("cartItem").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium";
+    document.getElementById("checkOutCallToAction").style.display = '';
+    document.getElementById("Total").style.visibility = '';
+  }
+  else
+  {
+    Ext.get("cartItem").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium inactive";
+    document.getElementById("checkOutCallToAction").style.display = 'none';
+    document.getElementById("Total").style.visibility = 'hidden';
+    document.getElementById("cartItems").innerHTML = '<h1 class="clearfix" style="margin-top: 100px; text-align: center;">Your Cart is Empty</h1>';
+  }
+
+  document.getElementById("apptScheduler").style.display = 'none';
+  document.getElementById("scrollbar").style.zIndex = 40;
+  document.getElementById("screen").style.display = 'none';
+  windowResize();
+
 
 }
 
@@ -3053,9 +3700,11 @@ function makeAppt(id)
               dayIndex = date.getDate();
               monthIndex = date.getMonth()+1;
               year = date.getFullYear();
+              gYear = year;
+              console.log('YEAR: ' + year);
 
               var header = document.getElementById("myApptHeader");
-              header.innerHTML = '<span style="font: bold 16px/24px Times, serif; position: absolute; top: 4px;">' + dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '</span>' + '<span style="position: absolute; top: 30px;">Choose the hours and services for this appointment</span>';
+              header.innerHTML = '<div style="font-size: 12px; line-height: 13px; font-weight: 400; color:#000000;"><span style="position: absolute; top: 6px;">' + dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '</span>' + '<span style="position: absolute; top: 20px;">Choose the hours/services for this appointment</span></div>';
 
               scheduleThisDay(date_picker);
               //console.log("SELECTED");
@@ -3222,34 +3871,37 @@ Ext.override(Ext.getCmp('currCalendar' + index), {
 
 
 
-function showRatings(JSONStr, index)
+function showRatings(JSONStr, index, elID, id)
 {
 
   //console.log(index);
+  //console.log(elID);
   curr = index;
   JSONStr = decodeURI(JSONStr);
   var comments = Ext.JSON.decode(JSONStr);
+  if(!Object.size(comments)) {return;}
 
-
-  var ID = initStr[curr].id;
+  var ID = id ? id : initStr[curr].id;
   // --Name--
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var name = first + ' ' + last;
 
+  var ratingsContainer = 'ratingsContainer_' + document.getElementById(elID).parentNode.id;
+  //console.log(ratingsContainer);
 
-  if(document.getElementById("searchItem" + curr))
+  if(document.getElementById(elID))
   {
-    var el = document.getElementById("searchItem" + curr);
-    if(document.getElementById("searchItem" + curr))
+    var el = document.getElementById(elID);
+    if(document.getElementById(elID))
     {
-      el = document.getElementById("searchItem" + curr).parentNode;
-
-      if(!document.getElementById("ratingsContainer"))
+      el = document.getElementById(elID).parentNode;
+      //console.log(el.id);
+      if(!document.getElementById(ratingsContainer))
       {
-
+        //console.log("CREATING NEW...");
         var container = document.createElement("div");
-        container.id = "ratingsContainer";
+        container.id = ratingsContainer;
         container.className = "x-window-default";
         container.style.position = "absolute";
         container.style.width = 360 + "px";
@@ -3309,8 +3961,8 @@ function showRatings(JSONStr, index)
       else
       {
         document.getElementById("ratingsTitle").innerHTML = '<div class="sidebar"><ul class="contact"><li><p><span class="name"></span><em id="labelName">' + name + '\'s' + ' ratings</em></p></li></ul></div>';
-        document.getElementById("ratingsContainer").style.left = (index % 4) * 175 + "px";
-        document.getElementById("ratingsContainer").style.display = "";
+        document.getElementById(ratingsContainer).style.left = (index % 4) * 175 + "px";
+        document.getElementById(ratingsContainer).style.display = "";
       }
     }
     var innerHTML = '';
@@ -3356,7 +4008,7 @@ function showRatings(JSONStr, index)
 
 
 
-      innerHTML += '<br><div class="ratingComment gradient-grey"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
     document.getElementById("showCurrRatingContent").innerHTML = innerHTML;
@@ -3468,15 +4120,15 @@ function getSubTotal()
     var currService = split[i];
     currService = currService.replace(/.*\s\-\-\s/,'');
     //console.log(currService);
-    subTotal += parseInt(services[currService], 10);
+    subTotal += parseFloat(services[currService].price);
     //console.log(subTotal);
   }
   var sTotal = document.getElementById("servicesTotal");
   //var split = sTotal.innerHTML;
-  //var oldSubTotal = parseInt(split.split(": $")[1], 10);
+  //var oldSubTotal = parseFloat(split.split(": $")[1]);
   //console.log("OLD: " + oldSubTotal);
   //console.log("SUB: " + subTotal);
-  //if(!isNaN(oldSubTotal)) {total += parseInt(subTotal - oldSubTotal, 10);}
+  //if(!isNaN(oldSubTotal)) {total += parseFloat(subTotal - oldSubTotal);}
   //console.log(total);
   //console.log("TOTAL: $" + currencyFormatted(total));
   sTotal.innerHTML = "SubTotal: $" + currencyFormatted(subTotal);
@@ -3500,16 +4152,16 @@ function getSubTotalFromSch(sch, ID)
     var currService = split[i];
     currService = currService.replace(/.*\s\-\-\s/,'');
     //console.log(currService);
-    if(services[currService]) {subTotal += parseInt(services[currService], 10);}
+    if(services[currService]) {subTotal += parseFloat(services[currService].price);}
     //console.log(subTotal);
   }
-  return parseInt(subTotal,10);
+  return parseFloat(subTotal);
   //var sTotal = document.getElementById("servicesTotal");
   //var split = sTotal.innerHTML;
-  //var oldSubTotal = parseInt(split.split(": $")[1], 10);
+  //var oldSubTotal = parseFloat(split.split(": $")[1]);
   //console.log(oldSubTotal);
   //console.log(subTotal);
-  //if(!isNaN(oldSubTotal)) {total += parseInt(subTotal - oldSubTotal, 10);}
+  //if(!isNaN(oldSubTotal)) {total += parseFloat(subTotal - oldSubTotal);}
   //console.log(total);
   //console.log("TOTAL: $" + currencyFormatted(total));
   //sTotal.innerHTML = "SubTotal: $" + currencyFormatted(subTotal);
@@ -3524,7 +4176,7 @@ function getTotal(subTotals)
   var currTotal = 0;
   for (var key in subTotals)
   {
-    currTotal += parseInt(subTotals[key], 10);
+    currTotal += parseFloat(subTotals[key]);
   }
   return currTotal;
 }
@@ -3544,6 +4196,44 @@ function removeChildren(el)
     } 
   }
 }
+
+
+
+function getZones()
+{
+  var timeZoneNames = new Array();
+  $.getJSON("js/timeZoneNames.json", function(data, Status, xhr )
+  {
+    //console.log(Status);
+    //console.log(data);
+    // data is a JavaScript object now. Handle it as such
+    //console.log("OK");
+    var zoneObj = data.main.en.dates.timeZoneNames.zone;
+    //console.log(zoneObj);
+    for(zone in zoneObj)
+    {
+      for(name in zoneObj[zone])
+      {
+        //console.log(zone + '/' + name);
+        timeZoneNames.push(zone + '/' + name);
+      }
+    }
+    addOptions("tzSelect", timeZoneNames);
+
+    var zoneGuess = jstz.determine().name(); // Determines the time zone of the browser client
+    //console.log(zoneGuess);
+    setGroupFromTimeZone("tzSelect", zoneGuess);
+
+  });
+}
+
+
+function populateTimeZones()
+{
+
+  var zones = getZones();
+}
+
 
 function populateAvailableTimes()
 {
@@ -3627,6 +4317,40 @@ function disableAvailableTimesFromSchedule()
   }
 }
 
+
+
+
+
+
+function setGroupFromTimeZone(combobox, timeZone)
+{
+
+  var combo = document.getElementsByName(combobox);
+
+  //var comboItems = {};
+
+  for (var j = 0; j < combo[0].options.length; j++)
+  {
+    if(combo[0].options[j])
+    {
+      //console.log("COMBO: " + combo[0].options[j].text + ' === ' + timeZone);
+      if(combo[0].options[j].text === timeZone) {combo[0].selectedIndex = j; continue;}
+      //comboItems[combo[j].options[j].text] = j;
+    }
+  }
+
+  //combo[j].selectedIndex = comboItems[timeZone];}
+}
+
+
+function setCheckbox(checkbox, title)
+{
+  var r = document.getElementsByName(checkbox);
+  for (var i = 0; i < r.length; i++)
+  {
+    if(r[i].value === title) {r[i].checked = true;}
+  }
+}
 
 
 
@@ -3837,13 +4561,13 @@ function applySelection()
   }
   if(thisAppt)
   {
-    document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Availability added</span><br><br>' + '<span style="color:#DAFF38; font: bold 11px/11px Arial, Helvetica, sans-serif;">' + apptDay + '<br><br>' + thisAppt + '</span>';
-    addMailMessage(user[0].inID, 'YOU HAVE ADDED AVAILABILITY FOR:<br>' + apptDay + '<br>' + thisAppt, true);
+    document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Availability added</span><br><br>' + '<span style="color:#DAFF38; font: bold;">' + apptDay + '<br><br>' + thisAppt + '</span>';
+    addMailMessage(user[0].inID, 'YOU HAVE ADDED AVAILABILITY FOR:<br>' + apptDay + '<br>' + thisAppt, true, true);
   }
   else
   {
-    document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Availability cleared</span><br><br>' + '<span style="color:#DAFF38; font: bold 11px/11px Arial, Helvetica, sans-serif;">' + apptDay + '<br><br>' + thisAppt + '</span>';
-    addMailMessage(user[0].inID, 'YOU CLEARED YOUR AVAILABILITY FOR:<br>' + apptDay + '<br>' + thisAppt, true);
+    document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Availability cleared</span><br><br>' + '<span style="color:#DAFF38; font: bold;">' + apptDay + '<br><br>' + thisAppt + '</span>';
+    addMailMessage(user[0].inID, 'YOU CLEARED YOUR AVAILABILITY FOR:<br>' + apptDay + '<br>' + thisAppt, true, true);
   }
   Ext.get("showApptAdded").fadeIn({opacity: 1.0, easing: 'easeIn', duration: 100});
   Ext.get("showApptAdded").fadeOut({opacity: 0.0, easing: 'easeIn', duration: 3000});
@@ -4133,7 +4857,7 @@ function removeOldSchByName(oldSch, name)
   for(var i = 0; i < split.length-1; i++)
   {
     //TTJ
-    //console.log("BEFORE: " + split[i]);
+    console.log("BEFORE: " + split[i]);
     var matchRE = new RegExp("APPT", "i");
     var appt = split[i].match(matchRE);
     var matchRE = new RegExp("AVAILABLE", "i");
@@ -4142,7 +4866,7 @@ function removeOldSchByName(oldSch, name)
     if(appt) {isAPPT = true; provider = split[i].split(/\:\s*/)[1];}
     else if(avail) {isAppt = false;}
     if(isAPPT && name == provider) {removedSch += split[i] + '<br>'; split[i] = '';}
-    //console.log("AFTER: " + split[i]);
+    console.log("AFTER: " + split[i]);
     returnStr = returnStr + split[i] + '<br>';
   }
   //console.log(returnStr);
@@ -4192,9 +4916,10 @@ function makeUnavailable(oldSch, sch)
         //console.log(time[j] + ' <-> ' + split[i]);
 	if(time[j] == split[i]) {split[i] = '';}
       }
+      //}
+      //console.log("AFTER: " + split[i]);
+      returnStr = returnStr + split[i] + '<br>';
     }
-    //console.log("AFTER: " + split[i]);
-    returnStr = returnStr + split[i] + '<br>';
   }
   //console.log(returnStr);
   returnStr = returnStr.replace(/(\<br\>){2,}/gi, '<br>');
@@ -4202,6 +4927,50 @@ function makeUnavailable(oldSch, sch)
   //console.log(returnStr);
   return returnStr;
 }
+
+
+
+
+
+
+function combineSchedules(oldSch, sch)
+{
+  //console.log("makeAvailable");
+  //console.log("OLD: " + oldSch);
+  //console.log("NEW: " + sch);
+
+  var isAPPT = false;
+  var isAVAIL = false;
+  var returnStr = "";
+  var time = [];
+
+  console.log("OLD: " + oldSch);
+  console.log("NEW: " + sch);
+
+  var split = oldSch.split('APPT:');
+  var oldAVAIL = split.shift();
+  var oldAPPTS = split.join('APPT:');
+  oldAPPTS.replace(/^\s*/,'');
+  if(oldAPPTS && !oldAPPTS.match(/^APPT/)) {oldAPPTS = "APPT:" + oldAPPTS;}
+
+  var split = sch.split('APPT:');
+  var schAVAIL = split.shift();
+  var schAPPTS = split.join('APPT:');
+  schAPPTS.replace(/^\s*/,'');
+  if(schAPPTS && !schAPPTS.match(/^APPT/)) {schAPPTS = "APPT:" + schAPPTS;}
+
+  if(sch) {returnStr = "AVAILABLE:<br>" + sch;}
+  returnStr = returnStr + '<br><br>' + oldAPPTS + '<br><br>' + schAPPTS;
+  //console.log(returnStr);
+  returnStr = returnStr.replace(/(\<br\>){3,}/gi, '<br><br>');
+  returnStr = returnStr.replace(/(\<br\>\<br\>)$/, '<br>');
+  //console.log(returnStr);
+  return returnStr;
+}
+
+
+
+
 
 
 function makeAvailable(oldSch, sch)
@@ -4243,9 +5012,10 @@ function makeAvailable(oldSch, sch)
         if(isTimeLessThan(time[j], split[i])) {/*console.log("TRUE");*/ toAdd += time[j] + '<br>'; time[j] = '';}
 	//if(time[j] == split[i]) {split[i] = '';}
       }
+      //}
+      //console.log("AFTER: " + split[i]);
+      returnStr = returnStr + toAdd + split[i] + '<br>';
     }
-    //console.log("AFTER: " + split[i]);
-    returnStr = returnStr + toAdd + split[i] + '<br>';
   }
   if(Object.size(time))
   {
@@ -4336,7 +5106,7 @@ function makeApptThisDay(day, month, year, cal)
 
   //var oldSch = getSchedule(Ext.getCmp('myCalendar'), tDay);
   var oldSch = getSchedule(user[0].inID, tDay);
-  oldSch = oldSch.replace(/\n/g, '<br>');
+  oldSch = oldSch ? oldSch.replace(/\n/g, '<br>') : '';
   if(sch)
   {
     var nameToDisplay = settings[ID]['identity'] ? 'Confidential' : name;
@@ -4395,6 +5165,11 @@ function makeDatesAvailableThisDay(day, month, year, cal)
   //console.log(day + " " + month);
 
   var tDay = day + "/" + month + "/" + year;
+
+  var oldSch = schedule[tDay];
+  console.log(oldSch);
+
+
   //dateArray.push(tDay);
   //dp2.updatedDay = tDay;
   //dp2.update(dp2.activeDate, true);
@@ -4403,8 +5178,15 @@ function makeDatesAvailableThisDay(day, month, year, cal)
   //var regExp = ["^(?!"+dateArray.join("|")+").*$"];
   //console.log(regExp);
   var sch = getGroup('checked', true);
+
+
+  sch = combineSchedules(oldSch, sch);
+  //console.log(sch);
+
+
   //var customTitle = "AVAILABLE:\n" + sch;
-  var customTitle = "AVAILABLE:<br>" + sch;
+  //var customTitle = "AVAILABLE:<br>" + sch;
+  var customTitle = sch;
 
     if(sch)
     {
@@ -4574,7 +5356,7 @@ function showCalendar(parent)
 
     parent.appendChild(window);
     
-    document.getElementById("calGear").onclick = function() {if(productStore.getById(user[0].inID).data.role == "give") {showSelectAvailability();} else {showSearch();} return false;};
+    document.getElementById("calGear").onclick = function() {if(productStore.getById(user[0].inID).data.role !== "find") {showSelectAvailability();} else {showSearch();} return false;};
 
 
 // define the calendar.
@@ -4748,6 +5530,8 @@ Ext.override(Ext.getCmp('myCalendar'), {
 function loadUsers()
 {
   //console.log('loadUsers');
+  $.ajaxSetup({ cache: false });
+
   $.ajax({url:"loadData.php",type:'get',async:false,success:function(result){
       //console.log(result + " " + result.length);
       if(result.length <= 3) {return;}
@@ -4762,7 +5546,7 @@ function loadUsers()
 
       var inID;
       var linkedINprofile;
-      var tzOffset;
+      var tzName;
       var email;
       var education;
       var role;
@@ -4771,9 +5555,11 @@ function loadUsers()
       var mail;
       var privacy;
       var cart;
-      var history;
+      var providerHistory_;
+      var history_;
       var feedback;
       var reviews;
+      var resume;
 
 
       for(var i=0;i < obj.length;i++)
@@ -4781,19 +5567,25 @@ function loadUsers()
 	//console.log(obj[i].id);
         inID = obj[i].id;
         linkedINprofile = obj[i].linkedINprofile;
-        tzOffset = obj[i].tzOffset;
-        email = obj[i].email;
-        education = obj[i].education;
+        tzName = obj[i].tzName;
+        //email = obj[i].email;
+        //education = obj[i].education;
         role = obj[i].role;
         providedServices = obj[i].services;
         calendar = obj[i].calendar;
         mail = obj[i].mail;
         privacy = obj[i].privacy;
         cart = obj[i].cart;
-        history = obj[i].history;
+        providerHistory_ = obj[i].providerHistory;
+        history_ = obj[i].history;
         feedback = obj[i].feedback;
         reviews = obj[i].rating;
+        resume = obj[i].resume;
 
+        //console.log(resume);
+        var temp = resume.split(/\,/)[1];
+        if(temp) {resume = decodeBase64(temp);}
+        //console.log("BTOA: " + temp);
         //console.log(privacy);
         settings[inID] = privacy ? Ext.JSON.decode(privacy) : {};
         
@@ -4802,27 +5594,29 @@ function loadUsers()
         {
           inID: inID,
           linkedINprofile: linkedINprofile,
-          tzOffset: tzOffset,
-          email: email,
-          education: education,
+          tzName: tzName,
+          //email: email,
+          //education: education,
           role: role,
           providedServices: providedServices,
           calendar: calendar,
           mail: mail,
           privacy: privacy,
           cart: cart,
-          history: history,
+          providerHistory: providerHistory_,
+          history: history_,
           feedback: feedback,
-          reviews: reviews
+          reviews: reviews,
+          resume: resume
         }];
         productStore.loadData(myNewRecord, true);
         //console.log("LOADED ID: " + inID);
       }//for
 
+      usersLoaded = true;
     }//function
   });
   //console.log("users loaded");
-  usersLoaded = true;
 }
 
 
@@ -4910,7 +5704,7 @@ function loadSelectedSchedule(inID)
         //sch = sch.replace(/\-\>/g, "\n");
 
         //console.log('ADDING: ' + key + '\n' + calendar[key]);
-        currSelectedSchedule[key] = calendar[key];
+        currSelectedSchedule[key] = hideOtherPeople(calendar[key], inID);
       }
     }//for (var key in calendar)
   }//if(productStore.getById(user[0].inID).data.role != 'find')
@@ -4918,33 +5712,79 @@ function loadSelectedSchedule(inID)
 }
 
 
+function hideOtherPeople(appt, ID)
+{
+  if(ID === user[0].inID) {return appt;}
+  
+  var split = appt.split('<br>');
 
+  // --Name--
+  var first = productStore.getById(ID) ? productStore.getById(ID).data.first : '--';
+  var last = productStore.getById(ID) ? productStore.getById(ID).data.last : '--';
+  var name = first + ' ' + last;
+
+  var myFirst = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.first : '--';
+  var myLast = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.last : '--';
+  var myName = myFirst + ' ' + myLast;
+
+  for(var i = 0; i < split.length; i++)
+  {
+    if(split[i].indexOf('APPT') != -1)
+    {
+      //console.log(split[i]);
+      var apptName = split[i].replace('APPT: ', '');
+      if(myName != apptName)
+      {
+	split[i] = 'APPT:';
+      }
+    }
+  }
+  return split.join('<br>');
+}
 
 
 function updateSchedule(id, day, name, sch)
 {
+  //console.log("updateSchedule");
+  //console.log("ID: " + id);
+  //console.log("DAY: " + day);
+  //console.log("NAME: " + name);
   //console.log("SCH: " + sch);
   var calendar = productStore.getById(id).data.calendar ? Ext.JSON.decode(productStore.getById(id).data.calendar) : {};
   var oldSch = calendar[day];
+  console.log("OLD: " + oldSch);
+
+  if(oldSch)
+  {
   var removed;
   var temp;
   temp = removeOldSchByName(oldSch, name);
   oldSch = temp.sch;
   removed = temp.removed;
-  //console.log("REMOVED: " + removed);
+  console.log("REMOVED: " + removed);
+  console.log("OLD: " + oldSch);
   if(sch)
   {
+    console.log("OLD: " + oldSch);
     oldSch = makeAvailable(oldSch, removed);
+    console.log("OLD: " + oldSch);
     oldSch = makeUnavailable(oldSch, sch);
+    console.log("OLD: " + oldSch);
     
     //thisAppt = 'APPT: ' + settings[id]['identity'] ? 'Confidential' : name + '<br>' + sch;
-    thisAppt = 'APPT: ' + name + '<br>' + sch;
+    var thisAppt = 'APPT: ' + name + '<br>' + sch;
     sch = oldSch + '<br>' + thisAppt;
   }
   else
   {
     oldSch = makeAvailable(oldSch, removed);
     sch = oldSch;
+  }
+  }
+  else
+  {
+    var thisAppt = 'APPT: ' + name + '<br>' + sch;
+    sch = thisAppt;
   }
   //console.log("SCH: " + sch);
   calendar[day] = sch;
@@ -5015,15 +5855,16 @@ function loadMail()
   //console.log("loadMail");
   if(mailLoaded) {return;}
   if(!user[0]) {return;}
-  if(!productStore.getById(user[0].inID))
+  //console.log("NEW USER: " + window.newUser);
+  if(!productStore.getById(user[0].inID) || window.newUser)
   {
-    addMailMessage('interviewring', 'Welcome ' + user[0].first + ' to Interview Ring.  If you have not yet done so, take a moment and browse the vast resouces and services offered.<br>Thank you!<br>-Interview Ring Team', true);
+    addMailMessage('interviewring', 'Welcome ' + user[0].first + ' to Interview Ring.  If you have not yet done so, take a moment and browse the vast resouces and services offered.<br>Thank you!<br>-Interview Ring Team', true, true);
     //mail['mail0'] = 'Welcome ' + user[0].first + ' to Interview Ring.  If you have not yet done so, take a moment and browse the vast resouces and services offered.<br>Thank you!<br>-Interview Ring Team';
     //document.getElementById('mailCount').innerHTML = 1;
     var myNewRecord = [
     {
       inID: user[0].inID,
-      role: 'find',
+      role: window.role,
       services: JSON.stringify(services),
       calendar: JSON.stringify(schedule),
       mail: JSON.stringify(mail)
@@ -5045,12 +5886,13 @@ function loadMail()
   for (var key in msgs)
   {
 
-    var search = /\((ID=[0-9a-zA-Z^)]+)\)/;
+    var search = /\((ID=[_\-0-9a-zA-Z^)]+)\)/;
     var ID = msgs[key].match(new RegExp(search));
     var msg = msgs[key].replace(new RegExp(search), '');
 
+    //console.log(ID);
 
-    var search = /\(ID=([0-9a-zA-Z^)]+)\)/;
+    var search = /\(ID=([_\-0-9a-zA-Z^)]+)\)/;
     if(ID) {ID = ID[0].match(new RegExp(search))[1];}
     //ID = ID[0].replace('ID=', ''); 
 
@@ -5058,7 +5900,7 @@ function loadMail()
     //console.log("MSG: " + msg);
 
 
-    addMailMessage(ID, msg, newMail);
+    addMailMessage(ID, msg, newMail, false);
   }//for (var key in calendar)
 
   mailLoaded = true;
@@ -5082,7 +5924,7 @@ function saveCartItem(inID, cartItems)
 
 function saveMail(inID, flag, mailMsgs)
 {
-  //console.log("Saving mail...");
+  //console.log("Saving mail..." + mailMsgs);
   var mailObj = {};
   mailObj.anyNew = flag;
   mailObj.mail = mailMsgs;
@@ -5110,7 +5952,7 @@ function showMail()
 
 
 
-function addMailMessage(sender, msg, flag)
+function addMailMessage(sender, msg, flag, save)
 {
 
   //console.log(sender);
@@ -5118,8 +5960,9 @@ function addMailMessage(sender, msg, flag)
   var id = 'mail' + parseInt(parseInt(size,10)+0,10);
   mail[id] = '(ID=' + sender + ')' + msg;
 
-  saveMail(user[0].inID, flag, mail);
+  if(save) {saveMail(user[0].inID, flag, mail);}
 
+  //console.log(sender);
   var senderImg = '';
   if(sender=='interviewring')
   {
@@ -5142,7 +5985,7 @@ function addMailMessage(sender, msg, flag)
   //mail[decodeURI(key)] = messages[key];
   //console.log(mail[key]);
   var container = document.createElement("div");
-  container.className = "mailWrapper gradient-paleGreen";
+  container.className = "mailWrapper gradient-dkblue";
   container.id = id;
   mailContainer.appendChild(container);
 
@@ -5158,9 +6001,8 @@ function addMailMessage(sender, msg, flag)
   container.appendChild(content);
   var close = document.createElement("div");
   close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode); removeMail(this.parentNode.parentNode.id); document.getElementById(\'mailCount\').innerHTML = parseInt(document.getElementById(\'mailCount\').innerHTML,10)-1; if(!parseInt(document.getElementById(\'mailCount\').innerHTML,10)) {document.getElementById(\'mail\').style.display=\'none\';}"></div>';
-  close.style.right = 6 + "px";
-  close.style.marginRight = 0 + "px";
-  close.style.marginTop = -8 + "px";
+  close.style.left = 306 + "px";
+  close.style.marginTop = -6 + "px";
   //close.style.padding = -2 + "px";
   close.style.position = "absolute";
   //close.style.top = 0 + "px";
@@ -5229,11 +6071,62 @@ function serviceReturn()
   loadCartItems("cartItemsReturn", true);
   if(Object.size(cartItemsReturn))
   {
-    msgEl.innerHTML = '<h2>Thank you for choosing interviewring to handle your career services.</h2><h3>You and your service provider(s) have been sent an email with info regarding how to connect with one another</h3><h4 style="color:#555555;">The interviewring team wishes you much success in your career and hopes to serve you again</h4><br>';
+    msgEl.innerHTML = '<h2>Thank you for choosing interviewring to handle your career services.</h2><h3>You and your service provider(s) have been sent an email with info regarding how to connect with one another.</h3><h4 style="color:#555555;">The interviewring team wishes you much success in your career and hopes to serve you again.</h4><br>';
 
     sendNotificationEmail();
     eraseAllCookies();
     saveCartItem(returnParameters.ID, {});
+
+    
+    for (var key in cartItemsReturn)
+    {
+      var split = key.split(/\:/);
+      var ID = split[0];
+      var day = split[1];
+      var thisAppt = cartItemsReturn[key];
+
+      var split = thisAppt.split('<br>');
+      split.shift();
+      thisAppt = split.join('<br>');
+
+
+      var date = {};
+      date = getDateIndexes(key);
+
+      var day = date.dayIndex;
+      var month = date.monthIndex;
+      var year = date.year;
+      day = pad(day, 2);
+      month = pad(month, 2);
+      var tDay = day + "/" + month + "/" + year;
+
+      // --Name--
+      var first = productStore.getById(ID) ? productStore.getById(ID).data.first : '--';
+      var last = productStore.getById(ID) ? productStore.getById(ID).data.last : '--';
+      var name = first + ' ' + last;
+
+      var myFirst = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.first : '--';
+      var myLast = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.last : '--';
+      var myName = myFirst + ' ' + myLast;
+
+      //My schedule
+      updateSchedule(user[0].inID, tDay, name, thisAppt);
+      $.ajax({url:"./saveCalendar.php", 
+              data: {id: user[0].inID, calendar: productStore.getById(user[0].inID).data.calendar },
+              type:'post',
+              async:true
+      });
+
+
+      //Provider schedule
+      thisAppt = changeNameForAppt(thisAppt, ID)
+      updateSchedule(ID, tDay, myName, thisAppt);
+      $.ajax({url:"./saveCalendar.php", 
+              data: {id: ID, calendar: productStore.getById(ID).data.calendar },
+              type:'post',
+              async:true
+      });
+    }
   }
   else
   {
@@ -5266,6 +6159,7 @@ function loadCartItems(id, isReturn)
   }
 
 
+  if(!Object.size(cartItems)) {return;}
 
 
   for (var key in cartItems)
@@ -5293,6 +6187,9 @@ function loadCartItems(id, isReturn)
     var last = productStore.getById(ID) ? productStore.getById(ID).data.last : '--';
     var name = first + ' ' + last;
 
+    //console.log(user[0].inID);
+    //console.log(productStore.getById(user[0].inID).data.first);
+
     var myFirst = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.first : '--';
     var myLast = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.last : '--';
     var myName = myFirst + ' ' + myLast;
@@ -5301,13 +6198,13 @@ function loadCartItems(id, isReturn)
 
     if(!isReturn)
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;"><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a><hr>' + cartItems[key] + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
     }
     else
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;"><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a><hr>' + cartItems[key] + '</div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div></li>';
 
-      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '<hr><a href="http://www.interviewring.com/?feedback=KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedack</a><br><a href="http://www.interviewring.com/?rate=ID=' + ID + '" target="_blank">Rate ' + first + '</a></div><div><a>' + ID + '</a></div></div>';
+      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '<hr><a href="http://www.interviewring.com/?feedback&KEY=' + user[0].inID + ':' + day + '" target="_blank" style="font-size: 16px;">Give ' + myFirst + ' feedback</a><br><a href="http://www.interviewring.com/?rate&ID=' + ID + '" target="_blank" style="font-size: 16px;">Rate ' + first + '</a></div><div><a>' + ID + '</a></div></div>';
     }
   }
   document.getElementById(elID).innerHTML = help;
@@ -5340,11 +6237,14 @@ function loadCartItems(id, isReturn)
 
 
 
-
+//<a href="http://www.interviewring.com/?feedback&KEY=' + user[0].inID + ':' + day + '" target="_blank">Give ' + myFirst + ' feedback</a><br><a href="http://www.interviewring.com/?rate&ID=' + ID + '" target="_blank">Rate ' + first + '</a></div><div><a>' + ID + '</a>
 function getEmailList(str)
 {
+  var userEmail = str;
+  var providerEmail = str;
   var emails = {};
   var titles = str.match(/title\s*=\s*\".*?\"/g);
+  var frames = str.split(/<div class=\"frame1\"/g);
   for(var i = 0; i < titles.length; i++)
   {
     var tmp = titles[i];
@@ -5359,17 +6259,44 @@ function getEmailList(str)
     {
       if(productStore.getById(ID).data.email)
       {
-        emails[i] = productStore.getById(ID).data.email;
+        if(!emails[ID]) emails[ID] = '';
+        if(!emails[user[0].inID]) emails[user[0].inID] = '';
         //console.log("EMAIL: " + emails[i]);
+
+
+        userEmail = '<div class="frame1"' + frames[i+1];
+        var search = '<div><a>' + ID + '</a></div>';
         replace = '<div><a title="' + productStore.getById(ID).data.email + '" href="mailto:' + productStore.getById(ID).data.email + '?subject=interviewring.com career service appointment"><img src="http://www.interviewring.com/images/contactIconEmail.png" alt="IconEmail"/>' + productStore.getById(ID).data.email + '</a></div>';
+        userEmail = userEmail.replace(new RegExp(search, 'g'), replace);
+
+        var search = '<a.*Give.*feedback</a>';
+        replace = '';
+        userEmail = userEmail.replace(new RegExp(search, 'g'), replace);
+
+        emails[user[0].inID] += userEmail;
+
+
+
+        providerEmail = '<div class="frame1"' + frames[i+1];
+        var search = '<div><a>' + ID + '</a></div>';
+        replace = '<div><a title="' + productStore.getById(user[0].inID).data.email + '" href="mailto:' + productStore.getById(user[0].inID).data.email + '?subject=interviewring.com career service appointment"><img src="http://www.interviewring.com/images/contactIconEmail.png" alt="IconEmail"/>' + productStore.getById(user[0].inID).data.email + '</a></div>';
+        providerEmail = providerEmail.replace(new RegExp(search, 'g'), replace);
+
+        var search = '<br><a.*Rate ' + productStore.getById(ID).data.first + '</a>';
+        replace = '';
+        providerEmail = providerEmail.replace(new RegExp(search, 'g'), replace);
+
+        var search = '<img src=\".*\" style=\"width';
+        replace = '<img src="' + productStore.getById(user[0].inID).data.image + '" style="width';
+        providerEmail = providerEmail.replace(new RegExp(search, 'g'), replace);
+
+
+        emails[ID] += providerEmail;
       }
     }
-    var search = '<div><a>' + ID + '</a></div>';
-    
-    str = str.replace(new RegExp(search, 'g'), replace);
   }
   
-  return {emails: emails, updatedEmail: str};
+  return {emails: emails, userEmail: userEmail, providerEmail: providerEmail};
 }
 
 
@@ -5409,20 +6336,72 @@ function getTotalFromEmail(str)
 
 
 
-function getTotalFromCartItems(items)
+function getTotalFromCartItems(items, myID)
 {
   var returnSubs = {};
   for (var key in items)
   {
     var split = key.split(/\:/);
     var ID = split[0];
+    myID = myID || ID;
     var day = split[1];
     var thisAppt = items[key];
     //console.log("thisAppt: " + thisAppt);
 
-    returnSubs[ID+day] = getSubTotalFromSch(thisAppt, ID);
+    if(ID === myID) {returnSubs[ID+day] = getSubTotalFromSch(thisAppt, ID);}
   }
   return getTotal(returnSubs);
+}
+
+
+
+
+
+function changeNameForAppt(email, myID)
+{
+  var first = productStore.getById(myID).data.first;
+  var last = productStore.getById(myID).data.last;
+  var name = first + ' ' + last;
+
+  var myFirst = productStore.getById(user[0].inID).data.first;
+  var myLast = productStore.getById(user[0].inID).data.last;
+  var myName = myFirst + ' ' + myLast;
+
+  email = email.replace(new RegExp(name, 'g'), myName);
+  return email;
+}
+
+
+
+function getMyItemsFromCartItems(items, myID)
+{
+
+  var first = productStore.getById(myID).data.first;
+  var last = productStore.getById(myID).data.last;
+  var name = first + ' ' + last;
+
+  var myFirst = productStore.getById(user[0].inID).data.first;
+  var myLast = productStore.getById(user[0].inID).data.last;
+  var myName = myFirst + ' ' + myLast;
+
+  var myItems = {};
+  for (var key in items)
+  {
+    var split = key.split(/\:/);
+    var ID = split[0];
+    myID = myID || ID;
+    var day = split[1];
+    var thisAppt = items[key];
+    //console.log("thisAppt: " + thisAppt);
+
+    if(ID === myID)
+    {
+      var newKey = user[0].inID + ':' + day;
+      thisAppt = thisAppt.replace(new RegExp(name, 'g'), myName);
+      myItems[newKey] = thisAppt;
+    }
+  }
+  return myItems;
 }
 
 
@@ -5460,33 +6439,86 @@ function sendNotificationEmail()
 {
   var tmp = {};
   var emails = {};
-  var innerHTML = '';
+  var userEmail;
+  var providerEmail;
 
   updateBackgroundImages(cartItemsReturn);
-  //var returnTotal = currencyFormatted(getTotalFromEmail(document.getElementById("hiddenEmailBody").innerHTML));
   var returnTotal = currencyFormatted(getTotalFromCartItems(cartItemsReturn));
   //console.log("TOTAL: " + returnTotal);
 
   tmp = getEmailList(document.getElementById("hiddenEmailBody").innerHTML);
   emails = tmp.emails;
-  innerHTML = tmp.updatedEmail;
-  //console.log(document.getElementById("hiddenEmailBody").innerHTML);
-  //console.log(innerHTML);
-  document.getElementById("hiddenEmailBody").innerHTML = innerHTML;
+  userEmail = tmp.userEmail;
+  providerEmail = tmp.providerEmail;
 
-  $.ajax({url:"./saveServices.php", 
-       data: {id: user[0].inID, services: JSON.stringify(cartItemsReturn) },
+  userEmail = emails[user[0].inID];
+  delete emails[user[0].inID];
+
+  //console.log(userEmail);
+
+  var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>Thank you for choosing interviewring to handle your career services.</h1><h2>You and your service provider(s) have been sent this email with info regarding how to connect with one another.</h2><h2>The interviewring team wishes you much success in your career and hopes to serve you again.</h2></div><br><br><br><div><h1>TOTAL: $' + returnTotal + '</h1></div>' + userEmail + '</body></html>';
+
+  //console.log("USER: " + user[0].first + " (" + user[0].email + "): " + userHTML);
+
+
+  $.ajax({url:"./saveHistory.php", 
+       data: {id: user[0].inID, history: JSON.stringify(cartItemsReturn) },
        type:'post',
        async:true
   });
 
 
-  //console.log(document.getElementById("hiddenEmailBody").innerHTML);
+  if(1)
+    {
+  //User Email
   $.ajax({url:"./email.php", 
-    data: {first_name: user[0].first, payer_email: user[0].email, provider_emails: JSON.stringify(emails), mc_gross: returnTotal, innerHTML: document.getElementById("hiddenEmailBody").innerHTML },
+    //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
+    data: {id: user[0].inID, name: user[0].first, email: user[0].email, subject: "Your Purchase from interviewring.com", MsgHTML: userHTML, attachResume: '0'},
     type:'post',
     async:false
   });
+    }
+
+  for(var ID in emails)
+  { 
+
+    var justMyItems = getMyItemsFromCartItems(cartItemsReturn, ID);
+    $.ajax({url:"./saveProviderHistory.php", 
+       data: {id: ID, providerHistory: JSON.stringify(justMyItems) },
+       type:'post',
+       async:false
+    });
+
+
+
+    var first = productStore.getById(ID).data.first;
+    var email = productStore.getById(ID).data.email;
+    var providerEmail = changeNameForAppt(emails[ID], ID);
+    //console.log(first + "->" + providerEmail);  
+    var serviceTotal = currencyFormatted(getTotalFromCartItems(cartItemsReturn, ID));
+    var processingPercent = 0.15;
+    var processingFee = currencyFormatted(parseFloat(serviceTotal) * processingPercent);
+    var payout = currencyFormatted(parseFloat(serviceTotal) - parseFloat(processingFee));
+
+    var providerHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>Congratulations!</h1><h2>Your service has been selected to help advance someone\'s career.</h2><h2>The interviewring team wishes to thank you for providing this service and giving of your time and talents so freely.</h2></div><br><br><br><div><h1>TOTAL: $' + serviceTotal + '</h1>';
+    if(parseFloat(serviceTotal)) {providerHTML += '<h2>Upon completing the service and providing feedback you will get $' + payout + '  (' + serviceTotal + ' - ' + processingFee + '*)  *processing fee (' + parseFloat(processingPercent * 100.00) + '%)</h2>';}
+    providerHTML += '</div><h2>Next Steps: Contact <a href="mailto:' + user[0].email + '?Subject=InterviewRing%20Appointment" target="_top">' + user[0].first + '</a><br>Please ensure that you can contact ' + user[0].first + ' before the day of the service.<br>Please share all the details of the service day. i.e. meeting location, if in person, or details of remote service tools like google hangouts address, skype address or the like.<br>After completion of the service be sure to provide feedback via the link below or logging into interviewring.com and finding this appointment in your history<br>Thanks again!<br></h2>';
+    providerHTML += '</div>' + providerEmail + '</body></html>';
+
+    //console.log("PROVIDER: " + first + " (" + email + "): " + providerHTML);
+
+    if(1)
+      {
+    //var MsgTEXT = getPlainText(emails[id]);
+    //Provider Email
+    $.ajax({url:"./email.php", 
+      //data: {name: first, email: email, cc_list: '', subject: "Your scheduled appointment via interviewring.com", MsgHTML: providerHTML},
+      data: {id: user[0].inID, name: first, email: email, subject: "Your scheduled appointment via interviewring.com", MsgHTML: providerHTML, attachResume: '1'},
+      type:'post',
+      async:false
+    });
+      }
+  }
 
 
 
@@ -5502,7 +6534,7 @@ function removeCartItem(key, ID)
   //console.log(ID);
   var removedSch = cartItems[key];
   delete cartItems[key];
-  if(!Object.size(cartItems)) {document.getElementById("cartItem").style.display = 'none';}
+
 
   var date = {};
   date = getDateIndexes(key);
@@ -5522,7 +6554,6 @@ function removeCartItem(key, ID)
 
 
 
-  //TODO
   var sch = "";  
   var thisAppt = '';
   // --Name--
@@ -5586,6 +6617,37 @@ function removeCartItem(key, ID)
   total = getTotal(subTotals);
   document.getElementById("Total").innerHTML = "TOTAL: $" + currencyFormatted(total);
 
+  //  if(!Object.size(cartItems)) {document.getElementById("cartItem").style.display = 'none';}
+  if(total != 0)
+  {
+    Ext.get("promoCodeContainer").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Choose your method of payment';
+    document.getElementById("checkOutCallToActionConfirm").style.display = 'none';
+    document.getElementById("checkOutCallToActionButtons").style.display = '';
+  }
+  else                       
+  {
+    Ext.get("promoCodeContainer").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionHeader").innerHTML = 'Confirm your appointment(s)';
+    document.getElementById("checkOutCallToActionConfirm").style.display = '';
+    document.getElementById("checkOutCallToActionButtons").style.display = 'none';
+  }
+  if(Object.size(cartItems))
+  {
+    Ext.get("cartItem").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium";
+    document.getElementById("checkOutCallToAction").style.display = '';
+    document.getElementById("Total").style.visibility = '';
+  }
+  else
+  {
+    Ext.get("cartItem").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
+    document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium inactive";
+    document.getElementById("checkOutCallToAction").style.display = 'none';
+    document.getElementById("Total").style.visibility = 'hidden';
+    document.getElementById("cartItems").innerHTML = '<h1 class="clearfix" style="margin-top: 100px; text-align: center;">Your Cart is Empty</h1>';
+  }
+
 }
 
 
@@ -5593,31 +6655,28 @@ function removeCartItem(key, ID)
 function historyAvailable()
 {
   var historyItems = {};
-
-
   if(productStore.getById(user[0].inID))
   {
     var result = productStore.getById(user[0].inID).data.history;
-    if(result.length > 2)
+    if(result)
     {
-      historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
+      if(result.length > 2)
+      {
+        historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
+      }
     }
   }
 
-
-
-  
-
   var items = 0;
+  var withFeedback = 0;
   for (var key in historyItems)
   {
     var split = key.split(/\:/);
     var ID = split[0];
     var day = split[1];
 
+    items++;
     //console.log(ID);
-
-
     var feedback = {};
     if(productStore.getById(ID))
     {
@@ -5631,23 +6690,73 @@ function historyAvailable()
 
     if(feedback[fbKey])
     {
-      items++;
+      withFeedback++;
     }
   }
-  return items;
+  return {items: items, withFeedback: withFeedback};
 }
+
+
+
+
+function providerHistoryAvailable()
+{
+  var historyItems = {};
+  if(productStore.getById(user[0].inID))
+  {
+    var result = productStore.getById(user[0].inID).data.providerHistory;
+    if(result)
+    {
+      if(result.length > 2)
+      {
+        historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
+      }
+    }
+  }
+
+  var items = 0;
+  var withFeedback = 0;
+  for (var key in historyItems)
+  {
+    var split = key.split(/\:/);
+    var ID = split[0];
+    var day = split[1];
+
+    items++;
+    //console.log(ID);
+    var feedback = {};
+    if(productStore.getById(ID))
+    {
+      var result = productStore.getById(user[0].inID).data.feedback;
+      if(result.length > 2)
+      {
+        feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
+      }
+    }
+    var fbKey = user[0].inID + ':' + day;
+
+    if(feedback[fbKey])
+    {
+      withFeedback++;
+    }
+  }
+  return {items: items, withFeedback: withFeedback};
+}
+
+
+
+
 
 function loadFeedbackCount()
 {
   if(document.getElementById("feedbackCount"))
   {
-    document.getElementById("feedbackCount").innerHTML = historyAvailable();
+    document.getElementById("feedbackCount").innerHTML = (historyAvailable().items + providerHistoryAvailable().items);
   }
 }
-//thurgood.jonathan@gmail.com  808.270.5704
 
 
-function loadHistory()
+function XXloadHistoryXX()
 {
   var elID = "history";
   var help = '';
@@ -5696,24 +6805,944 @@ function loadHistory()
 
 
 
+  function doHistory(arg)
+  {
+    //console.log('doHistory');
+    arg = arg || document.getElementById('explore').value;
+
+    historyItemKeyArray = [];
+    document.getElementById("historyItems").innerHTML = '';
+    loadHistory(arg);
+    loadProviderHistory(arg);
+  }
+
+
+
+
+
+
+  function loadHistory(exp)
+  {
+
+    //console.log('loadHistory');
+    var regExp = exp || ".";
+    regExp = regExp.replace(/\s+/g, "|");
+    var matchRE = new RegExp(regExp, "i");
+    //console.log(regExp);
+
+    //historyItemKeyArray = [];
+
+    var historyItems = {};
+    historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
+
+
+    for (var key in historyItems)
+    {
+      var split = key.split(/\:/);
+      var ID = split[0];
+      var day = split[1];
+      var status = '';
+      var dateFilter = '';
+      var company =  productStore.getById(ID).data.company || "";
+      var feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
+      var fbKey = user[0].inID + ':' + day;
+      if(feedback[fbKey])
+      {
+        status = 'Completed';
+      }
+      else
+      {
+        //console.log(day);
+
+        var date = {};
+        date = getDateIndexes(day);
+
+        var d = parseInt(date.dayIndex, 10);
+        var m = parseInt(date.monthIndex, 10);
+        var y = parseInt(date.year, 10);
+        //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+        var x=new Date();
+        x.setFullYear(y,m-1,d);
+        var t = new Date();
+
+        if (x>=t)
+        {
+          status = 'Scheduled';
+        }
+        else
+        {
+          status = 'Waiting Feedback';
+        }
+      }
+
+      //"date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago']
+      var date = {};
+      date = getDateIndexes(day);
+
+      var d = parseInt(date.dayIndex, 10);
+      var m = parseInt(date.monthIndex, 10);
+      var y = parseInt(date.year, 10);
+      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+      var x=new Date();
+      x.setFullYear(y,m-1,d);
+
+
+      //'< 1 month ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 1);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '< 1 month ago';}
+
+      //'1-3 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 3);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '1-3 months ago';}
+
+      //'4-6 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 6);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '4-6 months ago';}
+
+      //'7-12 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 12);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '7-12 months ago';}
+
+      //'> 1 year ago'
+      if(!dateFilter) {dateFilter = '> 1 year ago';}
+
+      //console.log(dateFilter);
+      historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter}); 
+    }
+
+    applyHistoryFilters();
+    historyItemKeyArray.sort(sortHistoryFunction)
+    populateHistoryItems();
+
+  } //loadHistory()
+
+
+
+
+
+
+  function loadProviderHistory(exp)
+  {
+
+    //console.log('loadHistory');
+    var regExp = exp || ".";
+    regExp = regExp.replace(/\s+/g, "|");
+    var matchRE = new RegExp(regExp, "i");
+    //console.log(regExp);
+
+    //historyItemKeyArray = [];
+
+    var historyItems = {};
+    historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
+
+
+    for (var key in historyItems)
+    {
+      var split = key.split(/\:/);
+      var ID = split[0];
+      var day = split[1];
+      var status = '';
+      var dateFilter = '';
+      var company =  productStore.getById(ID).data.company || "";
+      var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
+      var fbKey = user[0].inID + ':' + day;
+      if(feedback[fbKey])
+      {
+        status = 'Completed';
+      }
+      else
+      {
+        //console.log(day);
+
+        var date = {};
+        date = getDateIndexes(day);
+
+        var d = parseInt(date.dayIndex, 10);
+        var m = parseInt(date.monthIndex, 10);
+        var y = parseInt(date.year, 10);
+        //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+        var x=new Date();
+        x.setFullYear(y,m-1,d);
+        var t = new Date();
+
+        if (x>=t)
+        {
+          status = 'Scheduled';
+        }
+        else
+        {
+          status = 'Waiting Feedback';
+        }
+      }
+
+      //"date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago']
+      var date = {};
+      date = getDateIndexes(day);
+
+      var d = parseInt(date.dayIndex, 10);
+      var m = parseInt(date.monthIndex, 10);
+      var y = parseInt(date.year, 10);
+      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+      var x=new Date();
+      x.setFullYear(y,m-1,d);
+
+
+      //'< 1 month ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 1);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '< 1 month ago';}
+
+      //'1-3 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 3);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '1-3 months ago';}
+
+      //'4-6 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 6);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '4-6 months ago';}
+
+      //'7-12 months ago'
+      var y = new Date();
+      y.setMonth(y.getMonth() - 12);
+      var year =  y.getFullYear();
+      var month =  monthNames[y.getMonth()];
+      var weekDay = dayNames[y.getDay()];
+      var dayIndex = y.getDate();
+      var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+      //console.log(y.getMonth()+1);
+      //console.log("DAY: " + day + " FUTURE: " + futureDay);
+      if(x > y && !dateFilter) {dateFilter = '7-12 months ago';}
+
+      //'> 1 year ago'
+      if(!dateFilter) {dateFilter = '> 1 year ago';}
+
+      //console.log(dateFilter);
+      historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter}); 
+    }
+
+    applyHistoryFilters();
+    historyItemKeyArray.sort(sortHistoryFunction)
+    populateProviderHistoryItems();
+
+  } //loadProviderHistory()
+
+
+
+
+
+
+function sortHistoryFunction(a, b)
+{
+  //Compare "a" and "b" in some fashion, and return <0, 0, or >0
+  //Less than 0: Sort "a" to be a lower index than "b"
+  //Zero: "a" and "b" should be considered equal, and no sorting performed.
+  //Greater than 0: Sort "b" to be a lower index than "a".
+
+  var e = document.getElementById("sortHistory");
+  var opt = e.options[e.selectedIndex].value;
+  //console.log(opt);  
+
+  if(opt == 'company')
+  {
+    if(productStore.getById(a.id).data.company < productStore.getById(b.id).data.company) {return -1;}
+    if(productStore.getById(a.id).data.company > productStore.getById(b.id).data.company) {return 1;}
+    return 0;
+  }
+  else if(opt == 'status')
+  {
+    //console.log(a.status + " > " + b.status);
+    return a.status > b.status;
+  }
+  else if(opt == 'date')
+  {
+    var date = {};
+    date = getDateIndexes(a.day);
+    var d = parseInt(date.dayIndex, 10);
+    var m = parseInt(date.monthIndex, 10);
+    var y = parseInt(date.year, 10);
+    //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+    var aDate = new Date();
+    aDate.setFullYear(y,m-1,d);
+
+    date = getDateIndexes(b.day);
+    var d = parseInt(date.dayIndex, 10);
+    var m = parseInt(date.monthIndex, 10);
+    var y = parseInt(date.year, 10);
+    //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+    var bDate = new Date();
+    bDate.setFullYear(y,m-1,d);
+
+    if (aDate < bDate) {return -1;}
+    else if(aDate > bDate) {return 1;}
+    else {return 0;}
+  }
+
+
+}
+
+
+
+function applyHistoryFilters()
+{
+  var filterType = 'and';
+
+  var checkedFilters = {};
+  var toSave = {};
+  var atLeastOneChecked = false;
+  var filtered = new Array();
+
+  for(var key in historyFilters)
+  {
+    //console.log("FILTER: " + key);
+    var filterName = key + 'Filter';
+    if(!checkedFilters[key]) {checkedFilters[key] = {};}
+    var r = document.getElementsByName(filterName);
+    for (var i = 0; i < r.length; i++)
+    {
+      var value = r[i].value;
+      checkedFilters[key][value] = r[i].checked;
+      //console.log("ADDING -> KEY: " + key + " VALUE: " + value + " = " + checkedFilters[key][value]);
+      atLeastOneChecked |= r[i].checked;
+    }
+  }
+
+  if(!atLeastOneChecked) {return;}
+
+  if(filterType == 'and')
+  {
+    for(var key in historyFilters)
+    {
+      atLeastOneChecked = false;
+      for(var value in checkedFilters[key])
+      {
+        //console.log("--KEY: " + key + " VALUE: " + value + " = " + checkedFilters[key][value]);
+	atLeastOneChecked |= checkedFilters[key][value];
+      }
+      if(!atLeastOneChecked)
+      {
+        for(var value in checkedFilters[key])
+        {
+	  checkedFilters[key][value] = true;
+        }
+      }
+    }
+  }
+
+  for(var j = 0; j < historyItemKeyArray.length; j++)
+  {
+    var ID = historyItemKeyArray[j].id;
+    toSave[j] = (filterType == 'and') ? true : false;
+    //console.log("\n\nID: " + ID);
+    for(var key in historyFilters)
+    {
+      //console.log("--KEY: " + key);
+      var value = historyItemKeyArray[j][key];
+      var found = false;
+      var currValue = (key != 'services') ? value : 'services';
+      //console.log("CURRVALUE: " + currValue);
+      if(key == 'services')
+      {
+        var services;
+        if(productStore.getById(ID)) {services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
+
+        for (var service in services)
+        {
+          //console.log("REGEX: " + regExp + " KEY: " + key);
+          for(var checked in checkedFilters[key])
+          {
+	    if(checkedFilters[key][checked])
+	    {
+	      //console.log("OFFERED: " + service + " CHECKED: " + checked);
+              if(service == checked) {found = true;}
+	    }
+	  }
+        }
+	checkedFilters[key][currValue] = found;
+      }
+
+
+
+      //console.log("--VALUE: " + currValue);
+      if(typeof checkedFilters[key][currValue] !== "undefined")
+      {
+        //console.log("----KEY: " + key + " VALUE: " + currValue + " = " + checkedFilters[key][currValue]);
+        if(filterType == 'and')
+          toSave[j] &= checkedFilters[key][currValue];
+        else
+          toSave[j] |= checkedFilters[key][currValue];
+      }
+      //console.log("--TO SAVE: " + ID + "->" + toSave[ID]);
+    }
+  }
+
+  for(var key in toSave)
+  {
+    if(toSave[key]) {filtered.push(historyItemKeyArray[key]);}//      historyItemKeyArray.push({key: key, id: ID, day: day, status: status}); 
+
+  }
+  historyItemKeyArray = filtered;
+}
+
+
+
+function populateHistoryItems()
+{
+  var companies = new Array();
+  var elID = "historyItems";
+  var help = '';
+  var index = 0;
+  var historyItems = {};
+  historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
+
+
+  //document.getElementById("historyItems").innerHTML = '';
+  document.getElementById("resultsHistory").innerHTML = 'History Items: ' + historyItemKeyArray.length;
+
+
+
+
+  for(index = 0; index < historyItemKeyArray.length; index++)
+  {
+    var key = historyItemKeyArray[index].key;
+
+    //console.log('KEY: ' + key + ' = ' + services[key]);//var s = obj.
+    var historyID = elID + index;
+    var closeHistoryID = 'close' + elID + index;
+    var blisterHistoryID = 'blister' + elID + index;
+
+    var split = key.split(/\:/);
+    var ID = split[0];
+    var day = split[1];
+    var image = productStore.getById(ID).data.image || "./images/ghost.png";
+
+    var link = '';
+
+    split = historyItems[key].split('<br>');
+    split.shift();
+    var appt = split.join('<br>');
+
+    //console.log(ID);
+    var feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
+    var fbKey = user[0].inID + ':' + day;
+
+
+    //console.log(fbKey);
+    //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
+    //console.log("ID: " + split[1]);
+    //console.log("SETTING: " + imgID);
+    //console.log("STR: " + Ext.JSON.encode(feedback[fbKey]));
+    if(feedback[fbKey])
+    {
+      link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:green;"> Completed</span></span><hr></div>';
+    }
+    else
+    {
+      //console.log(day);
+
+      var date = {};
+      date = getDateIndexes(day);
+
+      var d = parseInt(date.dayIndex, 10);
+      var m = parseInt(date.monthIndex, 10);
+      var y = parseInt(date.year, 10);
+      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+      var x=new Date();
+      x.setFullYear(y,m-1,d);
+      var t = new Date();
+
+      if (x>=t)
+      {
+        link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
+      }
+      else
+      {
+        link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:red;"> Waiting Feedback</span></span><hr></div>';
+      }
+    }
+
+
+
+
+
+      // --Rating--
+      var ratingStr = '';
+      var ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
+
+      var rating = Math.ceil(ratingObj.average);
+      var rates = ratingObj.total || 0;
+      //console.log(ratingObj.comments);
+      if(!rating) {rating = 0;}
+
+
+
+
+
+      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
+      ratingStr += '<div style="right: -6px;">';
+      for(var i = rating; i < 5; i++)
+      {
+        ratingStr += '<img src="images/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      for(var i = 0; i < rating; i++)
+      {
+        ratingStr += '<img src="images/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      ratingStr += '</div></div><div style="color: #555; text-align: right; position: absolute; top: 15px; right: 0px;">' + rates + ' Reviews</div></div>';
+
+
+
+
+
+
+      // --Name--
+      var first = productStore.getById(ID).data.first;
+      var last = productStore.getById(ID).data.last;
+      var url = productStore.getById(ID).data.url;
+      var label = first + ' ' + last;
+      //console.log(label);
+
+      // --Services--
+      services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
+      //console.log(services);
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + day + '</div>' + appt;
+      help += '</div>';
+      //console.log(help);
+
+      // --Company--
+      var company =  productStore.getById(ID).data.company || "";
+      var found = 0;
+      for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+      if(!found) {companies.push(company);}
+      var companyTenure =  productStore.getById(ID).data.companyTenure || 0;
+
+      // --Industry--
+      var indsutry =  productStore.getById(ID).data.industry || "";
+      var industryTenure =  productStore.getById(ID).data.industryTenure || 0;
+
+      // --Position--
+      var position =  productStore.getById(ID).data.position || "";
+
+      var education = productStore.getById(ID).data.education || "";
+      //  Only display most recent education
+      var split = education.split('<br>');
+      education = split[0];
+
+      // --Image--
+      var image = productStore.getById(ID).data.imageSmall || "./images/ghostSmall.png";
+      //var image = productStore.getById(ID).data.image || 'http://m.c.lnkd.licdn.com/mpr/mpr/shrink_200_200/p/2/000/1a8/1fc/3597e0f.jpg';
+
+      if(settings[ID]['identity']) {label = ""; image = "./images/ghostSmall.png";}
+
+
+
+    var wrapper = document.createElement("div");
+
+
+
+
+    var window = document.createElement("div");
+    window.className = "historyItem";
+    window.id = "historyItem" + index;
+ 
+
+    //if(link.match('Completed'))      {window.onclick = function() {viewFeedback();}  ;}
+
+
+    //onclick = new Function('show_photo(' + path + ',' + description + ')')
+
+
+    if(link.match('Completed'))      {window.onclick = new Function( 'historyClicked(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+    else if(link.match('Waiting'))   {window.onclick = new Function( 'pingProvider(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+    //else if(link.match('Scheduled')) {window.onclick = function() {cancelService();} ;}
+
+
+    
+
+    var itemImage = document.createElement("div");
+    itemImage.className = "circular-small";
+    itemImage.style.background = 'url(' + image + ') no-repeat center center';
+    //itemImage.style.background = 'url(' + image + ') no-repeat';
+    window.appendChild(itemImage);
+    
+    var itemName = document.createElement("div");
+    itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
+
+    var itemPosition = document.createElement("div");
+    itemPosition.innerHTML = position;
+    window.appendChild(itemPosition);
+
+    var itemCompany = document.createElement("div");
+    itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
+    window.appendChild(itemCompany);
+
+    var itemEducation = document.createElement("div");
+    itemEducation.innerHTML = education;
+    window.appendChild(itemEducation);
+
+    var itemLink = document.createElement("div");
+    itemLink.innerHTML = link;
+    window.appendChild(itemLink);
+
+    var itemRating = document.createElement("div");
+    itemRating.innerHTML = ratingStr;
+    window.appendChild(itemRating);
+
+    var itemServices = document.createElement("div");
+    itemServices.innerHTML = help;
+    window.appendChild(itemServices);
+
+
+
+
+
+    var info = document.createElement("div");
+
+
+
+    wrapper.appendChild(window);
+    wrapper.appendChild(info);
+
+
+    document.getElementById(elID).appendChild(window);
+
+  }
+
+  if(!help) {help = '<h2>You Have no History</h2>';}
+  //document.getElementById(elID).innerHTML = help;
+  //ellipsizeCartItems(elID);
+  historyFilters.companyH = companies ? companies.sort() : {};
+
+}
+
+
+
+
+
+
+
+
+function populateProviderHistoryItems()
+{
+  var companies = new Array();
+  var elID = "historyItems";
+  var help = '';
+  var index = 0;
+  var historyItems = {};
+  historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
+
+
+  //document.getElementById("historyItems").innerHTML = '';
+  document.getElementById("resultsHistory").innerHTML = 'History Items: ' + historyItemKeyArray.length;
+
+
+
+
+  for(index = 0; index < historyItemKeyArray.length; index++)
+  {
+    var key = historyItemKeyArray[index].key;
+
+    //console.log('KEY: ' + key + ' = ' + services[key]);//var s = obj.
+    var historyID = elID + index;
+    var closeHistoryID = 'close' + elID + index;
+    var blisterHistoryID = 'blister' + elID + index;
+
+    var split = key.split(/\:/);
+    var ID = split[0];
+    var day = split[1];
+    var image = productStore.getById(ID).data.image || "./images/ghost.png";
+
+    var link = '';
+   
+    if(!historyItems[key]) {continue;}
+
+    split = historyItems[key].split('<br>');
+    split.shift();
+    var appt = split.join('<br>');
+
+    //console.log(ID);
+    var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
+    var fbKey = ID + ':' + day;
+
+
+    //console.log(fbKey);
+    //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
+    //console.log("ID: " + split[1]);
+    //console.log("SETTING: " + imgID);
+    //console.log("STR: " + Ext.JSON.encode(feedback[fbKey]));
+    if(feedback[fbKey])
+    {
+      link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:green;"> Completed</span></span><hr></div>';
+    }
+    else
+    {
+      //console.log(day);
+
+      var date = {};
+      date = getDateIndexes(day);
+
+      var d = parseInt(date.dayIndex, 10);
+      var m = parseInt(date.monthIndex, 10);
+      var y = parseInt(date.year, 10);
+      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+      var x=new Date();
+      x.setFullYear(y,m-1,d);
+      var t = new Date();
+
+      if (x>=t)
+      {
+        link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
+      }
+      else
+      {
+        link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:red;"> Waiting Feedback</span></span><hr></div>';
+      }
+    }
+
+
+
+
+
+      // --Rating--
+      var ratingStr = '';
+      var ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
+
+      var rating = Math.ceil(ratingObj.average);
+      var rates = ratingObj.total || 0;
+      //console.log(ratingObj.comments);
+      if(!rating) {rating = 0;}
+
+
+
+
+
+      var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
+      ratingStr += '<div style="right: -6px;">';
+      for(var i = rating; i < 5; i++)
+      {
+        ratingStr += '<img src="images/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      for(var i = 0; i < rating; i++)
+      {
+        ratingStr += '<img src="images/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      ratingStr += '</div></div><div style="color: #555; text-align: right; position: absolute; top: 15px; right: 0px;">' + rates + ' Reviews</div></div>';
+
+
+
+
+
+
+      // --Name--
+      var first = productStore.getById(ID).data.first;
+      var last = productStore.getById(ID).data.last;
+      var url = productStore.getById(ID).data.url;
+      var label = first + ' ' + last;
+      //console.log(label);
+
+      // --Services--
+      services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
+      //console.log(services);
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + day + '</div>' + appt;
+      help += '</div>';
+      //console.log(help);
+
+      // --Company--
+      var company =  productStore.getById(ID).data.company || "";
+      var found = 0;
+      for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+      if(!found) {companies.push(company);}
+      var companyTenure =  productStore.getById(ID).data.companyTenure || 0;
+
+      // --Industry--
+      var indsutry =  productStore.getById(ID).data.industry || "";
+      var industryTenure =  productStore.getById(ID).data.industryTenure || 0;
+
+      // --Position--
+      var position =  productStore.getById(ID).data.position || "";
+
+      var education = productStore.getById(ID).data.education || "";
+      //  Only display most recent education
+      var split = education.split('<br>');
+      education = split[0];
+
+      // --Image--
+      var image = productStore.getById(ID).data.imageSmall || "./images/ghostSmall.png";
+      //var image = productStore.getById(ID).data.image || 'http://m.c.lnkd.licdn.com/mpr/mpr/shrink_200_200/p/2/000/1a8/1fc/3597e0f.jpg';
+
+      if(settings[ID]['identity']) {label = ""; image = "./images/ghostSmall.png";}
+
+
+
+    var wrapper = document.createElement("div");
+
+
+
+
+    var window = document.createElement("div");
+    window.className = "providerHistoryItem";
+    window.id = "historyItem" + index;
+ 
+
+    //if(link.match('Completed'))      {window.onclick = function() {viewFeedback();}  ;}
+
+
+    //onclick = new Function('show_photo(' + path + ',' + description + ')')
+
+    fbKey = ID + ':' + day;
+    ID = user[0].inID;
+
+    if(link.match('Completed'))      {window.onclick = new Function( 'historyClicked(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\',' + true + ')');}
+    else if(link.match('Waiting'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+    //else if(link.match('Scheduled')) {window.onclick = function() {cancelService();} ;}
+
+
+    
+
+    var itemImage = document.createElement("div");
+    itemImage.className = "circular-small";
+    itemImage.style.background = 'url(' + image + ') no-repeat center center';
+    //itemImage.style.background = 'url(' + image + ') no-repeat';
+    window.appendChild(itemImage);
+    
+    var itemName = document.createElement("div");
+    itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
+
+    var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
+    itemPosition.innerHTML = position;
+    window.appendChild(itemPosition);
+
+    var itemCompany = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
+    window.appendChild(itemCompany);
+
+    var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
+    itemEducation.innerHTML = education;
+    window.appendChild(itemEducation);
+
+    var itemLink = document.createElement("div");
+    itemLink.innerHTML = link;
+    window.appendChild(itemLink);
+
+    var itemRating = document.createElement("div");
+    itemRating.innerHTML = ratingStr;
+    window.appendChild(itemRating);
+
+    var itemServices = document.createElement("div");
+    itemServices.innerHTML = help;
+    window.appendChild(itemServices);
+
+
+
+
+
+    var info = document.createElement("div");
+
+
+
+    wrapper.appendChild(window);
+    wrapper.appendChild(info);
+
+
+    document.getElementById(elID).appendChild(window);
+
+  }
+
+  if(!help) {help = '<h2>You Have no History</h2>';}
+  //document.getElementById(elID).innerHTML = help;
+  //ellipsizeCartItems(elID);
+  historyFilters.companyH = companies ? companies.sort() : {};
+
+}
+
+
+
+
+
+
+
+
 function historyClicked(JSONStr, JSONKey, ID, share)
 {
   //console.log("historyClicked");
   //console.log(JSONStr);
+  //console.log(JSONKey);
+  //console.log(ID);
   JSONStr = decodeURI(JSONStr);
   //console.log(JSONStr);
   var form = Ext.JSON.decode(JSONStr);
-
+  var fbKey = JSONKey;
 
   var split = JSONKey.split(/\:/);
+  var myID = split[0];
   var day = split[1];
   var first = productStore.getById(ID).data.first;
   var last = productStore.getById(ID).data.last;
   var name = first + ' ' + last;
   var company =  productStore.getById(ID).data.company;
 
-  var myFirst = productStore.getById(user[0].inID).data.first;
-  var myLast = productStore.getById(user[0].inID).data.last;
+  var myFirst = productStore.getById(myID).data.first;
+  var myLast = productStore.getById(myID).data.last;
   var myName = myFirst + ' ' + myLast;
 
   var ratingSum = 0;
@@ -5721,14 +7750,14 @@ function historyClicked(JSONStr, JSONKey, ID, share)
 
 
 
+  //'socialShare(this.alt,\'Check out my results\',\'' + ID + '\',\'' + JSONKey + '\');'
+  //'socialShare(this.alt,\'Check out my results\');'
 
 
+  var innerHTML = share ? '' : '<div class="x-window-default" style="margin-top:0px;"><div style="border: 0px solid #ff0000; height: 30px;"><img class="socialiconShare connect" src="images/google-up.png"   alt="google" title="Share on Google+" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/google-dn.png\';   this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/google-up.png\'"/><img class="socialiconShare connect" src="images/twitter-up.png"  alt="twitter" title="Share on Twitter" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/twitter-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/twitter-up.png\'"/><img class="socialiconShare connect" src="images/facebook-up.png" alt="facebook" title="Share on Facebook" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/facebook-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/facebook-up.png\'"/><img class="socialiconShare connect" src="images/linkedin-up.png" alt="linkedin" title="Share on LinkedIn" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/linkedin-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/linkedin-up.png\'"/><img class="socialiconShare connect" src="images/email-up.png"  alt="email" title="Share via email" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/email-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/email-up.png\'"/><span style="float: right; font-size: 16px; line-height: 16px; font-weight: 400;">Share this result on: </span></div><div style="border: 0px solid #000000;"><input type="checkbox" name="shareRating" onclick="shareRating(\'' + JSONKey + '\', this.checked);"></input><span style="font-size: 16px; line-height: 16px; font-weight: 400;">Allow interviewring.com recruiters to see this result</span></div></div>';
 
 
-  var innerHTML = share ? '' : '<div class="x-window-default" style="color: #4A5612;"><div style="border: 0px solid #ff0000; height: 30px;"><img class="socialiconShare connect" src="images/linkedin-up.png" alt="linkedin" title="Share on LinkedIn" onclick="socialShare(this.alt,\'Check out my results\');" onmouseover="this.src=\'images/linkedin-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/linkedin-up.png\'"/><img class="socialiconShare connect" src="images/facebook-up.png" alt="facebook" title="Share on Facebook" onclick="socialShare(this.alt,\'Check out my results\');" onmouseover="this.src=\'images/facebook-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/facebook-up.png\'"/><img class="socialiconShare connect" src="images/google-up.png"   alt="google" title="Share on Google+" onclick="socialShare(this.alt,\'Check out my results\');" onmouseover="this.src=\'images/google-dn.png\';   this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/google-up.png\'"/><img class="socialiconShare connect" src="images/twitter-up.png"  alt="twitter" title="Share on Twitter" onclick="socialShare(this.alt,\'Check out my results\');" onmouseover="this.src=\'images/twitter-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/twitter-up.png\'"/><span style="float: right;">Share this result on: </span></div><div style="border: 0px solid #000000;"><input type="checkbox" name="shareRating" onclick="shareRating(\'' + JSONKey + '\', this.checked);">Allow other interviewring.com members, including perspective employers, to see this result</input></div></div>';
-
-
-  innerHTML += '<h2 style="text-align: center; margin-top: 6px;">' + myName + '</h2><h3 style="text-align: center; margin-top: -30px;">' + day + '</h3><h4 style="text-align: center; margin-top: -10px;">by ' + name + ' (' + company + ')</h4><div class="sidebar" style="width: 540px; margin-left: 12px; margin-top: 50px;"><ul>';
+  innerHTML += '<h2 style="text-align: center; margin-top: 6px;">' + myName + '</h2><h3 style="text-align: center; margin-top: -10px;">' + day + '</h3><h4 style="text-align: center; margin-top: -10px;">by ' + name + ' (' + company + ')</h4><div class="sidebar" style="width: 540px; margin-left: 12px; margin-top: 50px;"><ul>';
 
   for (var key in form)
   {
@@ -5747,7 +7776,7 @@ function historyClicked(JSONStr, JSONKey, ID, share)
     {
       ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     }
-    ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
+    ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
 
     innerHTML += '<li><h2>' + key + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + form[key]['comment'] + '</span></li>';
   }
@@ -5765,7 +7794,7 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   {
     ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   }
-  ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
+  ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
 
 
   innerHTML += '<li><h2>' + 'average rating' + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + comment + '</span></li>';
@@ -5773,10 +7802,68 @@ function historyClicked(JSONStr, JSONKey, ID, share)
 
   innerHTML += '</ul></div>';
 
+  var container = document.createElement("div");
+  container.id = "viewFeedback";
+
+            
+  var window = document.createElement("div");
+  window.className = "feedbackWindow x-window-default-lt";
+  window.id = "formPage";
+  window.innerHTML = innerHTML;
+  
+  container.appendChild(window);
+
+  
+  //<div class="x-window-default" style="position: absolute; top: -10px; margin-left: 0px; width: 940px; height: 50px;">
+  var header = document.createElement("div");
+  header.className = "x-window-default";
+  header.style.position = "absolute";
+  header.style.top = -30 + "px";
+  header.style.marginLeft = 20 + "px";
+  header.style.width = 940 + "px";
+  header.style.height = 50 + "px";
+  header.style.zIndex = 70;
+
+  var dismiss = document.createElement("div");
+  dismiss.style.position = "absolute";
+  dismiss.style.top = 10 + 'px';
+  dismiss.style.right = 10 + 'px';
+  dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode.parentNode);"></div>';
+  header.appendChild(dismiss);
+
+  console.log();
+  //Allow author to re-submit feedback
+  if(ID === myID)
+  {
+    var buttonHTML = '<div class="a-button a-button-large" style="height: 36px;" onclick="doFeedback(\'' + encodeURI(Ext.JSON.encode(form)) + '\',\'' + fbKey + '\',\'' + ID + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Edit Feedback</span></span></div>';
+
+    var reSubmit = document.createElement("div");
+    reSubmit.style.position = "absolute";
+    reSubmit.style.top = 10 + 'px';
+    reSubmit.style.marginLeft = 320 + 'px';
+    reSubmit.innerHTML = buttonHTML;
+
+    header.appendChild(reSubmit);
+  }
+
+
+  container.appendChild(header);
+
+
+  document.getElementById("featuredHistoryItems").appendChild(container);
+
+
+
   var formPage = share ? document.getElementById("share") : document.getElementById("formPage");
   formPage.innerHTML = innerHTML;
 
-  if(!share) {setGroup("shareRating", settings[user[0].inID]['share'][JSONKey]);}
+
+  if(!share)
+  {
+    if(!settings[user[0].inID]['share']) {settings[user[0].inID]['share'] = {};}
+    if(!settings[user[0].inID]['share'][JSONKey]) {settings[user[0].inID]['share'][JSONKey] = false;}
+    setGroup("shareRating", settings[user[0].inID]['share'][JSONKey]);
+  }
   else {formPage.style.marginLeft = -120 + 'px';}
 
 }
@@ -5784,13 +7871,101 @@ function historyClicked(JSONStr, JSONKey, ID, share)
 
 
 
-function socialShare(type, elID, description)
+function doFeedback(JSONStr, JSONKey, ID)
+{
+  returnParameters.KEY = JSONKey;
+  showFeedbackForm();
+  populateFeedbackForm();
+}
+
+
+function pingProvider(JSONStr, JSONKey, ID)
+{
+  //console.log("historyClicked");
+  //console.log(JSONStr);
+  //console.log(JSONKey);
+  //console.log(ID);
+  JSONStr = decodeURI(JSONStr);
+  //console.log(JSONStr);
+  var form = Ext.JSON.decode(JSONStr);
+
+
+  var split = JSONKey.split(/\:/);
+  var day = split[1];
+  var first = productStore.getById(ID).data.first;
+  var last = productStore.getById(ID).data.last;
+  var name = first + ' ' + last;
+  var company =  productStore.getById(ID).data.company;
+
+  var myFirst = productStore.getById(user[0].inID).data.first;
+  var myLast = productStore.getById(user[0].inID).data.last;
+  var myName = myFirst + ' ' + myLast;
+
+
+
+
+
+  var innerHTML = '<h2 style="margin-top: 100px;">You had an appointment with ' + name + ' on ' + day + '.</h2>';
+  innerHTML += '<h2>' + first + ' has yet to provide you feedback.</h2>';
+  innerHTML += '<h2>Send ' + first + ' a note to remind them.</h2>';
+
+  innerHTML += '<form id="pingProviderForm" name="pingProviderForm"><textarea name="comment" placeholder="Leave a message here" style="height: 80px; width: 566px; resize: none;"></textarea><br><br><div class="a-button a-button-large" style="height: 61px; margin-left: 150px;" onclick="pingSubmit(this.parentNode.name,\'' + ID +'\',\'' + day + '\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Ping</span></span></div></form>';
+
+  var container = document.createElement("div");
+  container.id = "viewFeedback";
+
+            
+  var window = document.createElement("div");
+  window.className = "feedbackWindow x-window-default-lt";
+  window.id = "formPage";
+  window.innerHTML = innerHTML;
+  
+  container.appendChild(window);
+
+  
+  //<div class="x-window-default" style="position: absolute; top: -10px; margin-left: 0px; width: 940px; height: 50px;">
+  var header = document.createElement("div");
+  header.className = "x-window-default";
+  header.style.position = "absolute";
+  header.style.top = -30 + "px";
+  header.style.marginLeft = 20 + "px";
+  header.style.width = 940 + "px";
+  header.style.height = 50 + "px";
+  header.style.zIndex = 70;
+
+  var dismiss = document.createElement("div");
+  dismiss.style.position = "absolute";
+  dismiss.style.top = 10 + 'px';
+  dismiss.style.right = 10 + 'px';
+  dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode.parentNode);"></div>';
+  header.appendChild(dismiss);
+  container.appendChild(header);
+
+
+  document.getElementById("featuredHistoryItems").appendChild(container);
+
+}
+
+
+
+
+
+
+
+
+
+function socialShare(type, description, ID, JSONKey)
 {
   var content =  '';
   description = encodeURI(description);
 
+  var shareURL = 'http://www.interviewring.com/' + encodeURI('?share&ID=' + ID + '&KEY=') + encodeURI(JSONKey);
+  //console.log(shareURL);
+  var fbShareURL = encodeURIComponent('http://www.interviewring.com/' + '?share&ID=' + ID + '&KEY=') + escape(JSONKey);
+  //fbShareURL = encodeURIComponent(fbShareURL);
 
-
+  shareURL = encodeURIComponent(shareURL);
+  var liShareURL = shareURL;
 
   var myFirst = productStore.getById(user[0].inID).data.first;
   var myLast = productStore.getById(user[0].inID).data.last;
@@ -5802,7 +7977,7 @@ function socialShare(type, elID, description)
   //console.log(myParams);
 
 
-  var fbLink = 'http://www.facebook.com/share.php?u=' + encodeURI('http://www.interviewring.com/images/share.png' + myParams) + '&t=www.interviewring.com';
+  var fbLink = 'http://www.facebook.com/share.php?u=' + fbShareURL + '&t=www.interviewring.com';
 
 
   //fbLink = 'index.php?' + myParams;
@@ -5814,10 +7989,10 @@ function socialShare(type, elID, description)
   var myLink = 'http://www.interviewring.com/images/share.png';
   var myText = description;
   //var twLink = 'http://twitter.com/home?status=' + myText;
-  var twLink = 'http://www.twitter.com/share?url=' + myLink + '&text=' + myText;
+  var twLink = 'http://www.twitter.com/share?url=' + liShareURL + '&text=' + description;
   var tw = '<a href="' + twLink + '" onclick="window.open(this.href); return false;"><img src="./images/twitter.png" height="16px" title="Tweet this"/></a>';
 
-  var gpLink = 'https://plusone.google.com/_/+1/confirm?hl=en&url=' + encodeURI(encodeURI('http://www.interviewring.com/images/share.png'));
+  var gpLink = 'https://plusone.google.com/_/+1/confirm?hl=en&url=' + liShareURL;
   var gp = '<a href="' + gpLink + '" onclick="window.open(this.href); return false;"><img src="./images/gplus.png" height="16px" title="Plus 1"/></a>';
 
   var blLink = 'http://www.blogger.com/blog_this.pyra?t=&u=' + encodeURI('http://www.interviewring.com') + '&b=' + encodeURI('<a href=') + encodeURI('http://www.interviewring.com') + encodeURI('><img src="') + encodeURI('http://www.interviewring.com/images/' + content) + encodeURI('"/><br>www.interviewring.com</a>') + '&n=I love ' + encodeURI(description) + ' found at www.interviewring.com';
@@ -5837,13 +8012,90 @@ function socialShare(type, elID, description)
   var pin = '<a href="' + pinLink + '" onclick="window.open(this.href); return false;"><img src="./images/pinit.png" height="16px" title="Pin it"/></a>';
 
 
-  var liLink = 'http://www.linkedin.com/shareArticle?mini=true&url=' + encodeURI('http://www.interviewring.com/images/share.png' + myParams) + '&title=' + description + '&summary=' + 'Click to see ' + myName + '%27s results' + '&source=www.interviewring.com';
+  var liLink = 'http://www.linkedin.com/shareArticle?mini=true&url=' + shareURL + '&title=' + description + '&summary=' + 'Click to see ' + myName + '%27s results' + '&source=' + shareURL;
 
 
 
   var link = (type=='facebook') ? fbLink : (type=='linkedin') ? liLink : (type=='google') ? gpLink : (type=='twitter') ? twLink : (type=='delicious') ? dlLink : (type=='blogger') ? blLink : (type=='pinterest') ? pinLink : "";
 
-  window.open(link);
+  if(type != 'email') {window.open(link);}
+  else
+  {
+
+      var msg = '<div>Please enter the email addresses of the people you wish to share<br>your feedback with (seperated by spaces and/or commas)<br /><br /><label for="emailAddressesText">Email Addresses:</label><input id="emailAddressesText" name="emailAddressesText" type="textbox" style="width: 466px;"/>';
+      msg += '<br><label for="emailShareComment">Comment:</label><textarea name="emailShareComment" id="emailShareComment" placeholder="Leave a message here" style="height: 80px; width: 466px; resize: none;"></textarea>';
+      msg += '</div>';
+
+      var addresses = '';
+
+      var mbox = Ext.Msg.show({
+        title:    'Share via email',
+        msg:      msg,
+        buttons:  Ext.MessageBox.OKCANCEL,
+        icon: Ext.Msg.QUESTION,
+	callback: function(btn, text, cfg )
+        {
+          if( btn == 'ok')
+          {
+
+            addresses = Ext.get('emailAddressesText').getValue();
+            var comment = Ext.get('emailShareComment').getValue();
+            var allowEmailAddresses = document.getElementById('acceptEmailAddresses') ? document.getElementById('acceptEmailAddresses').checked : false;
+
+            var exp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            var regexp = new RegExp(exp);
+
+            //console.log(addresses);
+
+            var allAddresses = addresses.split(/[\s,;]+/);
+            var validEmail = true;
+            for(var address in allAddresses)
+	    {
+	      //console.log("->"+allAddresses[address]+"<-");
+              validEmail &= allAddresses[address].match(regexp) ? true : false;
+              //console.log(validEmail);
+	    }
+
+            //console.log("ALLOW: " + allowEmailAddresses);
+            if(!addresses)
+	    {
+              var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'You must specify at least one email address' + '</span>' + '<br><br>' + cfg.msg;
+              Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
+	    }
+            else if(!validEmail && !allowEmailAddresses)
+	    {
+              //console.log(cfg.msg);
+              //console.log(addresses);
+              cfg.msg = cfg.msg.replace('name="emailAddressesText"', 'name="emailAddressesText" value="' + addresses + '"');
+              //console.log(addresses);
+              var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'One or more of your email addresses does not seem to be a valid email address' + '</span>' + '<br><br><input type="checkbox" name="acceptEmailAddresses" id="acceptEmailAddresses"/><label for="acceptEmailAddresses">These email addresses are valid</label><br><br>' + cfg.msg;
+              Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
+	    }
+            else
+	    {
+
+              var showFeedbackURL = 'http://www.interviewring.com/?share&ID=' + ID + '&KEY=' + JSONKey;
+
+              var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>I\'d like to share my interview feedback on interviewring.com with you.</h1><h2>Click <a href="' + showFeedbackURL +'">this</a> link to see my feedback.</h2></div><br><br><br><div><h3>This email was sent via interviewring.com on behalf of ' + myName + '<br>-The InterviewRing.com team<br><br><br>Message:<br>' + comment + '</div></h3></body></html>';
+
+	    var cc_list = new Array();
+	    cc_list[0] = user[0].email;
+            for(var address in allAddresses)
+	    {
+              $.ajax({url:"./email.php", 
+	      data: {id: user[0].inID, name: '', email: allAddresses[address], cc_list: cc_list, subject: "Check out my interview feedback on InterviewRing.com", MsgHTML: userHTML, attachResume: '0'},
+              type:'post',
+              async:false
+              });
+	    }
+	    }
+
+
+
+	  }
+        }
+      });//Msg.show
+  }
 }
 
 
@@ -5866,7 +8118,12 @@ function populateShareElement()
   //console.log(JSONStr);
   //console.log(JSONKey);
   //console.log(ID);
-  if(feedback[JSONKey] && settings[user[0].inID]['share'][JSONKey])
+
+  var split = JSONKey.split(/\:/);
+  var myID = split[0];
+  var day = split[1];
+
+  if(feedback[JSONKey] && settings[myID]['share'][JSONKey])
   {
     historyClicked(JSONStr,JSONKey,ID,true);
   }
@@ -5925,16 +8182,16 @@ function populateRateForm()
     for(var i = rating; i < 5; i++)
     {
       var starID = 'rate' + 'Star' + i;
-      ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -6px; left: -280px; margin-right: -4px; height: 14px;"/>';
-      ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 19; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
+      ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -0px; left: -280px; margin-right: -4px; height: 14px;"/>';
+      ratingStr += '<img id="' + starID + '" src="images/emptyStar.png" style="z-index: 19; position: relative; top: -0px; left: -270px; margin-right: -6px; height: 15px;"/>';
     }
     for(var i = 0; i < rating; i++)
     {
       var starID = 'rate' + 'Star' + i;
-      ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -6px; left: -280px; margin-right: -4px; height: 14px;"/>';
-      ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19; position: relative; top: -6px; left: -270px; margin-right: -6px; height: 15px;"/>';
+      ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999; position: relative; top: -0px; left: -280px; margin-right: -4px; height: 14px;"/>';
+      ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19; position: relative; top: -0px; left: -270px; margin-right: -6px; height: 15px;"/>';
     }
-    //ratingStr += '<span style="width: 640px; position: absolute; top: 85px; text-align: center; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
+    //ratingStr += '<span style="width: 640px; position: absolute; top: 85px; text-align: center; font-size:9px; color:#606060; white-space: pre;">' + rates + ' ratings</span></div>';
 
 
 
@@ -5987,10 +8244,10 @@ function populateRateForm()
 
 
 
-      innerHTML += '<br><div class="ratingComment gradient-grey"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
-    rateForm.innerHTML = '<div style="display: block; margin: 10px auto;" ><h2 style="text-align: center;">Rate: ' + name + '</h2>' + ratingStr + '<form id="myRating" name="myRating" style="position: absolute; top: 84px; left: 50px;"><textarea name="comment" placeholder="After rating this provider you can enter your comments here" style="height: 80px; width: 566px; resize: none;"></textarea><div class="a-button a-button-large" style="position: absolute; top: 90px; float: left; left: 140px; z-index: 51;" onclick="rateSubmit(this.parentNode.name,\'' + ID +'\');"><span class="a-button-inner" style="padding-top: 15px;"><span class="a-button-text">Submit</span></span></div></form>' + '<div style="position: absolute; bottom: 10px; left: 50px; height: 150px; width: 570px; overflow: auto; border: 1px solid; border-color: #73841D #C7E520 #73841D #4A5612; border-radius: 3px;">' + innerHTML + '</div></div>';
+    rateForm.innerHTML = '<div style="display: block; margin: 10px auto;" ><h2 style="text-align: center;">Rate: ' + name + '</h2>' + ratingStr + '<form id="myRating" name="myRating" style="position: absolute; top: 84px; left: 50px;"><textarea name="comment" placeholder="After rating this provider you can enter your comments here" style="height: 80px; width: 566px; resize: none;"></textarea><div class="a-button a-button-large" style="height: 61px; position: absolute; top: 90px; float: left; left: 140px; z-index: 51;" onclick="rateSubmit(this.parentNode.name,\'' + ID +'\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Submit</span></span></div></form>' + '<div class="gradient-darkGrey" style="position: absolute; bottom: 10px; left: 50px; height: 250px; width: 570px; overflow: auto; border: 1px solid; border-color: #73841D #C7E520 #73841D #4A5612; border-radius: 3px;">' + innerHTML + '</div></div>';
   }
   else
   {
@@ -6010,7 +8267,7 @@ function populateRateForm()
 
 function populateFeedbackForm()
 {
-  var JSONKey = returnParameters.KEY ;
+  var JSONKey = returnParameters.KEY;
 
   var split = JSONKey.split(/\:/);
   var ID = split[0];
@@ -6020,6 +8277,9 @@ function populateFeedbackForm()
   feedbackForm.style.marginLeft = 20 + 'px';
 
 
+
+  var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
+  var fbKey = JSONKey;
 
 
 
@@ -6036,12 +8296,13 @@ function populateFeedbackForm()
     var company =  productStore.getById(user[0].inID).data.company;
     feedbackFormImg.style.background = 'url(' + productStore.getById(ID).data.image + ') no-repeat center center';
 
-    var innerHTML = '<h2 style="text-align: center; margin-top: 6px;">' + name + '</h2><h3 style="text-align: center; margin-top: -30px;">' + day + '</h3><h4 style="text-align: center; margin-top: -10px;">by ' + myName + ' (' + company + ')</h4><form id="myFeedback" name="myFeedback"><div class="sidebar" style="width: 540px; margin-left: 12px; margin-top: 50px;"><ul>';
+    var innerHTML = '<h2 style="text-align: center; margin-top: 6px;">' + name + '</h2><h3 style="text-align: center; margin-top: -10px;">' + day + '</h3><h4 style="text-align: center; margin-top: -10px;">by ' + myName + ' (' + company + ')</h4><form id="myFeedback" name="myFeedback"><div class="sidebar" style="width: 540px; margin-left: 12px; margin-top: 50px;"><ul>';
 
     for (var key in formItems)
     {
       //console.log("KEY: " + key + " VAL: " + form[key]['rating'] + form[key]['comment']);
       var rating = 0;
+      if(feedback) {if(feedback[fbKey]) {if(feedback[fbKey][key]) {rating = feedback[fbKey][key].rating || 0;}}}
 
       var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: relative; top: -40px; left:109px;"/>';
       for(var i = rating; i < 5; i++)
@@ -6056,10 +8317,13 @@ function populateFeedbackForm()
         ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999;  position: relative; top: -30px; left: 208px; margin-right: -4px; height: 14px;"/>';
         ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
       }
-      ratingStr += '<span style="position: relative; top: -65px; left: 300px; font-size:9px; font-family: verdana; color:#606060; white-space: pre;">Very Dissatisfied                                          Very Satisfied</span></div>';
+      ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
+
+      var comment = '';
+      if(feedback) {if(feedback[fbKey]) {if(feedback[fbKey][key]) {comment = feedback[fbKey][key].comment || '';}}}
 
       var textAreaName = key + 'Comment';
-      innerHTML += '<li><h2>' + key + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + '<textarea id="' + textAreaName + '" name="' + textAreaName + '" placeholder="Provide your comments here" style="height: 80px; width: 566px; resize: none;"></textarea>' + '</span></li>';
+      innerHTML += '<li><h2>' + key + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + '<textarea id="' + textAreaName + '" name="' + textAreaName + '" placeholder="Provide your comments here" style="height: 80px; width: 566px; resize: none;">' + comment + '</textarea>' + '</span></li>';
     }
     innerHTML += '</ul></div></form>';
 
@@ -6068,7 +8332,7 @@ function populateFeedbackForm()
 
 
 
-    feedbackForm.innerHTML = innerHTML + '<div class="a-button a-button-large" style="position: relative; margin-top: 20px; bottom: 0px; float: right; right: 20px; z-index: 51;" onclick="feedbackSubmit(this.parentNode.name,\'' + JSONKey + '\');"><span class="a-button-inner" style="padding-top: 15px;"><span class="a-button-text">Submit</span></span></div></form>';
+    feedbackForm.innerHTML = innerHTML + '<div class="a-button a-button-large" style="position: relative; height: 61px; margin-top: 20px; bottom: 0px; float: right; right: 20px; z-index: 51;" onclick="feedbackSubmit(this.parentNode.name,\'' + JSONKey + '\');"><span class="a-button-inner" style="padding-top: 24px;"><span class="a-button-text">Submit</span></span></div></form>';
   }
   else
   {
@@ -6168,7 +8432,7 @@ function rateSubmit(fID, inID)
           {
 	    //console.log("YES");
             //console.log(inID);
-            rateForm.innerHTML = '<div style="text-align: center;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
+            rateForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
             updateRating(inID, rating, comment);
           }
         }
@@ -6177,7 +8441,7 @@ function rateSubmit(fID, inID)
   else
   {
     //console.log('Submitting...');
-    rateForm.innerHTML = '<div style="text-align: center;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
+    rateForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
     updateRating(inID, rating, comment);
   }
   
@@ -6239,7 +8503,7 @@ function feedbackSubmit(fID, JSONKey)
 	    else
  	    {
               //console.log("Submitting...");
-              feedbackForm.innerHTML = '<div style="text-align: center;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
+              feedbackForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
               updateFeedback(ID, JSONKey, myFeedback);
 	    }
           },
@@ -6249,7 +8513,7 @@ function feedbackSubmit(fID, JSONKey)
   else
   {
     //console.log("Submitting...");
-    feedbackForm.innerHTML = '<div style="text-align: center;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
+    feedbackForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
     updateFeedback(ID, JSONKey, myFeedback);
   }
   
@@ -6288,7 +8552,7 @@ function makePayment(vendor)
   var itemStr = '';
   var idx = 1;
 
-  var returnUrl = "http://www.interviewring.com/index.php?return=ID=" + user[0].inID;
+  var returnUrl = "http://www.interviewring.com/index.php?return&ID=" + user[0].inID;
 
   var currentDate = new Date();
   var year = currentDate.getFullYear();
@@ -6505,6 +8769,10 @@ function updateRating(inID, myRating, myComment)
 
 }
 
+
+
+
+
 function updateFeedback(inID, JSONKey, myFeedback)
 {
   //console.log("updateFeedback");
@@ -6536,7 +8804,7 @@ function updateFeedback(inID, JSONKey, myFeedback)
   var myName = myFirst + ' ' + myLast;
 
   var sender = user[0].inID;
-  var msg = 'You got feedback from ' + myName + '<br>Click on Step3 View Results to see your feedback';
+  var msg = 'You got feedback from ' + myName + '<br>Click on the history icon in the upper right to see your feedback';
   var mailObj = productStore.getById(inID).data.mail ? Ext.JSON.decode(productStore.getById(inID).data.mail) : {};
   var msgs = mailObj.mail;
 
@@ -6551,8 +8819,96 @@ function updateFeedback(inID, JSONKey, myFeedback)
 
 
 
+  //console.log(JSONKey);
+  //console.log(myFeedback);
+
+  var showFeedbackURL = 'http://www.interviewring.com/?showFeedback&ID=' + user[0].inID + '&KEY=' + JSONKey;
+
+  var email = productStore.getById(inID).data.email;
+  //console.log(email);
+
+  var date = JSONKey.split(':')[1];
+  var synopsis = 'Overall Feedback:<br>' + myFeedback['overall feedback'].rating + '/5 stars<br>Comment: ' + myFeedback['overall feedback'].comment;
+  var userEmail = '<br>Appointment Synopsis for ' + date + '<br>' + synopsis;
+  //console.log(userEmail);
+
+  var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>Congratulations! You got feedback from your appointment with ' + myName + '</h1><h2>You can view this feedback at anytime by logging in to InterviewRing.com and clicking on the history icon in the upper right hand corner</h2><h2>OR</h2><h2>Clicking <a href="' + showFeedbackURL +'">this</a> link</h2></div><br><br><br><div><h3>Thank you for choosing InterviewRing.com<br>-The InterviewRing.com team</div>' + userEmail + '</h3></body></html>';
+
+  $.ajax({url:"./email.php", 
+    //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
+    data: {id: user[0].inID, name: first, email: email, subject: "InterviewRing.com user, " + myName + ", gave you feedback from your appointment", MsgHTML: userHTML, attachResume: '0'},
+    type:'post',
+    async:false
+  });
+
+
 
 }
+
+
+
+
+
+
+function pingSubmit(fID, inID, day)
+{
+  var comment = document.pingProviderForm.comment.value;
+
+  var first = productStore.getById(inID).data.first;
+  var last = productStore.getById(inID).data.last;
+  var name = first + ' ' + last;
+
+  var myFirst = productStore.getById(user[0].inID).data.first;
+  var myLast = productStore.getById(user[0].inID).data.last;
+  var myName = myFirst + ' ' + myLast;
+
+  var sender = user[0].inID;
+  var msg = 'You got a ping from ' + myName + '<br>Click on the history icon in the upper right to submit your feedback';
+  var mailObj = productStore.getById(inID).data.mail ? Ext.JSON.decode(productStore.getById(inID).data.mail) : {};
+  var msgs = mailObj.mail;
+
+
+  var size = Object.size(msgs);
+  var id = 'mail' + parseInt(parseInt(size,10)+0,10);
+  //console.log(id);
+  msgs[id] = '(ID=' + sender + ')' + msg;
+  //console.log(msgs[id]);
+  //console.log(inID);
+  saveMail(inID, true, msgs);
+
+
+
+  //console.log(JSONKey);
+  //console.log(myFeedback);
+
+
+
+  var email = productStore.getById(inID).data.email;
+  //console.log(email);
+
+
+  var userEmail = '<br>Appointment Synopsis:<br>' + myName + ' on ' + day + '<br>';
+  if(comment) {userEmail += 'Coment: ' + comment + '<br>';}
+
+  console.log(userEmail);
+
+  var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>You got a ping from ' + myName + '</h1><h2>You can submit feedback for ' + myFirst + ' at anytime by logging in to InterviewRing.com and clicking on the history icon in the upper right hand corner and finding their appointment in your history.</h2><h2>OR</h2><h2>Clicking <a href="http://www.interviewring.com?feedback&KEY=' + user[0].inID + ':' + day + '" target="_blank">this</a> link</h2></div><br><br><br><div><h3>Please try to be prompt in providing feedback to your customers.<br>-The InterviewRing.com team</div>' + userEmail + '</h3></body></html>';
+
+  $.ajax({url:"./email.php", 
+    //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
+    data: {id: user[0].inID, name: first, email: email, subject: "InterviewRing.com user, " + myName + ", pinged you about an appointment", MsgHTML: userHTML, attachResume: '0'},
+    type:'post',
+    async:false
+  });
+
+
+
+}
+
+
+
+
+
 
 
 
@@ -6576,57 +8932,11 @@ function shareRating(rating, checked)
 
 function showSettings()
 {
-  var parent = document.getElementById("headerClearfix");
-  if(! document.getElementById("showSettings"))
+  if(linkedINlogin)
   {
-    var window = document.createElement("div");
-    window.className = "show-settings gradient-gray";
-    window.id = "showSettings";
-
-    var close = document.createElement("div");
-    close.innerHTML = '<div class="close-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.parentNode.style.visibility=\'hidden\';"></div>';
-    close.style.position = "absolute";
-    close.style.zIndex = 100;
-    close.style.float = "right";
-    close.style.right = 0 + "px";
-    close.style.marginRight = 0 + "px";
-    close.style.padding = 4 + "px";
-    window.appendChild(close);
-
-    var content = document.createElement("div");
-    content.className = "showSettingsContent";
-    content.id = "showSettingsContent";
-    window.appendChild(content);
-
-    parent.appendChild(window);
-  }
-  else if(document.getElementById("showSettings").style.visibility != 'hidden')
-  {
-    Ext.get("showSettings").fadeOut({opacity: 0.0, easing: 'easeIn', duration: 1000});
-    //document.getElementById("showSettings").style.display = 'none';
-  }
-  else
-  {
-    Ext.get("showSettings").fadeIn({opacity: 1.0, easing: 'easeIn', duration: 100});
-    //document.getElementById("showSettings").style.display = 'block';
-  }
-
-  var role = productStore.getById(user[0].inID).data.role;
-  if(role == 'find')
-  {
-    document.getElementById("showSettingsContent").innerHTML = '';
-  }
-  else
-  {
-    document.getElementById("showSettingsContent").innerHTML = '';
-  }
-
-
-
-    document.getElementById("showSettingsContent").innerHTML = '<div style="padding:30px 4px 4px 4px;"><table class="x-window-default"><tr><td><img src="./images/identity.png"/></td><td><input type="checkbox" name="infoConfidential" onclick="updateConfidentiality(this.checked);">Keep my identity confidential</input></td></tr></table></div>';
-
+    document.getElementById("showSettingsContainer").style.display = '';
     setGroup("infoConfidential", settings[user[0].inID]['identity']);
-
+  }
 }
 
 
@@ -6647,12 +8957,46 @@ function doQuickLink(key, item)
 }
 
 
+
+
+
+
+
+
+
 function clearAllFilters()
 {
+  document.getElementById("searchFilterList").innerHTML = '[]';
   for(var key in filters)
   {
     var filterName = key + 'Filter';
     setGroup(filterName, false);
+  }
+
+  document.getElementById("historyFilterList").innerHTML = '[]';
+  for(var key in historyFilters)
+  {
+    var filterName = key + 'Filter';
+    setGroup(filterName, false);
+  }
+}
+
+function collapseAllFilters()
+{
+  for(var key in filters)
+  {
+    var el = document.getElementById(key);
+    var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+    el.style.display = 'none';
+    elImg.className = "expand-arrow";
+  }
+
+  for(var key in historyFilters)
+  {
+    var el = document.getElementById(key);
+    var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+    el.style.display = 'none';
+    elImg.className = "expand-arrow";
   }
 }
 
@@ -6668,7 +9012,145 @@ function collapseOtherFilters(filter)
       elImg.className = "expand-arrow";
     }
   }
+
+  for(var key in historyFilters)
+  {
+    if(key != filter)
+    {
+      var el = document.getElementById(key);
+      var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+      el.style.display = 'none';
+      elImg.className = "expand-arrow";
+    }
+  }
 }
+
+
+
+function addFilterTypeToList(type, elID)
+{
+  elID = elID || "searchFilterList";
+
+
+  var atLeastOneChecked = false;
+  var filtered = new Array();
+
+  var r = document.getElementsByName(type);
+  for (var i = 0; i < r.length; i++)
+  {
+    atLeastOneChecked |= r[i].checked;
+  }
+
+
+  type = type.replace('Filter','');
+  type = type.replace('<br>','');
+  type = type.replace('companyH','company');
+
+
+  var innerHTML = document.getElementById(elID).innerHTML;
+  //console.log("INNER: " + innerHTML);
+  innerHTML = innerHTML.replace(/[\[|\]\s*]/g,'');
+  var split = innerHTML ? innerHTML.split(',') : [];
+  
+  //console.log(Object.size(split));
+  //console.log(split.length);
+
+
+  var found = 0;
+  for(var i = 0; i < split.length; i++) {if(split[i] === type) found++;}
+  if(!found) {split.push(type);}
+
+  innerHTML = split.join(', ');
+
+
+  //[type, type, type]
+   var firstEl = new RegExp(type + ", ");
+   var middleEl = new RegExp(", " + type);
+   var onlyEl = new RegExp(type);
+   if(!atLeastOneChecked) {innerHTML = innerHTML.replace(firstEl,''); innerHTML = innerHTML.replace(middleEl,''); innerHTML = innerHTML.replace(onlyEl,'');}
+
+  document.getElementById(elID).innerHTML = '[' + innerHTML + ']';
+}
+
+
+
+
+function pruneFilters()
+{
+
+  for(var key in filters)
+  {
+    var filterName = key + 'Filter';
+    var filterValues = new Array();
+    var el = document.getElementById(key);
+    //console.log("INNER: " + el.innerHTML);
+    var innerHTML = '';
+    //console.log(obj);
+    for(var j = 0; j < initStr.length; j++)
+    {
+      var ID = initStr[j].id;
+      var values = {};
+
+      //console.log("--KEY: " + key);
+      if(key == 'services' || key == 'price')
+      {
+        if(productStore.getById(ID)) {values = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
+      }        
+      else
+      {
+        values[productStore.getById(ID).data[key]] = true;
+      }
+      for(value in values)
+      {
+      
+        var currValue;
+	if(key == 'price')
+        {
+	  currValue = values[value].price;
+
+	  var items = filters[key];
+          var range = items[items.length-1];
+	  for(var i = 0; i < items.length; i++)
+	  {
+	    var item = items[i];
+            //console.log(item);
+	    item = item.replace('/hr','');
+	    item = item.replace(/\$/g,'');
+            item = item.replace('FREE', '0');
+            item = item.replace('+', '-999999');
+	    var split = item.split('-');
+	    var priceLO = parseFloat(split[0]);
+            var priceHI = parseFloat(split[1],10) || parseFloat('0');
+            //console.log(LO + "->" + " LO: " + priceLO + " HI: " + priceHI);
+            if(parseFloat(currValue) >= priceLO && parseFloat(currValue) <= priceHI) {range = items[i];}
+	  }
+          currValue = range;
+
+	}
+        else {currValue = value;}
+        //console.log("KEY: " + key + " VALUE: " + currValue);
+
+        var found = 0;
+        for(var i = 0; i < filterValues.length; i++) {if(filterValues[i] === currValue) found++;}
+        if(!found) {filterValues.push(currValue);}
+      }
+    }
+    for(var i = 0; i < filterValues.length; i++)
+    {
+      //console.log(key + obj[key]);
+      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + filterValues[i] + '" onclick="doSearch();"/>' +  filterValues[i] + '<br>';
+    }
+    //console.log(initStr.length);
+    //console.log(innerHTML);
+    if(!innerHTML) {innerHTML = 'No Results';}
+    el.innerHTML = innerHTML;
+    //console.log(el.innerHTML);
+  }
+}
+
+
+
+
 
 
 function populateFilters()
@@ -6685,16 +9167,30 @@ function populateFilters()
     for(var key in obj)
     {
       //console.log(key + obj[key]);
-      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch();"/>' + obj[key] + '<br>';
+      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch(); addFilterTypeToList(this.name, \'' + "searchFilterList" + '\');"/>' + obj[key] + '<br>';
     }
     el.innerHTML = innerHTML;
   }
 
-
-
-
-
+  for(var key in historyFilters)
+  {
+    var obj = historyFilters[key];
+    var filterName = key + 'Filter';
+    var el = document.getElementById(key);
+    //console.log("INNER: " + el.innerHTML);
+    var innerHTML = '';
+    //console.log(obj);
+    if(!obj) {continue;}
+    for(var key in obj)
+    {
+      //console.log(key + obj[key]);
+      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
+    }
+    el.innerHTML = innerHTML;
+  }
 }
+
+
 
 
 function showFilter(filter)
@@ -6717,7 +9213,7 @@ function showFilter(filter)
       for(var key in obj)
       {
         //console.log("FILTER: " + filter + "KEY:" + key + "=" + obj[key]);
-        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch();"/>' + obj[key] + '<br>';
+        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doSearch(); addFilterTypeToList(this.name, \'' + "searchFilterList" + '\');"/>' + obj[key] + '<br>';
     
       }
       el.innerHTML = innerHTML;
@@ -6730,6 +9226,43 @@ function showFilter(filter)
     elImg.className = "expand-arrow";
   }
 }
+
+
+
+function showHistoryFilter(filter)
+{
+  var obj = historyFilters[filter];
+  var filterName = filter + 'Filter';
+  var el = document.getElementById(filter);
+  var elImg = el.parentNode.firstChild.nextSibling.firstChild.nextSibling;
+  collapseOtherFilters(filter);
+  //console.log(elImg.className);
+  //console.log(el.style.zIndex);
+  if(!el.style.display || el.style.display == 'none')
+  {
+    elImg.className = "implode-arrow";
+    //console.log(">"+el.innerHTML+"<");
+    if(!el.innerHTML && obj)
+    {
+      var innerHTML = '';
+      //console.log("OBJ: " + obj);
+      for(var key in obj)
+      {
+        //console.log("FILTER: " + filter + "KEY:" + key + "=" + obj[key]);
+        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
+    
+      }
+      el.innerHTML = innerHTML;
+    }
+    el.style.display = 'block';
+  }
+  else
+  {
+    el.style.display = 'none';
+    elImg.className = "expand-arrow";
+  }
+}
+
 
 
 
@@ -6815,11 +9348,13 @@ function applyFilters()
       var found = false;
       var currValue = (key != 'services') ? value : 'services';
       //console.log("CURRVALUE: " + currValue);
+
       if(key == 'services')
       {
         var services;
         if(productStore.getById(ID)) {services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};}
-
+        if(!Object.size(services)) {found = true;}
+        
         for (var service in services)
         {
           //console.log("REGEX: " + regExp + " KEY: " + key);
@@ -6833,9 +9368,7 @@ function applyFilters()
 	  }
         }
 	checkedFilters[key][currValue] = found;
-      }
-
-
+      }//if(key == 'services')
 
       //console.log("--VALUE: " + currValue);
       if(typeof checkedFilters[key][currValue] !== "undefined")
@@ -6857,6 +9390,135 @@ function applyFilters()
   initStr = filtered;
 }
 
+
+
+
+
+
+
+
+function startRead() {  
+
+  var re = /(?:\.([^.]+))?$/;
+
+  // obtain input element through DOM 
+  var filename = document.getElementById('uploadFile').files[0].name;
+  var extension = re.exec(filename)[1]; 
+  //console.log(extension);
+  //console.log(document.getElementById('uploadFile').files[0].type);
+  //console.log(document.getElementById('uploadFile').files[0].size);
+  var file = document.getElementById('uploadFile').files[0];
+  if(file){
+    document.getElementById("uploadButtonText").style.fontSize = 12 + "px";
+    document.getElementById("uploadButtonText").style.paddingTop = 24 + "px";
+    //getAsText(file, filename);
+    getAsDataURL(file, filename);
+  }
+}
+
+function getAsText(readFile, filename) {
+        
+  var reader = new FileReader();
+  
+  // Read file into memory as UTF-16      
+  //reader.readAsText(readFile, "UTF-16");
+  reader.readAsText(readFile);
+
+  document.getElementById("uploadButtonText").innerHTML = 'Loading ' + filename;
+
+  
+  // Handle progress, success, and errors
+  reader.onprogress = updateProgress;
+  reader.onload = loaded(filename);
+  reader.onerror = errorHandler;
+}
+
+//base64_decode(file) before storing it.
+//At the server, you must split the base64 string by "," and store only the second part - so mime type will not get stored with actual file content.
+function getAsDataURL(readFile, filename)
+{
+  var reader = new FileReader();
+  
+  // Read file into memory as UTF-16      
+  //reader.readAsText(readFile, "UTF-16");
+  reader.readAsDataURL(readFile);
+
+  document.getElementById("uploadButtonText").innerHTML = 'Loading ' + filename; 
+
+  
+  // Handle progress, success, and errors
+  reader.onprogress = updateProgress;
+  reader.onload = loaded;
+  reader.onerror = errorHandler;
+}
+
+
+
+function updateProgress(evt) {
+  if (evt.lengthComputable) {
+    // evt.loaded and evt.total are ProgressEvent properties
+    var loaded = (evt.loaded / evt.total);
+    //console.log(loaded);
+    if (loaded < 1) {
+      // Increase the prog bar length
+      // style.width = (loaded * 200) + "px";
+      document.getElementById("uploadButtonText").innerHTML = 'Loading... (' + loaded * 100 + '%)'; 
+      //console.log('Loading... (' + loaded * 100 + ')');
+    }
+  }
+}
+
+function loaded(evt) {  
+  // Obtain the read file data    
+  var fileString = evt.target.result;
+  // Handle UTF-16 file dump
+  var filename = document.getElementById('uploadFile').files[0].name;
+
+  //console.log(filename);
+  //console.log(fileString);
+  //console.log(user[0].inID);
+
+  $.ajax({url:"./saveResume.php", 
+       data: {id: user[0].inID, resume: fileString },
+       type:'post',
+       async:false
+  });
+
+
+
+  document.getElementById("uploadButtonText").style.fontSize = 21 + "px";
+  document.getElementById("uploadButtonText").style.paddingTop = 22 + "px";
+  document.getElementById("uploadButtonText").innerHTML = 'Complete'; 
+
+}
+
+function errorHandler(evt) {
+  if(evt.target.error.name == "NotReadableError") {
+    // The file could not be read
+    document.getElementById("uploadButtonText").style.fontSize = 21 + "px";
+    document.getElementById("uploadButtonText").style.paddingTop = 22 + "px";
+    document.getElementById("uploadButtonText").innerHTML = 'Error'; 
+  }
+}
+
+
+
+
+
+
+
+
+
+decodeBase64 = function(s) {
+    var e={},i,b=0,c,x,l=0,a,r='',w=String.fromCharCode,L=s.length;
+    var A="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for(i=0;i<64;i++){e[A.charAt(i)]=i;}
+    for(x=0;x<L;x++){
+        c=e[s.charAt(x)];b=(b<<6)+c;l+=6;
+        while(l>=8){((a=(b>>>(l-=8))&0xff)||(x<(L-2)))&&(r+=w(a));}
+    }
+    return r;
+};
 
 
 
@@ -6897,6 +9559,7 @@ Object.size = function(obj)
 
     return size;
 };
+
 
 
 if (!Object.keys)

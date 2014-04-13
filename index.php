@@ -116,8 +116,8 @@ session_start();
 
 
       <div class="login" onmouseover='this.style.cursor="pointer"; showSettings(); document.getElementById("dropdown").className = "dropdown-dn";' onmouseout='document.getElementById("showSettingsContainer").style.display = "none"; document.getElementById("dropdown").className = "dropdown-up";'>
-        <div id="login" style="position: relative; float:left;"><div onclick="IN.User.authorize(); return true;">login</div></div>
-        <div style="position: relative; float:left; margin-left: 6px;">
+        <div id="login" style="position: relative; float:left;"><div onclick="IN.User.authorize(); return true;">Sign In</div></div>
+        <div style="position: relative; float:left; margin-left: 6px;margin-top:2px">
           <div id="dropdown" class="dropdown-up" onmouseover='this.style.cursor="pointer"; this.className="dropdown-dn";' onmouseout='this.className="dropdown-up";'></div>
         </div>
         <div id="showSettingsContainer" style="display:none;">

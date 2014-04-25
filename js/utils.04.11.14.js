@@ -4,9 +4,7 @@ var formItems = {"communication skills":"","technical knowledge":"","seniority l
 
 var filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['In-person Interview','Remote Interview','Interview Mentoring','Resume Review'], "price":['FREE', '$0.01-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-249/hr', '$250+/hr']};
 
-var historyFilters = {"status":['Scheduled','Waiting Feedback','Completed'], "date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago'], "companyH":""};
-
-var historyType = '';
+var historyFilters = {"status":['Completed','Scheduled','Waiting Feedback'], "date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago'], "companyH":""};
 
 linkedINlogin = false;
 
@@ -327,8 +325,7 @@ Ext.override(Ext.getCmp('myCal'), {
     {
       countdown = setTimeout('waitLoading6()', 500);
     }
-    //else {populateRateForm();}
-    else {historyType = 'interviewee'; window.showProfile(); pingProvider();}
+    else {populateRateForm();}
   }
 
   function waitLoading7()
@@ -337,14 +334,7 @@ Ext.override(Ext.getCmp('myCal'), {
     {
       countdown = setTimeout('waitLoading7()', 500);
     }
-    //else {populateFeedbackForm();}
-    else
-    {
-      historyType = 'interviewer';
-      window.showProfile();
-      //historyClicked('{}', JSONKey, ID, false);
-      doFeedback();
-    }
+    else {populateFeedbackForm();}
   }
 
   function waitLoading8()
@@ -354,7 +344,7 @@ Ext.override(Ext.getCmp('myCal'), {
       //console.log("user[0]: " + user[0] + " user[0].inID: " + user[0].inID + " productStore.getById(user[0].inID): " + productStore.getById(user[0].inID) + " usersLoaded: " + usersLoaded + " linkedinLoaded: " + linkedinLoaded + " linkedINlogin: " + linkedINlogin);
       countdown = setTimeout('waitLoading8()', 500);
     }
-    else {loadMail(); populateSideBarMenu();}
+    else {loadMail();}
   }
 
   function waitLoading9()
@@ -398,29 +388,12 @@ Ext.override(Ext.getCmp('myCal'), {
         //console.log(JSONKey);
       }
 
-      var split = JSONKey.split(/\:/);
-      var myID = split[0];
-      var day = split[1];
-      
-      //console.log(myID + '==' + user[0].inID);
       if(feedback[JSONKey])
       {
         historyClicked(JSONStr,JSONKey,ID,false);
       }
     }
   }
-
-
-  function waitLoading12()
-  {
-    if(!user[0] || !productStore.getById(user[0].inID) || !usersLoaded || !linkedinLoaded || !linkedINlogin)
-    {
-      countdown = setTimeout('waitLoading12()', 500);
-    }
-    else {loadCartAtStartup();}
-  }
-
-
 
 
 var inProfile;
@@ -1213,7 +1186,6 @@ else if(addr == 'rate')
   var key;
   var item;
 
-  var JSONKey;
   var ID;
 
   for(var i = 0; i < tag.length; i++)
@@ -1221,24 +1193,19 @@ else if(addr == 'rate')
     if(!tag[i]) {continue;}
     key = decodeURI(tag[i].split("=")[0]);
     item = decodeURI(tag[i].split("=")[1]);
-    if(key == 'KEY') {JSONKey = item;}
-    else if(key == 'ID') {ID = item;}
+    if(key == 'ID') {ID = item;}
   }
   rateReturn = true;
-  returnParameters.KEY = JSONKey;
   returnParameters.ID = ID;
 
-  //window.showRateMe();
-  waitLoading6();
+  window.showRateMe();
 }
-
 else if(addr == 'feedback')
 {
   var key;
   var item;
 
   var JSONKey;
-  var ID;
 
   for(var i = 0; i < tag.length; i++)
   {
@@ -1247,16 +1214,12 @@ else if(addr == 'feedback')
     item = decodeURI(tag[i].split("=")[1]);
 
     if(key == 'KEY') {JSONKey = item;}
-    else if(key == 'ID') {ID = item;}
   }
   feedbackReturn = true;
   returnParameters.KEY = JSONKey;
-  returnParameters.ID = ID;
 
-  //window.showFeedbackForm();
-  waitLoading7();
+  window.showFeedbackForm();
 }
-
 else if(addr == 'showFeedback')
 {
   var key;
@@ -1804,9 +1767,6 @@ function sortfunction(a, b)
       var numFeedbacks = Object.size(feedbackObj);
       var interviewsStr = '<div style="position: absolute; top: 6px; width: 200px; color: #555;">Interviews: ' + numFeedbacks + '</div>';
 
-      var charityCoins = productStore.getById(ID).data.coins ? Ext.JSON.decode(productStore.getById(ID).data.coins || 0) : 0;
-      var charityCoinStr = '<div style="position: absolute; top: 30px; width: 200px; color: #555;"><img style="float:left; position: absolute; top:4px;" src="./images/coins.png"/><span style="position:absolute; top: -12px; left: -2px;">Charity Coins</span><span style="position:absolute; top:28px; left: 0px; width: 36px; text-align: center; border: 0px solid #00ff00;">' + charityCoins + '</span></div>';
-
 
       // --Rating--
       var ratingStr = '';
@@ -1945,39 +1905,26 @@ function sortfunction(a, b)
     itemImage.style.background = 'url(' + image + ') no-repeat center center';
     //itemImage.style.background = 'url(' + image + ') no-repeat';
     window.appendChild(itemImage);
-
-
-    var itemInfoWrapper = document.createElement("div");
-    itemInfoWrapper.id = "itemInfoWrapper" + index;
-    itemInfoWrapper.style.height = 110 + 'px';
-    //itemInfoWrapper.style.height = 60 + 'px';
-    itemInfoWrapper.style.overflow = 'hidden';
-    itemInfoWrapper.style.marginTop = -18 + "px";
-    //itemInfoWrapper.style.border = "1px solid #00ff00";
     
     var itemName = document.createElement("div");
     itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
-    itemInfoWrapper.appendChild(itemName);
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
 
     var itemPosition = document.createElement("div");
     //itemPosition.style.textAlign = "left";
     itemPosition.innerHTML = position;
-    itemInfoWrapper.appendChild(itemPosition);
+    window.appendChild(itemPosition);
 
     var itemCompany = document.createElement("div");
     //itemCompany.style.textAlign = "left";
     itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
-    itemInfoWrapper.appendChild(itemCompany);
+    window.appendChild(itemCompany);
 
     var itemEducation = document.createElement("div");
     //itemEducation.style.textAlign = "left";
     itemEducation.innerHTML = education;
-    itemInfoWrapper.appendChild(itemEducation);
-
-
-    window.appendChild(itemInfoWrapper);
-
-
+    window.appendChild(itemEducation);
 
     var itemLink = document.createElement("div");
     itemLink.innerHTML = link;
@@ -1987,11 +1934,6 @@ function sortfunction(a, b)
     numInterviews.innerHTML = interviewsStr;
     numInterviews.style.textAlign = 'left';
     window.appendChild(numInterviews);
-
-    var numCharityCoins = document.createElement("div");
-    numCharityCoins.innerHTML = charityCoinStr;
-    numCharityCoins.style.textAlign = 'left';
-    window.appendChild(numCharityCoins);
 
     var itemRating = document.createElement("div");
     itemRating.innerHTML = ratingStr;
@@ -2004,47 +1946,13 @@ function sortfunction(a, b)
     document.getElementById("searchItems").appendChild(window);
 
 
-    var childID = "full_itemInfoWrapper" + index;
-    var popup = document.createElement("div");
-    popup.className = "darkBlue";
-    popup.onmouseout=function() { document.getElementById(this.id).style.display = 'none'; }; 
-    popup.style.position = 'absolute';
-    popup.style.top = 96 + 'px';
-    popup.style.width = 200 + 'px';
-    popup.style.height = 206 + 'px';
-    popup.style.display = 'none';
-    popup.id = childID;
-    popup.innerHTML = itemInfoWrapper.innerHTML;
-    window.appendChild(popup);
+
+
 
 
 
 
     }
-
-
-
-
-    for(var index = 0; index < initStr.length; index++)
-    {
-      var overallHeight = document.getElementById("itemInfoWrapper" + index).offsetHeight
-      //console.log(overallHeight);
-      var otherSiblingHeights = getHeightsOfPreviousSiblings("itemInfoWrapper" + index);
-      //console.log(otherSiblingHeights);
-      var remainingHeight = overallHeight - otherSiblingHeights;
-      //console.log(remainingHeight);
-      document.getElementById("itemInfoWrapper" + index).lastChild.style.height = remainingHeight + 'px';
-      if(document.getElementById("itemInfoWrapper" + index).lastChild.scrollHeight > remainingHeight)
-      {
-        document.getElementById("itemInfoWrapper" + index).onmouseover=function() { event = event || window.event; event.stopPropagation(); event.cancelBubble = true; document.getElementById("full_" + this.id).style.display= ''; }; 
-        //document.getElementById("full_itemInfoWrapper" + index).onmouseout=function() { document.getElementById(this.id).style.display = 'none'; }; 
-	//console.log(document.getElementById("itemInfoWrapper" + index).lastChild.innerHTML);
-	//console.log(document.getElementById("itemInfoWrapper" + index).lastChild.id);
-        //ellipsizeTextBox("itemInfoWrapper" + index);
-        ellipsizeTextBoxToHeightByElement(document.getElementById("itemInfoWrapper" + index).lastChild)
-      }
-    }
-
 
 
 
@@ -2122,30 +2030,6 @@ function sortfunction(a, b)
     }
 
   }
-
-
-
-
-
-function getHeightsOfPreviousSiblings(id)
-{
-  var cummHeight = 0;
-  x=document.getElementById(id).lastChild;
-  //console.log(x.innerHTML);
-  x=x.previousSibling;
-  while (x)
-  {
-    //console.log(x);
-    //console.log("NODE TYPE: " + x.nodeType);
-    if(x.nodeType==1)
-    {
-      //console.log(x.offsetHeight);
-      cummHeight += x.offsetHeight;
-    }
-    x=x.previousSibling;
-  }
-  return cummHeight;
-}
 
 
 function sortFilters(a, b)
@@ -2580,8 +2464,6 @@ window.addAppointment = function()
   loadInfoFromLinkedIn();
 
   waitLoading9();
-  //Load Cart Items if any
-  waitLoading12();
 
   windowResize();
 
@@ -2636,31 +2518,6 @@ String.prototype.isPrintable=function()
 }
 
 
-
-function ellipsizeTextBoxToHeightByElement(el)
-{
-  //console.log("ID: " + id);
-  //var el = document.getElementById(id);
-  var keep = el.innerHTML;
-  //console.log(keep);
-  //return;
-  //i = 1000;
-  //console.log(el.scrollHeight + ' > ' + el.offsetHeight);
-  while(el.scrollHeight > el.offsetHeight)
-  {
-    el.innerHTML = keep;
-    el.innerHTML = el.innerHTML.substring(0, el.innerHTML.length-1);
-    keep = el.innerHTML;
-    el.innerHTML = el.innerHTML + "... [MORE]";
-    //console.log(el.scrollHeight + ' > ' + el.offsetHeight);
-    //i--;
-  }
-  //console.log(el.innerHTML);   
-}
-
-
-
-
 function ellipsizeTextBox(id)
 {
   //console.log("ID: " + id);
@@ -2673,7 +2530,7 @@ function ellipsizeTextBox(id)
     el.innerHTML = keep;
     el.innerHTML = el.innerHTML.substring(0, el.innerHTML.length-1);
     keep = el.innerHTML;
-    el.innerHTML = el.innerHTML + "... [MORE]";
+    el.innerHTML = el.innerHTML + "...";
     //console.log(el.scrollHeight + ' > ' + el.offsetHeight);
   }
   //console.log(el.innerHTML);   
@@ -2943,153 +2800,6 @@ function renumberMailBoxes(id)
     }
   }
 }
-
-
-
-
-
-
-
-
-
-function populateSideBarMenu ()
-{
-  var sideBarMenu = document.getElementById("sideBarMenu");
-  if(!sideBarMenu.innerHTML)
-  {
-    var sbInterviewer = document.createElement("div");
-    sbInterviewer.id = "sbInterviewer";
-    sbInterviewer.className = "qlHeader";
-    sbInterviewer.innerHTML = "<h3>INTERVIEWER PROFILE</h3>";
-
-    var sbInterviewee = document.createElement("div");
-    sbInterviewee.id = "sbInterviewee";
-    sbInterviewee.className = "qlHeader";
-    sbInterviewee.innerHTML = "<h3>INTERVIEWEE PROFILE</h3>";
-
-    var sbInterviewerTools = document.createElement("div");
-    sbInterviewerTools.id = "sbInterviewerTools";
-    sbInterviewerTools.className = "qlHeader";
-    sbInterviewerTools.innerHTML = "<h3>INTERVIEWER TOOLS</h3>";
-
-    var sbInterviewerInfo = document.createElement("div");
-    sbInterviewerInfo.id = "sbInterviewerInfo";
-    sbInterviewerInfo.className = "qlHeader";
-    sbInterviewerInfo.innerHTML = "<h3>INTERVIEWER INFO</h3>";
-
-
-    // ----INTERVIEWEE----
-    if(productStore.getById(user[0].inID).data.role == 'find' || productStore.getById(user[0].inID).data.role == 'both')
-    {
-      sideBarMenu.appendChild(sbInterviewee);
-
-      var statusObj = getHistoryStatuses();
-
-      var elID = 'sbInterviewee'; 
-      //console.log(elID);
-      var el = document.getElementById(elID);
-      var innerHTML = '<div class="qlSection">';
-      //var sorted_keys = Object.keys(filters.services).sort(window.sortFilters);
-      for(var i = 0; i < historyFilters.status.length; i++)
-      {
-        var item = historyFilters.status[i];
-        var key = 'status';
-	//console.log(item);
-        innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doHistoryQuickLink(\'' + key + '\',\'' + item + '\',\'interviewee\'); addFilterTypeToList(\'' + key + "Filter" + '\', \'' + "historyFilterList" + '\');">' + '  ' + item + ' (' + statusObj[item] + ')</span><br>';
-      }
-      el.innerHTML += innerHTML + '</div>';
-    }
-
-
-    // ----INTERVIEWER----
-    if(productStore.getById(user[0].inID).data.role == 'give' || productStore.getById(user[0].inID).data.role == 'both')
-    {
-      sideBarMenu.appendChild(sbInterviewer);
-
-      var statusObj = getProviderHistoryStatuses();
-
-      var elID = 'sbInterviewer'; 
-      //console.log(elID);
-      var el = document.getElementById(elID);
-      var innerHTML = '<div class="qlSection">';
-      //var sorted_keys = Object.keys(filters.services).sort(window.sortFilters);
-      for(var i = 0; i < historyFilters.status.length; i++)
-      {
-        var item = historyFilters.status[i];
-        var key = 'status';
-	//console.log(item);
-        innerHTML += '<span onmouseover="this.style.cursor=\'pointer\';" onclick="doHistoryQuickLink(\'' + key + '\',\'' + item + '\',\'interviewer\'); addFilterTypeToList(\'' + key + "Filter" + '\', \'' + "historyFilterList" + '\');">' + '  ' + item + ' (' + statusObj[item] + ')</span><br>';
-      }
-      el.innerHTML += innerHTML + '</div>';
-
-      //INFO
-      sideBarMenu.appendChild(sbInterviewerInfo);
-      var elID = 'sbInterviewerInfo'; 
-      //console.log(elID);
-      var el = document.getElementById(elID);
-      var charityCoins = productStore.getById(user[0].inID).data.coins ? Ext.JSON.decode(productStore.getById(user[0].inID).data.coins || 0) : 0;
-      var charityCoinStr = '<div style="position: relative; color: #555;" title="Services performed for free earn you Charity Coins"><span>Charity Coins</span><img src="./images/coins.png"/><span style="position: absolute; top: 40px; left: 1px; width: 36px; text-align: center; border: 0px solid #00ff00;">' + charityCoins + '</span></div>';
-
-
-      var innerHTML = '<div class="qlSection" style="max-height: 220px;">';
-
-      innerHTML += charityCoinStr + '<br>';
-
-      innerHTML += '<input type="checkbox" name="sbInfoConfidential" style="color: #000000;" onclick="updateConfidentiality(this.checked);">Anonymous</input><br><br>';
-
-      innerHTML += '<div class="a-button a-button-medium" style="z-index: 1000; height: 35px;" onclick="showSelectServices();"><span class="a-button-inner a-button-text" style="padding-top: 12px; font-size: 11px; line-height: 11px;">Create/Edit Service</span></div><br>';
-
-      var invitations = 20;
-      innerHTML += '<div class="a-button a-button-medium" style="z-index: 1000; height: 35px; margin-top: 10px;" onclick="inviteOthers();"><span class="a-button-inner a-button-text" style="padding-top: 12px; font-size: 11px; line-height: 11px;">Send Invite (' + invitations + ' left)</span></div>';
-
-
-
-
-      //<div class="a-button a-button-medium" style="height: 35px;" onclick="showSelectServices();"><span class="a-button-inner" style="padding-top: 10px;"><span class="a-button-text" style="margin-left: 0px; padding-top: 0px; font-size: 11px; line-height: 21px;">Create/Edit Service</span></span></div>';
-
-      el.innerHTML += innerHTML + '</div>';
-
-      if(user[0].inID)
-      {
-        if(settings[user[0].inID])
-        {
-          setGroup("sbInfoConfidential", settings[user[0].inID]['identity']);
-        }
-      }
-
-
-
-
-      //TOOLS
-      sideBarMenu.appendChild(sbInterviewerTools);
-      var elID = 'sbInterviewerTools'; 
-      //console.log(elID);
-      var el = document.getElementById(elID);
-      var innerHTML = '<div class="qlSection">';
-      innerHTML += '<a style="color: #555;" href="http://www.circuitmirror.com" target="_blank">Analog Schematic Drawing</a><br><a style="color: #555;" href="http://www.circuitmirror.com/whiteboard" target="_blank">Whiteboard</a>';
-      el.innerHTML += innerHTML + '</div>';
-    }
-
-
-
-
-
-
-
-
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3424,11 +3134,6 @@ function serviceClicked(el, getPrice, price)
         {
           if( btn == 'ok')
           {
-            if(isNaN(Ext.get('servicePriceText').getValue()))
-	    {
-              var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'You must enter a valid number' + '</span>' + '<br><br>' + cfg.msg;
-              Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
-	    }
             var price = currencyFormatted(Math.abs(Ext.get('servicePriceText').getValue()));
             //console.log(price);
             if(!services[decodeURI(file)]) {services[decodeURI(file)] = {};}
@@ -3538,18 +3243,22 @@ function convertTimeTo12(time)
 }
 
 
-function localizeTime(inID, time, thisDayIndex, thisMonthIndex, thisYear)
+function localizeTime(inID, time)
 {
   //console.log("LOCALIZETIME: " + time);
 
   var tzPRV = productStore.getById(inID).data.tzName;
   var tzUSR = productStore.getById(user[0].inID).data.tzName;
 
-  var day = parseInt(thisDayIndex,10);
-  var month = parseInt(thisMonthIndex-1,10);
+  //console.log(tzPRV);
+  //console.log(tzUSR);
+
+  var day = parseInt(dayIndex,10);
+  var month = parseInt(monthIndex-1,10);
   day = pad(day, 2);
   month = pad(month, 2);
-  var year = thisYear;
+  //console.log(year);
+  //var year = parseInt(year);
 
   var timeStr = Number(time.match(/^(\d+)/)[1]) + ':00' + ' ' + time.match(/([ap]m)/);
   timeStr = timeStr.replace(/\,[ap]m$/,'');
@@ -3560,14 +3269,100 @@ function localizeTime(inID, time, thisDayIndex, thisMonthIndex, thisYear)
   
   //console.log(year + ' ' + month + ' ' + day + ' ' + hour + ' ' + minute);
 
-  var dtPRV = new timezoneJS.Date(year, month, day, hour, minute, tzPRV);
-  var utcPRV = dtPRV.getTime();
-  var dtUSR = new timezoneJS.Date(utcPRV, tzUSR);  //PRV hour directly converted to USR hour
 
-  var localHour = pad(parseInt(dtUSR.getHours(),10),2);
-  var localMinutes = pad(parseInt(dtUSR.getMinutes(),10),2);
+
+
+
+
+  var dtA = new timezoneJS.Date(year, month, day, hour, minute, tzPRV);
+  var dtB = new timezoneJS.Date(year, month, day, hour, minute, tzUSR);
+  var dtC = new timezoneJS.Date(year, month, day, hour, minute, 'Etc/GMT');
+
+  var offsetPRV = dtA.getTimezoneOffset();
+  var offsetUSR = dtB.getTimezoneOffset();
+  var offsetUTC = dtC.getTimezoneOffset();
+  console.log("OFFSETPRV: " + offsetPRV);
+  console.log("OFFSETUSR: " + offsetUSR);
+  console.log("OFFSETUTC: " + offsetUTC);
+
+  var localHour = pad(parseInt(dtC.getHours(),10),2);
+  var localMinutes = pad(parseInt(dtC.getMinutes(),10),2);
   var localTimeStr = localHour + ':' + localMinutes;
-  //console.log(localTimeStr);
+  console.log(localTimeStr);
+
+
+
+
+  var utcA = dtA.getTime();
+  var utcB = dtB.getTime();
+  var utcC = dtC.getTime();
+
+  //console.log(utcA);
+  //console.log(utcB);
+  //console.log(utcC);
+  
+  // create new Date object for different city
+  // using supplied offset
+  var ndA = new timezoneJS.Date(utcA, 'Etc/GMT');  //PRV hour in UTC
+  var ndB = new timezoneJS.Date(utcB, 'Etc/GMT');  //USR hour in UTC
+  var ndC = new timezoneJS.Date(utcC, 'Etc/GMT');
+  
+  var offsetPRV = ndA.getTimezoneOffset();
+  var offsetUSR = ndB.getTimezoneOffset();
+  var offsetUTC = ndC.getTimezoneOffset();
+  console.log("OFFSETPRV: " + offsetPRV);
+  console.log("OFFSETUSR: " + offsetUSR);
+  console.log("OFFSETUTC: " + offsetUTC);
+
+  var localHour = pad(parseInt(ndA.getHours(),10),2);
+  var localMinutes = pad(parseInt(ndA.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log(localTimeStr);
+  var localHour = pad(parseInt(ndB.getHours(),10),2);
+  var localMinutes = pad(parseInt(ndB.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log(localTimeStr);
+  var localHour = pad(parseInt(ndC.getHours(),10),2);
+  var localMinutes = pad(parseInt(ndC.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log(localTimeStr);
+
+
+  var utcB = ndA.getTime();
+  var ndB = new timezoneJS.Date(utcB, tzUSR);  //PRV hour in UTC converted to USR hour
+  var localHour = pad(parseInt(ndB.getHours(),10),2);
+  var localMinutes = pad(parseInt(ndB.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log("USR: " + localTimeStr);
+
+  var ndB = new timezoneJS.Date(utcA, tzUSR);  //PRV hour directly converted to USR hour
+  var localHour = pad(parseInt(ndB.getHours(),10),2);
+  var localMinutes = pad(parseInt(ndB.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log("USR: " + localTimeStr);
+
+
+  // return time as a string
+  //console.log("The PRV time is " + ndA.toLocaleString());
+  
+  // return time as a string
+  //console.log("The USR time is " + ndB.toLocaleString());
+
+
+  //console.log(ndA.getHours() + ':' + ndA.getMinutes());
+  //console.log(ndB.getHours() + ':' + ndB.getMinutes());
+
+  var localHour = pad(parseInt(dtC.getHours(),10),2);
+  var localMinutes = pad(parseInt(dtC.getMinutes(),10),2);
+  var localTimeStr = localHour + ':' + localMinutes;
+  console.log(localTimeStr);
+  //console.log(localHour + ':' + localMinutes);
+
+  //console.log(offsetPRV + ' ' + offsetUSR);
+
+  // Same timestamp
+  //dtA.getTime(); //=> 1193855400000
+  //dtB.getTime(); //=> 1193855400000
 
   var timeObj = convertTimeTo12(localTimeStr);
   var hour = timeObj.hour;
@@ -3575,7 +3370,7 @@ function localizeTime(inID, time, thisDayIndex, thisMonthIndex, thisYear)
   var ampm = timeObj.ampm;
   localTimeStr = hour + ':' + minute + ampm;
   //console.log(hour + ':' + minute + ampm);
-  return {dateObj: dtUSR, localTimeStr: localTimeStr};
+  return {dateObj: dtC, localTimeStr: localTimeStr};
 }
 
 
@@ -3587,7 +3382,7 @@ function localizeApptScheduler(inID)
   for (var i = 1, row; row = table.rows[i]; i++)
   {
 
-    var localTimeObj = localizeTime(inID, row.cells[0].innerHTML, dayIndex, monthIndex, year);
+    var localTimeObj = localizeTime(inID, row.cells[0].innerHTML);
     var localTime = localTimeObj.localTimeStr;
     row.cells[0].innerHTML = localTime;
 
@@ -3636,75 +3431,6 @@ function unlocalizeApptScheduler()
     */
   }
 }
-
-
-
-
-
-
-
-function localizeSch(sch, inID, thisDayIndex, thisMonthIndex, thisYear)
-{
-  var isAPPT = true;
-  var isAVAIL = false;
-  var returnStr = "";
-  var dateStr = "";
-
-  //console.log(inID);
-  var split = sch.split('<br>');
-  for(var i = 0; i < split.length-1; i++)
-  {
-    var matchRE = new RegExp("APPT", "i");
-    var appt = split[i].match(matchRE);
-    var matchRE = new RegExp("AVAILABLE", "i");
-    var avail = split[i].match(matchRE);
-
-    if(appt) {isAVAIL = false; isAPPT = true; continue;}
-    else if(avail) {isAPPT = false; isAVAIL = true; continue;}
-    if(isAVAIL)
-    {
-      if(split[i] && split[i].match(/([ap]m)/))
-      {
-        //console.log(split[i]);
-        var localTimeObj = localizeTime(inID, split[i], thisDayIndex, thisMonthIndex, thisYear);
-        var localTime = localTimeObj.localTimeStr;
-        if(!dateStr)
-        {
-          var date = localTimeObj.dateObj;
-          var tzUSR = productStore.getById(inID).data.tzName;
-          var tzAbbreviation = date.getTimezoneAbbreviation() || tzUSR;
-          dateStr = dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ' (' + tzAbbreviation + ')';
-	}
-        //console.log(localTime);
-        split[i] = localTime;
-        //console.log(split[i]);
-      }
-    }
-    if(isAPPT)
-    {
-      if(split[i])
-      {
-	var apptSplit = split[i].split(/\s*--\s*/);
-        if(!apptSplit[0].match(/([ap]m)/)) {continue;}
-        //console.log(apptSplit[0]);
-        var localTimeObj = localizeTime(inID, apptSplit[0], thisDayIndex, thisMonthIndex, thisYear);
-        var localTime = localTimeObj.localTimeStr;
-        if(!dateStr)
-        {
-          var date = localTimeObj.dateObj;
-          var tzUSR = productStore.getById(inID).data.tzName;
-          var tzAbbreviation = date.getTimezoneAbbreviation() || tzUSR;
-          dateStr = dayNames[date.getDay()] + '  ' + monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ' (' + tzAbbreviation + ')';
-	}
-        //console.log(localTime);
-        apptSplit[0] = localTime;
-	split[i] = apptSplit.join(" -- ");
-      }
-    }
-  }
-  return {sch: split.join('<br>'), dateStr: dateStr};
-}
-
 
 
 
@@ -3936,12 +3662,8 @@ function applySchedule()
   }
   if(thisAppt)
   {
-     var lsObj = localizeSch(thisAppt, ID, dayIndex, monthIndex, year);
-     localDay = lsObj.dateStr;
-
-    thisAppt = lsObj.sch;
     document.getElementById("showApptAddedContent").innerHTML = '<span style="color:#ffffff; font: bold 14px/14px Arial, Helvetica, sans-serif;">Appointment made</span><br><br>' + '<span style="color:#DAFF38; font: bold 11px/11px Arial, Helvetica, sans-serif;">' + thisAppt + '</span>';
-    addMailMessage(ID, 'YOU HAVE AN APPOINTMENT FOR:<br>' + localDay + '<br>' + thisAppt, true, true);
+    addMailMessage(ID, 'YOU HAVE AN APPOINTMENT FOR:<br>' + apptDay + '<br>' + thisAppt, true, true);
   }
   else
   {
@@ -3952,6 +3674,7 @@ function applySchedule()
   Ext.get("showApptAdded").fadeOut({opacity: 0.0, easing: 'easeIn', duration: 1000});
 
 
+  //TTJ
   if(total != 0)
   {
     Ext.get("promoCodeContainer").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
@@ -4311,7 +4034,7 @@ function showRatings(JSONStr, index, elID, id)
 
 
         var window = document.createElement("div");
-        window.className = "gradient-darkGrey showCurrRating";
+        window.className = "showCurrRating";
         window.id = "showCurrRating";
         window.style.left = 10 + "px";
         window.style.marginTop = -20 + "px";
@@ -4389,7 +4112,9 @@ function showRatings(JSONStr, index, elID, id)
       ratingStr += '</div>';
 
 
-      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #FFFFFF; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #444444;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+
+
+      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + name + '</span></div>' + ratingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
     document.getElementById("showCurrRatingContent").innerHTML = innerHTML;
@@ -4674,6 +4399,7 @@ function disableAvailableTimesFromSchedule()
       var split = schedule[key].split('<br>');
       for(var i = 0; i < split.length-1; i++)
       {
+        //TTJ
         //console.log(split[i]);
         var matchRE = new RegExp("APPT", "i");
         var appt = split[i].match(matchRE);
@@ -4782,6 +4508,7 @@ function setGroupsFromSchedule(checkbox, combobox, schedule)
       var split = schedule[key].split('<br>');
       for(var i = 0; i < split.length-1; i++)
       {
+        //TTJ
         //console.log(split[i]);
         var matchRE = new RegExp("APPT", "i");
         var appt = split[i].match(matchRE);
@@ -4852,6 +4579,7 @@ function disableGroupsFromSchedule(checkbox, combobox, schedule)
       var split = schedule[key].split('<br>');
       for(var i = 0; i < split.length-1; i++)
       {
+        //TTJ
         //console.log(split[i]);
         var matchRE = new RegExp("APPT", "i");
         var appt = split[i].match(matchRE);
@@ -4951,7 +4679,7 @@ function applySelection()
   Ext.get("showApptAdded").fadeOut({opacity: 0.0, easing: 'easeIn', duration: 3000});
 
 
-  productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
+  //productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
 
 
 }
@@ -5234,6 +4962,7 @@ function removeOldSchByName(oldSch, name)
   var split = oldSch.split('<br>');
   for(var i = 0; i < split.length-1; i++)
   {
+    //TTJ
     //console.log("BEFORE: " + split[i]);
     var matchRE = new RegExp("APPT", "i");
     var appt = split[i].match(matchRE);
@@ -5277,6 +5006,7 @@ function makeUnavailable(oldSch, sch)
   var split = oldSch.split('<br>');
   for(var i = 0; i < split.length-1; i++)
   {
+    //TTJ
     //console.log("BEFORE: " + split[i]);
     var matchRE = new RegExp("APPT", "i");
     var appt = split[i].match(matchRE);
@@ -5370,6 +5100,7 @@ function makeAvailable(oldSch, sch)
   var split = oldSch.split('<br>');
   for(var i = 0; i < split.length-1; i++)
   {
+    //TTJ
     //console.log("BEFORE: " + split[i]);
     var matchRE = new RegExp("APPT", "i");
     var appt = split[i].match(matchRE);
@@ -5492,11 +5223,7 @@ function makeApptThisDay(day, month, year, cal)
     oldSch = temp.sch;
     removed = temp.removed;
     //console.log(removed);
-
-    //TODO: localize just the appts.
-    var lsObj = localizeSch(thisAppt, ID, day, month, year);
-    var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-    sch = oldSch + '<br>' + localizedAppt;
+    sch = oldSch + '<br>' + thisAppt;
   }
   else
   {
@@ -5875,14 +5602,6 @@ Ext.override(Ext.getCmp('myCalendar'), {
         for (var day in schedule)
         {
 	  //console.log(day);
-	  /*
-          var split = day.split('/');
-          var d = parseInt(split[0], 10);
-          var m = parseInt(split[1], 10);
-          var y = parseInt(split[2], 10);
-          var lsObj = localizeSch(schedule[day], user[0].inID, d, m, y);
-          var title = lsObj.dateStr + '<br>' + lsObj.sch;
-	  */
           var title = schedule[day];
           //console.log("DAY: " + day + " SCH: " + title);
           addSchedule(me, day, title);
@@ -5946,7 +5665,6 @@ function loadUsers()
       var history_;
       var feedback;
       var reviews;
-      var coins;
       var resume;
 
 
@@ -5968,7 +5686,6 @@ function loadUsers()
         history_ = obj[i].history;
         feedback = obj[i].feedback;
         reviews = obj[i].rating;
-        coins = obj[i].coins;
         resume = obj[i].resume;
 
         //console.log(resume);
@@ -5996,7 +5713,6 @@ function loadUsers()
           history: history_,
           feedback: feedback,
           reviews: reviews,
-          coins: coins,
           resume: resume
         }];
         productStore.loadData(myNewRecord, true);
@@ -6066,7 +5782,6 @@ function loadSelectedSchedule(inID)
   {
     //console.log(productStore.getById(inID).data.email);
     currSelectedSchedule = {};
-    currSelectedScheduleOrig = {};
     var calendar = productStore.getById(inID).data.calendar ? Ext.JSON.decode(productStore.getById(inID).data.calendar) : {};
     //console.log(calendar);
     for (var key in calendar)
@@ -6095,18 +5810,11 @@ function loadSelectedSchedule(inID)
         //sch = sch.replace(/\-\>/g, "\n");
 
         //console.log('ADDING: ' + key + '\n' + calendar[key]);
-        var currSch = hideOtherPeople(calendar[key], inID);
-        //console.log(currSch);
-        var lsObj = localizeSch(calendar[key], inID, d, m, y);
-        currSch = lsObj.dateStr + '<br>' + lsObj.sch;
-        //console.log(currSch);
-        currSelectedSchedule[key] = currSch;
-
-        currSelectedScheduleOrig[key] = calendar[key];
+        currSelectedSchedule[key] = hideOtherPeople(calendar[key], inID);
       }
     }//for (var key in calendar)
   }//if(productStore.getById(user[0].inID).data.role != 'find')
-  productStore.getById(inID).data.calendar = JSON.stringify(currSelectedScheduleOrig);
+  productStore.getById(inID).data.calendar = JSON.stringify(currSelectedSchedule);
 }
 
 
@@ -6150,7 +5858,7 @@ function updateSchedule(id, day, name, sch)
   //console.log("SCH: " + sch);
   var calendar = productStore.getById(id).data.calendar ? Ext.JSON.decode(productStore.getById(id).data.calendar) : {};
   var oldSch = calendar[day];
-  //console.log("OLD: " + oldSch);
+  console.log("OLD: " + oldSch);
 
   if(oldSch)
   {
@@ -6159,15 +5867,15 @@ function updateSchedule(id, day, name, sch)
   temp = removeOldSchByName(oldSch, name);
   oldSch = temp.sch;
   removed = temp.removed;
-  //console.log("REMOVED: " + removed);
-  //console.log("OLD: " + oldSch);
+  console.log("REMOVED: " + removed);
+  console.log("OLD: " + oldSch);
   if(sch)
   {
-    //console.log("OLD: " + oldSch);
+    console.log("OLD: " + oldSch);
     oldSch = makeAvailable(oldSch, removed);
-    //console.log("OLD: " + oldSch);
+    console.log("OLD: " + oldSch);
     oldSch = makeUnavailable(oldSch, sch);
-    //console.log("OLD: " + oldSch);
+    console.log("OLD: " + oldSch);
     
     //thisAppt = 'APPT: ' + settings[id]['identity'] ? 'Confidential' : name + '<br>' + sch;
     var thisAppt = 'APPT: ' + name + '<br>' + sch;
@@ -6489,14 +6197,14 @@ function serviceReturn()
 
 
       var date = {};
-      date = getDateIndexes(day);
+      date = getDateIndexes(key);
 
-      var d = date.dayIndex;
-      var m = date.monthIndex;
-      var y = date.year;
-      d = pad(d, 2);
-      m = pad(m, 2);
-      var tDay = d + "/" + m + "/" + y;
+      var day = date.dayIndex;
+      var month = date.monthIndex;
+      var year = date.year;
+      day = pad(day, 2);
+      month = pad(month, 2);
+      var tDay = day + "/" + month + "/" + year;
 
       // --Name--
       var first = productStore.getById(ID) ? productStore.getById(ID).data.first : '--';
@@ -6573,15 +6281,6 @@ function loadCartItems(id, isReturn)
     var split = key.split(/\:/);
     var ID = split[0];
     var day = split[1];
-
-    var date = {};
-    date = getDateIndexes(day);
-
-    var d = date.dayIndex;
-    var m = date.monthIndex;
-    var y = date.year;
-
-
     var image = (productStore.getById(ID) && settings[ID]['identity'] != true) ? productStore.getById(ID).data.image || "./images/ghost.png" : "./images/ghost.png";
     //console.log("ID: " + split[1]);
     //console.log("SETTING: " + imgID);
@@ -6601,20 +6300,17 @@ function loadCartItems(id, isReturn)
     var myLast = productStore.getById(user[0].inID) ? productStore.getById(user[0].inID).data.last : '--';
     var myName = myFirst + ' ' + myLast;
 
-    var lsObj = localizeSch(cartItems[key],ID,d,m,y);
-    localDay = lsObj.dateStr;
 
-    //console.log(localDay);
 
     if(!isReturn)
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + localDay + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: left; top:-154px;left:8px;">' + lsObj.sch + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div><div id="' + closeCartID + '" class="close-up" style="position: relative; top: -282px; left: 195px;" onmouseover="this.style.cursor=\'pointer\'; this.className=\'close-dn\';" onmouseout="this.className=\'close-up\';" onclick="this.parentNode.style.display=\'none\'; removeCartItem(\'' + key + '\', \'' + ID + '\');"></div></li>';
     }
     else
     {
-      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + localDay + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: left; top:-154px;left:8px;">' + lsObj.sch + '</div></li>';
+      help += '<li><div class="frame1"><div class="box2" style="background: #A0A0A0;"><div id="' + cartID + '" title="' + key + '" style="padding-top: 4px; padding-left: 6px; width:197px; height:125px; text-align: center; background: url(' + image + '); background-size: cover; opacity: 0.5; filter: alpha(opacity=50); color: #F1FFAF;"></div></div><span class="servicePrice">' + day + '</span></div><div id="' + blisterCartID + '" style="border: 0px solid #000; position: relative; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '</div></li>';
 
-      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '<hr><a href="http://www.interviewring.com/?feedback&KEY=' + user[0].inID + ':' + day + '" target="_blank" style="font-size: 16px;">Give ' + myFirst + ' feedback</a><br><a href="http://www.interviewring.com/?rate&ID=' + ID + '&KEY=' + key + '" target="_blank" style="font-size: 16px;">Rate ' + first + '</a></div><div><a>' + ID + '</a></div></div>';
+      email += '<div class="frame1" style="background-color: #E0E0E0;border: 1px solid #CCCCCC; width: 203px;margin: 10px 10px 10px 10px;padding: 8px 8px 8px 8px;text-align: center;"><div class="box2" style="background-color: #333333;display: inline-block;-moz-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);-webkit-box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);box-shadow: 0 0 1px 3px rgba(207, 207, 207, 0.6);filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3, MakeShdow=true, ShadowOpacity=0.80);-ms-filter: &quot;progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)&quot;;zoom: 1;margin-top: -14px;"><div id="' + emailCartID + '" title="' + key + '" style="padding: 4px;width: 197px; height: 125px; text-align: center; color: #F1FFAF; display: block;position: relative;"><img src="' + image + '" style="width: 189px; height: 113px;"/></div></div><div style="margin-bottom: 10px; text-align: center;"><span class="servicePrice" style="color: #F1FFAF;padding-left: 6px;padding-right: 6px;text-align: center;border-radius: 20px;background: #AECC2C;border: solid 0px #4A5612;">' + day + '</span></div><div id="' + blisterEmailCartID + '" style="border: 0px solid #000; position: absolute; padding-top: 4px; padding-left: 4px; width:197px; height:125px; text-align: center; top:-154px;left:8px;">' + cartItems[key] + '<hr><a href="http://www.interviewring.com/?feedback&KEY=' + user[0].inID + ':' + day + '" target="_blank" style="font-size: 16px;">Give ' + myFirst + ' feedback</a><br><a href="http://www.interviewring.com/?rate&ID=' + ID + '" target="_blank" style="font-size: 16px;">Rate ' + first + '</a></div><div><a>' + ID + '</a></div></div>';
     }
   }
   document.getElementById(elID).innerHTML = help;
@@ -6681,27 +6377,6 @@ function getEmailList(str)
 
         var search = '<a.*Give.*feedback</a>';
         replace = '';
-        userEmail = userEmail.replace(new RegExp(search, 'g'), replace);
-
-        //Strip out appt and replace with localized version
-        search = 'APPT:.*<hr><br>';
-        var appt = userEmail.match(new RegExp(search))[0];
-        appt = appt.split('<hr>')[0];
-        //console.log("MATCH: " + appt);
-
-        var date = {};
-        date = getDateIndexes(day);
-
-        var d = date.dayIndex;
-        var m = date.monthIndex;
-        var y = date.year;
-
-
-        appt = localizeSch(appt, ID, d, m, y).sch;
-        //console.log("LOCALIZED: " + appt);
-        appt = appt + '<hr><br>';
-        
-        replace = appt;
         userEmail = userEmail.replace(new RegExp(search, 'g'), replace);
 
         emails[user[0].inID] += userEmail;
@@ -6904,7 +6579,7 @@ function sendNotificationEmail()
   //User Email
   $.ajax({url:"./email.php", 
     //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
-    data: {id: user[0].inID, name: user[0].first, email: user[0].email, from: 'The InterviewRing Team', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML, attachResume: '0'},
+    data: {id: user[0].inID, name: user[0].first, email: user[0].email, subject: "Your Purchase from interviewring.com", MsgHTML: userHTML, attachResume: '0'},
     type:'post',
     async:false
   });
@@ -6940,12 +6615,11 @@ function sendNotificationEmail()
 
     if(1)
       {
-    var attach = productStore.getById(user[0].inID).data.resume ? '1' : '0';
     //var MsgTEXT = getPlainText(emails[id]);
     //Provider Email
     $.ajax({url:"./email.php", 
       //data: {name: first, email: email, cc_list: '', subject: "Your scheduled appointment via interviewring.com", MsgHTML: providerHTML},
-      data: {id: user[0].inID, name: first, email: email, from: 'InterviewRing Appointment', subject: "Your scheduled appointment via interviewring.com", MsgHTML: providerHTML, attachResume: attach},
+      data: {id: user[0].inID, name: first, email: email, subject: "Your scheduled appointment via interviewring.com", MsgHTML: providerHTML, attachResume: '1'},
       type:'post',
       async:false
     });
@@ -6960,63 +6634,12 @@ function sendNotificationEmail()
 
 
 
-
-function loadCartAtStartup()
-{
-  cartItems = productStore.getById(user[0].inID).data.cart ? Ext.JSON.decode(productStore.getById(user[0].inID).data.cart) : {};
-
-  //If user had items in their cart load them up
-  if(Object.size(cartItems))
-  {
-    //console.log("ITEMS IN CART");
-    total = getTotalFromCartItems(cartItems);
-
-    document.getElementById("Total").innerHTML = "TOTAL: $" + currencyFormatted(total);
-
-    if(total != 0)
-    {
-      Ext.get("promoCodeContainer").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
-      document.getElementById("checkOutCallToActionHeader").innerHTML = 'Choose your method of payment';
-      document.getElementById("checkOutCallToActionConfirm").style.display = 'none';
-      document.getElementById("checkOutCallToActionButtons").style.display = '';
-    }
-    else                       
-    {
-      Ext.get("promoCodeContainer").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
-      document.getElementById("checkOutCallToActionHeader").innerHTML = 'Confirm your appointment(s)';
-      document.getElementById("checkOutCallToActionConfirm").style.display = '';
-      document.getElementById("checkOutCallToActionButtons").style.display = 'none';
-    }
-    if(Object.size(cartItems))
-    {
-      Ext.get("cartItem").fadeIn({opacity: 1, easing: 'easeIn', duration: 1000});
-      document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium";
-      document.getElementById("checkOutCallToAction").style.display = '';
-      document.getElementById("Total").style.visibility = '';
-    }
-    else
-    {
-      Ext.get("cartItem").fadeOut({opacity: 0, easing: 'easeIn', duration: 1000});
-      document.getElementById("checkOutCallToActionConfirmButton").className="a-button a-button-medium inactive";
-      document.getElementById("checkOutCallToAction").style.display = 'none';
-      document.getElementById("Total").style.visibility = 'hidden';
-      document.getElementById("cartItems").innerHTML = '<h1 class="clearfix" style="margin-top: 100px; text-align: center;">Your Cart is Empty</h1>';
-    }
-    loadCartItems();
-  }
-}
-
-
-
-
-
 function removeCartItem(key, ID)
 {
   //console.log(cartItems[key]);
   //console.log(ID);
   var removedSch = cartItems[key];
   delete cartItems[key];
-  saveCartItem(user[0].inID, cartItems);
 
 
   var date = {};
@@ -7054,10 +6677,7 @@ function removeCartItem(key, ID)
 
   //var oldSch = getSchedule(Ext.getCmp('myCalendar'), tDay);
   var oldSch = getSchedule(user[0].inID, tDay);
-  //console.log("OLD SCH: " + oldSch);
   oldSch = oldSch.replace(/\n/g, '<br>');
-
-  //console.log("OLD SCH: " + oldSch);
 
   //console.log("SCH: " + sch);
   if(sch)
@@ -7237,11 +6857,7 @@ function loadFeedbackCount()
 {
   if(document.getElementById("feedbackCount"))
   {
-    var items = 0;
-    if(productStore.getById(user[0].inID).data.role=='find') {items = historyAvailable().items;}
-    if(productStore.getById(user[0].inID).data.role=='give') {items = providerHistoryAvailable().items;}
-    if(productStore.getById(user[0].inID).data.role=='both') {items = historyAvailable().items + providerHistoryAvailable().items;}
-    document.getElementById("feedbackCount").innerHTML = items;
+    document.getElementById("feedbackCount").innerHTML = (historyAvailable().items + providerHistoryAvailable().items);
   }
 }
 
@@ -7295,149 +6911,15 @@ function XXloadHistoryXX()
 
 
 
-
-
-
-
-function getHistoryStatuses()
-{
-
-  var historyItems = {};
-  historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
-
-  var scheduled = 0;
-  var waiting = 0;
-  var completed = 0;
-
-  for (var key in historyItems)
-  {
-    var split = key.split(/\:/);
-    var ID = split[0];
-    var day = split[1];
-    var status = '';
-    var dateFilter = '';
-    var company =  productStore.getById(ID).data.company || "";
-    var feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
-    var fbKey = user[0].inID + ':' + day;
-    if(feedback[fbKey])
-    {
-      completed++;
-    }
-    else
-    {
-      //console.log(day);
-      var date = {};
-      date = getDateIndexes(day);
-
-      var d = parseInt(date.dayIndex, 10);
-      var m = parseInt(date.monthIndex, 10);
-      var y = parseInt(date.year, 10);
-      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
-      var x=new Date();
-      x.setFullYear(y,m-1,d);
-      var t = new Date();
-
-      if (x>t)
-      {
-        scheduled++;
-      }
-      else
-      {
-        waiting++;
-      }
-    }
-  }
-  return {'Scheduled': scheduled, 'Waiting Feedback': waiting, 'Completed': completed};
-}
-
-
-
-
-
-function getProviderHistoryStatuses()
-{
-
-  var historyItems = {};
-  historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
-
-  var scheduled = 0;
-  var waiting = 0;
-  var completed = 0;
-
-  for (var key in historyItems)
-  {
-    var split = key.split(/\:/);
-    var ID = split[0];
-    var day = split[1];
-    var status = '';
-    var dateFilter = '';
-    var company =  productStore.getById(ID).data.company || "";
-    var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
-    //var fbKey = user[0].inID + ':' + day;
-    var fbKey = ID + ':' + day;
-    //console.log("FBKEY: " + fbKey);
-    if(feedback[fbKey])
-    {
-      //console.log("HERE");
-      completed++;
-    }
-    else
-    {
-      //console.log(day);
-      var date = {};
-      date = getDateIndexes(day);
-
-      var d = parseInt(date.dayIndex, 10);
-      var m = parseInt(date.monthIndex, 10);
-      var y = parseInt(date.year, 10);
-      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
-      var x=new Date();
-      x.setFullYear(y,m-1,d);
-      var t = new Date();
-
-      if (x>t)
-      {
-        scheduled++;
-      }
-      else
-      {
-        waiting++;
-      }
-    }
-  }
-  return {'Scheduled': scheduled, 'Waiting Feedback': waiting, 'Completed': completed};
-}
-
-
-
-
-
-
   function doHistory(arg)
   {
     //console.log('doHistory');
     arg = arg || document.getElementById('explore').value;
-    document.getElementById('explore').value = arg;
 
     historyItemKeyArray = [];
     document.getElementById("historyItems").innerHTML = '';
-
     loadHistory(arg);
-    //loadProviderHistory(arg);
-    historyType = 'interviewee';
-  }
-
-
-  function doProviderHistory(arg)
-  {
-    //console.log('doHistory');
-    arg = arg || document.getElementById('explore').value;
-    document.getElementById('explore').value = arg;
-
-    historyItemKeyArray = [];
-    document.getElementById("historyItems").innerHTML = '';
     loadProviderHistory(arg);
-    historyType = 'interviewer';
   }
 
 
@@ -7455,7 +6937,7 @@ function getProviderHistoryStatuses()
     //console.log(regExp);
 
     //historyItemKeyArray = [];
-    var companies = new Array();
+
     var historyItems = {};
     historyItems = productStore.getById(user[0].inID).data.history ? Ext.JSON.decode(productStore.getById(user[0].inID).data.history) : {};
 
@@ -7467,16 +6949,7 @@ function getProviderHistoryStatuses()
       var day = split[1];
       var status = '';
       var dateFilter = '';
-
-
-      var first = productStore.getById(ID).data.first || "";
-      var last = productStore.getById(ID).data.last || "";
-      var company = productStore.getById(ID).data.company || "";
-      var position = productStore.getById(ID).data.position || "";
-      var industry = productStore.getById(ID).data.industry || "";
-      //var summary = productStore.getById(ID).data.summary || "";
-
-
+      var company =  productStore.getById(ID).data.company || "";
       var feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
       var fbKey = user[0].inID + ':' + day;
       if(feedback[fbKey])
@@ -7498,7 +6971,7 @@ function getProviderHistoryStatuses()
         x.setFullYear(y,m-1,d);
         var t = new Date();
 
-        if (x>t)
+        if (x>=t)
         {
           status = 'Scheduled';
         }
@@ -7572,35 +7045,12 @@ function getProviderHistoryStatuses()
       if(!dateFilter) {dateFilter = '> 1 year ago';}
 
       //console.log(dateFilter);
-
-
-      var found = first.match(matchRE);
-      found += last.match(matchRE);
-      found += company.match(matchRE);
-      found += position.match(matchRE);
-      found += industry.match(matchRE);
-      //found += summary.match(matchRE);
-      found += status.match(matchRE);
-      found += dateFilter.match(matchRE);
-      if(ID == regExp) {found++;}
-      //console.log("FOUND: " + found);
-      if(found)
-      {
-        historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter});
-        var found = 0;
-        for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
-        if(!found) {companies.push(company);}
-      }
-
+      historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter}); 
     }
-    historyFilters.companyH = companies ? companies.sort() : {};
-    //populateFilters();
 
     applyHistoryFilters();
     historyItemKeyArray.sort(sortHistoryFunction)
     populateHistoryItems();
-
-    if(exp) {pruneHistoryFilters();}
 
   } //loadHistory()
 
@@ -7619,7 +7069,7 @@ function getProviderHistoryStatuses()
     //console.log(regExp);
 
     //historyItemKeyArray = [];
-    var companies = new Array();
+
     var historyItems = {};
     historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
 
@@ -7631,22 +7081,11 @@ function getProviderHistoryStatuses()
       var day = split[1];
       var status = '';
       var dateFilter = '';
-
-      var first = productStore.getById(ID).data.first || "";
-      var last = productStore.getById(ID).data.last || "";
-      var company = productStore.getById(ID).data.company || "";
-      var position = productStore.getById(ID).data.position || "";
-      var industry = productStore.getById(ID).data.industry || "";
-      //var summary = productStore.getById(ID).data.summary || "";
-
-
+      var company =  productStore.getById(ID).data.company || "";
       var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
-      //var fbKey = user[0].inID + ':' + day;
-      var fbKey = ID + ':' + day;
-      //console.log("FBKEY: " + fbKey);
+      var fbKey = user[0].inID + ':' + day;
       if(feedback[fbKey])
       {
-        //console.log("HERE");
         status = 'Completed';
       }
       else
@@ -7664,7 +7103,7 @@ function getProviderHistoryStatuses()
         x.setFullYear(y,m-1,d);
         var t = new Date();
 
-        if (x>t)
+        if (x>=t)
         {
           status = 'Scheduled';
         }
@@ -7738,34 +7177,12 @@ function getProviderHistoryStatuses()
       if(!dateFilter) {dateFilter = '> 1 year ago';}
 
       //console.log(dateFilter);
-
-      var found = first.match(matchRE);
-      found += last.match(matchRE);
-      found += company.match(matchRE);
-      found += position.match(matchRE);
-      found += industry.match(matchRE);
-      //found += summary.match(matchRE);
-      found += status.match(matchRE);
-      found += dateFilter.match(matchRE);
-      if(ID == regExp) {found++;}
-      //console.log("FOUND: " + found);
-      if(found)
-      {
-        historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter});
-        var found = 0;
-        for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
-        if(!found) {companies.push(company);}
-      }
-
+      historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter}); 
     }
-    historyFilters.companyH = companies ? companies.sort() : {};
-    //populateFilters();
 
     applyHistoryFilters();
     historyItemKeyArray.sort(sortHistoryFunction)
     populateProviderHistoryItems();
-
-    if(exp) {pruneHistoryFilters();}
 
   } //loadProviderHistory()
 
@@ -7928,7 +7345,6 @@ function applyHistoryFilters()
 
 
 
-
 function populateHistoryItems()
 {
   var companies = new Array();
@@ -7958,16 +7374,6 @@ function populateHistoryItems()
     var ID = split[0];
     var day = split[1];
     var image = productStore.getById(ID).data.image || "./images/ghost.png";
-
-
-    var date = {};
-    date = getDateIndexes(day);
-
-    var d = parseInt(date.dayIndex, 10);
-    var m = parseInt(date.monthIndex, 10);
-    var y = parseInt(date.year, 10);
-
-
 
     var link = '';
 
@@ -8004,7 +7410,7 @@ function populateHistoryItems()
       x.setFullYear(y,m-1,d);
       var t = new Date();
 
-      if (x>t)
+      if (x>=t)
       {
         link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
       }
@@ -8055,13 +7461,10 @@ function populateHistoryItems()
       var label = first + ' ' + last;
       //console.log(label);
 
-      var lsObj = localizeSch(appt,ID,d,m,y);
-      localDay = lsObj.dateStr;
-
       // --Services--
       services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
       //console.log(services);
-      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + localDay + '</div>' + lsObj.sch;
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + day + '</div>' + appt;
       help += '</div>';
       //console.log(help);
 
@@ -8210,13 +7613,6 @@ function populateProviderHistoryItems()
     var day = split[1];
     var image = productStore.getById(ID).data.image || "./images/ghost.png";
 
-    var date = {};
-    date = getDateIndexes(day);
-
-    var d = parseInt(date.dayIndex, 10);
-    var m = parseInt(date.monthIndex, 10);
-    var y = parseInt(date.year, 10);
-
     var link = '';
    
     if(!historyItems[key]) {continue;}
@@ -8230,7 +7626,7 @@ function populateProviderHistoryItems()
     var fbKey = ID + ':' + day;
 
 
-    //console.log("FBKey: " + fbKey);
+    //console.log(fbKey);
     //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
     //console.log("ID: " + split[1]);
     //console.log("SETTING: " + imgID);
@@ -8254,7 +7650,7 @@ function populateProviderHistoryItems()
       x.setFullYear(y,m-1,d);
       var t = new Date();
 
-      if (x>t)
+      if (x>=t)
       {
         link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
       }
@@ -8305,13 +7701,10 @@ function populateProviderHistoryItems()
       var label = first + ' ' + last;
       //console.log(label);
 
-      var lsObj = localizeSch(appt,ID,d,m,y);
-      localDay = lsObj.dateStr;
-
       // --Services--
       services = productStore.getById(ID).data.providedServices ? Ext.JSON.decode(productStore.getById(ID).data.providedServices) : {};
       //console.log(services);
-      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + localDay + '</div>' + lsObj.sch;
+      var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + day + '</div>' + appt;
       help += '</div>';
       //console.log(help);
 
@@ -8348,8 +7741,7 @@ function populateProviderHistoryItems()
 
 
     var window = document.createElement("div");
-    //window.className = "providerHistoryItem";
-    window.className = "historyItem";
+    window.className = "providerHistoryItem";
     window.id = "historyItem" + index;
  
 
@@ -8361,8 +7753,7 @@ function populateProviderHistoryItems()
     fbKey = ID + ':' + day;
     ID = user[0].inID;
 
-    //if(link.match('Completed'))      {window.onclick = new Function( 'historyClicked(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\',' + true + ')');}
-    if(link.match('Completed'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+    if(link.match('Completed'))      {window.onclick = new Function( 'historyClicked(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\',' + true + ')');}
     else if(link.match('Waiting'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
     //else if(link.match('Scheduled')) {window.onclick = function() {cancelService();} ;}
 
@@ -8439,7 +7830,7 @@ function populateProviderHistoryItems()
 
 function historyClicked(JSONStr, JSONKey, ID, share)
 {
-  console.log("historyClicked");
+  //console.log("historyClicked");
   //console.log(JSONStr);
   //console.log(JSONKey);
   //console.log(ID);
@@ -8448,7 +7839,6 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   var form = Ext.JSON.decode(JSONStr);
   var fbKey = JSONKey;
 
-  //console.log("FBKey: " + fbKey);
   var split = JSONKey.split(/\:/);
   var myID = split[0];
   var day = split[1];
@@ -8465,43 +7855,21 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   var ratingAvg = 0;
 
 
-  //Check if user has rated their service provider for this appointment or has already seen the feedback
-  var found = false;
-  var seen = form.seen;
-  if(!share)
-  {
-    var ratingObj = productStore.getById(ID).data.reviews ? Ext.JSON.decode(productStore.getById(ID).data.reviews) : {};
-    if(ratingObj)
-    {
-      var rating = Math.ceil(ratingObj.average);
-      var rates = ratingObj.total || 0;
-      var comments = ratingObj.comments;
-      for (var key in comments)
-      {
-        var commenterID = key.split(/:/)[0];
-        var timeStamp = key.split(/:/)[1];
-        var apptDay = key.split(/:/)[3];
-        if(commenterID == user[0].inID && apptDay == day) {found = true; continue;}
-      }
-    }
-  }
-
 
   //'socialShare(this.alt,\'Check out my results\',\'' + ID + '\',\'' + JSONKey + '\');'
   //'socialShare(this.alt,\'Check out my results\');'
 
 
-  var innerHTML = share ? '' : '<div class="x-window-default" style="margin-top:0px;"><div style="border: 0px solid #ff0000; height: 30px;"><img class="socialiconShare connect" src="images/google-up.png"   alt="google" title="Share on Google+" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/google-dn.png\';   this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/google-up.png\'"/><img class="socialiconShare connect" src="images/twitter-up.png"  alt="twitter" title="Share on Twitter" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/twitter-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/twitter-up.png\'"/><img class="socialiconShare connect" src="images/facebook-up.png" alt="facebook" title="Share on Facebook" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/facebook-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/facebook-up.png\'"/><img class="socialiconShare connect" src="images/linkedin-up.png" alt="linkedin" title="Share on LinkedIn" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/linkedin-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/linkedin-up.png\'"/><img class="socialiconShare connect" src="images/email-up.png"  alt="email" title="Share via email" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/email-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/email-up.png\'"/><span style="float: right; font-size: 16px; line-height: 16px; font-weight: 400;">Share this result via:  </span></div><div style="border: 0px solid #000000;"><input type="checkbox" name="shareRating" onclick="shareRating(\'' + JSONKey + '\', this.checked);"></input><span style="font-size: 16px; line-height: 16px; font-weight: 400;">Allow interviewring.com recruiters to see this result</span></div></div>';
+  var innerHTML = share ? '' : '<div class="x-window-default" style="margin-top:0px;"><div style="border: 0px solid #ff0000; height: 30px;"><img class="socialiconShare connect" src="images/google-up.png"   alt="google" title="Share on Google+" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/google-dn.png\';   this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/google-up.png\'"/><img class="socialiconShare connect" src="images/twitter-up.png"  alt="twitter" title="Share on Twitter" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/twitter-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/twitter-up.png\'"/><img class="socialiconShare connect" src="images/facebook-up.png" alt="facebook" title="Share on Facebook" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/facebook-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/facebook-up.png\'"/><img class="socialiconShare connect" src="images/linkedin-up.png" alt="linkedin" title="Share on LinkedIn" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/linkedin-dn.png\'; this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/linkedin-up.png\'"/><img class="socialiconShare connect" src="images/email-up.png"  alt="email" title="Share via email" onclick="socialShare(this.alt,\'Check out my interviewring.com interview feedback!\',\'' + ID + '\',\'' + JSONKey + '\');" onmouseover="this.src=\'images/email-dn.png\';  this.style.cursor=\'pointer\';"  onmouseout="this.src=\'images/email-up.png\'"/><span style="float: right; font-size: 16px; line-height: 16px; font-weight: 400;">Share this result on: </span></div><div style="border: 0px solid #000000;"><input type="checkbox" name="shareRating" onclick="shareRating(\'' + JSONKey + '\', this.checked);"></input><span style="font-size: 16px; line-height: 16px; font-weight: 400;">Allow interviewring.com recruiters to see this result</span></div></div>';
 
 
   innerHTML += '<h2 style="text-align: center; margin-top: 6px;">' + myName + '</h2><h3 style="text-align: center; margin-top: -10px;">' + day + '</h3><h4 style="text-align: center; margin-top: -10px;">by ' + name + ' (' + company + ')</h4><div class="sidebar" style="width: 540px; margin-left: 12px; margin-top: 50px;"><ul>';
 
   for (var key in form)
   {
-    if(key == 'seen') {continue;}
     //console.log("KEY: " + key + " VAL: " + form[key]['rating'] + form[key]['comment']);
     var rating = form[key]['rating'];
-    if(!rating) {rating = 0;}
+    if(!rating) {rating = 3;}
     ratingSum += parseInt(rating,10);
 
     var ratingStr = '<div><img src="images/starBoard.png" style="z-index: 20; position: relative; top: -40px; left:109px;"/>';
@@ -8509,16 +7877,12 @@ function historyClicked(JSONStr, JSONKey, ID, share)
     {
       ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     }
-    if(rating)
+    ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+    for(var i = 0; i < rating-1; i++)
     {
-      ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
-      for(var i = 0; i < rating-1; i++)
-      {
-        ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
-      }
+      ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
     }
-    ratingStr += '<span style="position: relative; top: -30px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied</span>';
-    ratingStr += '<span style="position: relative; top: -30px; left: 440px; font-size:9px; color:#606060; white-space: pre;">Very Satisfied</span></div>';
+    ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
 
     innerHTML += '<li><h2>' + key + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + form[key]['comment'] + '</span></li>';
   }
@@ -8531,16 +7895,12 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   {
     ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   }
-  if(rating)
+  ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
+  for(var i = 0; i < rating-1; i++)
   {
-    ratingStr += '<img src="images/filledStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
-    for(var i = 0; i < rating-1; i++)
-    {
-      ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
-    }
+    ratingStr += '<img src="images/emptyStar.png" style="z-index: 19; position: relative; top: -30px; left: 218px; margin-right: 4px; height: 15px;"/>';
   }
-  ratingStr += '<span style="position: relative; top: -30px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied</span>';
-  ratingStr += '<span style="position: relative; top: -30px; left: 440px; font-size:9px; color:#606060; white-space: pre;">Very Satisfied</span></div>';
+  ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
 
 
   innerHTML += '<li><h2>' + 'average rating' + ':</h2> ' + ratingStr + '<span style="position: relative; top: -30px;">Comments: ' + comment + '</span></li>';
@@ -8554,33 +7914,9 @@ function historyClicked(JSONStr, JSONKey, ID, share)
             
   var window = document.createElement("div");
   window.className = "feedbackWindow x-window-default-lt";
-  window.id = "popupFormPage";
-
-
- 
-
-  if(!share)
-  {
-    if(!found && !seen)
-    {
-      form.seen = true;
-      console.log("NOT FOUND NOR SEEN");
-      var choiceHTML = '<h2 style="margin-top: 100px;">You had an appointment with ' + name + ' on ' + day + '.</h2>';
-      choiceHTML += '<h2>Let ' + first + ' know how well you thought they did.</h2>';
-      choiceHTML += '<div class="a-button a-button-large" style="height: 36px;" onclick="doRateMe(\'popupFormPage\',\'' + ID + '\',\'' + JSONKey + '\'); markFeedbackSeen(\'' + ID + '\',\'' + JSONKey + '\'); doHistory();"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Rate ' + first + '</span></span></div><br><br><br><br><br>';
-
-      choiceHTML += '<h2>' + first + ' has provided you with feedback.</h2>';
-      choiceHTML += '<h2>Once you view this feedback you will not be able to rate ' + name + '.</h2>';
-      choiceHTML += '<div class="a-button a-button-large" style="height: 36px;" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode); markFeedbackSeen(\'' + ID + '\',\'' + JSONKey + '\'); doHistory(); historyClicked(\'' + encodeURI(Ext.JSON.encode(form)) + '\',\'' + JSONKey + '\',\'' + ID + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">View Feedback</span></span></div>';
-
-      window.innerHTML = choiceHTML;
-    }
-    else
-      window.innerHTML = (myID == user[0].inID || ID == user[0].inID) ? innerHTML : '<img src="./images/403.png" style="height: 380px; display: inline-block; margin-right: 275px;"/>';
-  }
-  else
-    window.innerHTML = innerHTML;
-
+  window.id = "formPage";
+  window.innerHTML = innerHTML;
+  
   container.appendChild(window);
 
   
@@ -8589,7 +7925,7 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   header.className = "x-window-default";
   header.style.position = "absolute";
   header.style.top = -30 + "px";
-  header.style.marginLeft = 18 + "px";
+  header.style.marginLeft = 20 + "px";
   header.style.width = 940 + "px";
   header.style.height = 50 + "px";
   header.style.zIndex = 70;
@@ -8601,29 +7937,26 @@ function historyClicked(JSONStr, JSONKey, ID, share)
   dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode.parentNode);"></div>';
   header.appendChild(dismiss);
 
-  //console.log();
-  if(!share)
+  console.log();
+  //Allow author to re-submit feedback
+  if(ID === myID)
   {
-    //Allow author to re-submit feedback  //Author does not go through this flow now, uses doFeedback()
-    if(ID === myID && ID === user[0].inID && 0)
-    {
-      var buttonHTML = '<div class="a-button a-button-large" style="height: 36px;" onclick="doFeedback(\'' + encodeURI(Ext.JSON.encode(form)) + '\',\'' + fbKey + '\',\'' + ID + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Edit Feedback</span></span></div>';
+    var buttonHTML = '<div class="a-button a-button-large" style="height: 36px;" onclick="doFeedback(\'' + encodeURI(Ext.JSON.encode(form)) + '\',\'' + fbKey + '\',\'' + ID + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Edit Feedback</span></span></div>';
 
-      var reSubmit = document.createElement("div");
-      reSubmit.style.position = "absolute";
-      reSubmit.style.top = 10 + 'px';
-      reSubmit.style.marginLeft = 320 + 'px';
-      reSubmit.innerHTML = buttonHTML;
+    var reSubmit = document.createElement("div");
+    reSubmit.style.position = "absolute";
+    reSubmit.style.top = 10 + 'px';
+    reSubmit.style.marginLeft = 320 + 'px';
+    reSubmit.innerHTML = buttonHTML;
 
-      header.appendChild(reSubmit);
-    }
+    header.appendChild(reSubmit);
   }
 
 
   container.appendChild(header);
 
+
   document.getElementById("featuredHistoryItems").appendChild(container);
-  document.getElementById("featuredHistoryItems").style.zIndex = 50;
 
 
 
@@ -8636,7 +7969,6 @@ function historyClicked(JSONStr, JSONKey, ID, share)
     if(!settings[user[0].inID]['share']) {settings[user[0].inID]['share'] = {};}
     if(!settings[user[0].inID]['share'][JSONKey]) {settings[user[0].inID]['share'][JSONKey] = false;}
     setGroup("shareRating", settings[user[0].inID]['share'][JSONKey]);
-
   }
   else {formPage.style.marginLeft = -120 + 'px';}
 
@@ -8647,70 +7979,8 @@ function historyClicked(JSONStr, JSONKey, ID, share)
 
 function doFeedback(JSONStr, JSONKey, ID)
 {
-
-  JSONStr = JSONStr || '{}';
-  JSONKey = JSONKey || returnParameters.KEY;
-  ID = ID || returnParameters.ID;
-
-  //console.log("JSONKey: " + JSONKey);
-  //console.log("ID: " + ID);
   returnParameters.KEY = JSONKey;
-  //showFeedbackForm();
-
-
-
-
-  var container = document.createElement("div");
-  container.id = "viewFeedback";
-
-            
-  var window = document.createElement("div");
-  window.className = "feedbackWindow x-window-default-lt";
-  window.id = "feedbackFormPage";
-
-  container.appendChild(window);
-
-  
-  //<div class="x-window-default" style="position: absolute; top: -10px; margin-left: 0px; width: 940px; height: 50px;">
-  var header = document.createElement("div");
-  header.className = "x-window-default";
-  header.style.position = "absolute";
-  header.style.top = -30 + "px";
-  header.style.marginLeft = 18 + "px";
-  header.style.width = 940 + "px";
-  header.style.height = 50 + "px";
-  header.style.zIndex = 70;
-
-  var dismiss = document.createElement("div");
-  dismiss.style.position = "absolute";
-  dismiss.style.top = 10 + 'px';
-  dismiss.style.right = 10 + 'px';
-  dismiss.innerHTML = '<div class="closeLarge-up" onmouseover="this.style.cursor=\'pointer\'; this.className=\'closeLarge-dn\';" onmouseout="this.className=\'closeLarge-up\';" onclick="this.parentNode.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode.parentNode);"></div>';
-  header.appendChild(dismiss);
-
-  container.appendChild(header);
-
-  document.getElementById("featuredHistoryItems").appendChild(container);
-  document.getElementById("featuredHistoryItems").style.zIndex = 50;
-
-
-  //<div id="feedbackFormImg" class="circular" style="margin-top: 60px;"></div>
-  //<div id="feedbackForm" class="formPage gradient-ltblue">
-  var feedbackFormImg = document.createElement("div");
-  feedbackFormImg.id = "feedbackFormImg";
-  feedbackFormImg.className = "circular";
-  feedbackFormImg.style.position = "fixed";
-  feedbackFormImg.style.top = 300 + "px";
-
-  var feedbackForm = document.createElement("div");
-  feedbackForm.id = "feedbackFormForm";
-  feedbackForm.className = "formPage gradient-ltblue";
-  feedbackForm.style.marginTop = 100 + "px";
-
-  window.appendChild(feedbackFormImg);
-  window.appendChild(feedbackForm);
-
-
+  showFeedbackForm();
   populateFeedbackForm();
 }
 
@@ -8718,16 +7988,9 @@ function doFeedback(JSONStr, JSONKey, ID)
 function pingProvider(JSONStr, JSONKey, ID)
 {
   //console.log("historyClicked");
-
-  JSONStr = JSONStr || '{}';
-  JSONKey = JSONKey || returnParameters.KEY;
-  ID = ID || returnParameters.ID;
-
   //console.log(JSONStr);
   //console.log(JSONKey);
   //console.log(ID);
-
-
   JSONStr = decodeURI(JSONStr);
   //console.log(JSONStr);
   var form = Ext.JSON.decode(JSONStr);
@@ -8749,14 +8012,10 @@ function pingProvider(JSONStr, JSONKey, ID)
 
 
   var innerHTML = '<h2 style="margin-top: 100px;">You had an appointment with ' + name + ' on ' + day + '.</h2>';
-
-  innerHTML += '<h2>Let ' + first + ' know how well you thought they did.</h2>';
-  innerHTML += '<div class="a-button a-button-large" style="height: 36px;" onclick="doRateMe(\'waitingFormPage\',\'' + ID + '\',\'' + JSONKey + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Rate ' + first + '</span></span></div><br><br><br><br><br>';
-
   innerHTML += '<h2>' + first + ' has yet to provide you feedback.</h2>';
   innerHTML += '<h2>Send ' + first + ' a note to remind them.</h2>';
-  innerHTML += '<div class="a-button a-button-large" style="height: 36px;" onclick="doPingMe(\'waitingFormPage\',\'' + ID + '\',\'' + day + '\');"><span class="a-button-inner" style="padding-top: 11px;"><span class="a-button-text">Ping ' + first + '</span></span></div>';
 
+  innerHTML += '<form id="pingProviderForm" name="pingProviderForm"><textarea name="comment" placeholder="Leave a message here" style="height: 80px; width: 566px; resize: none;"></textarea><br><br><div class="a-button a-button-large" style="height: 61px; margin-left: 150px;" onclick="pingSubmit(this.parentNode.name,\'' + ID +'\',\'' + day + '\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Ping</span></span></div></form>';
 
   var container = document.createElement("div");
   container.id = "viewFeedback";
@@ -8764,7 +8023,7 @@ function pingProvider(JSONStr, JSONKey, ID)
             
   var window = document.createElement("div");
   window.className = "feedbackWindow x-window-default-lt";
-  window.id = "waitingFormPage";
+  window.id = "formPage";
   window.innerHTML = innerHTML;
   
   container.appendChild(window);
@@ -8775,7 +8034,7 @@ function pingProvider(JSONStr, JSONKey, ID)
   header.className = "x-window-default";
   header.style.position = "absolute";
   header.style.top = -30 + "px";
-  header.style.marginLeft = 18 + "px";
+  header.style.marginLeft = 20 + "px";
   header.style.width = 940 + "px";
   header.style.height = 50 + "px";
   header.style.zIndex = 70;
@@ -8789,51 +8048,11 @@ function pingProvider(JSONStr, JSONKey, ID)
   container.appendChild(header);
 
 
-
-
   document.getElementById("featuredHistoryItems").appendChild(container);
-  document.getElementById("featuredHistoryItems").style.zIndex = 50;
 
 }
 
 
-function doRateMe(elID, ID, JSONKey)
-{
-  returnParameters.KEY = JSONKey;
-  returnParameters.ID = ID;
-  console.log("HERE");
-
-  var window = document.getElementById(elID);
-  console.log(window.innerHTML);
-  window.innerHTML = '';
-  
-  //<div id="rateFormImg" class="circular" style="margin-top: 60px;"></div>
-  //<div id="rateForm" class="formPage gradient-ltblue">
-  var rateFormImg = document.createElement("div");
-  rateFormImg.id = "rateFormImg";
-  rateFormImg.className = "circular";
-  rateFormImg.style.position = "fixed";
-  rateFormImg.style.top = 300 + "px";
-
-  var rateForm = document.createElement("div");
-  rateForm.id = "rateForm";
-  rateForm.className = "formPage gradient-ltblue";
-  rateForm.style.marginTop = 100 + "px";
-
-  window.appendChild(rateFormImg);
-  window.appendChild(rateForm);
-
-  populateRateForm();
-}
-
-
-
-function doPingMe(elID, ID, day)
-{
-  var window = document.getElementById(elID);
-  window.innerHTML = '<form id="pingProviderForm" name="pingProviderForm"><textarea name="comment" placeholder="Leave a message here" style="height: 80px; width: 566px; resize: none;"></textarea><br><br><div class="a-button a-button-large" style="height: 61px; margin-left: 150px;" onclick="pingSubmit(\'' + elID + '\',\'' + ID +'\',\'' + day + '\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Ping</span></span></div></form>';
-  
-}
 
 
 
@@ -8843,8 +8062,6 @@ function doPingMe(elID, ID, day)
 
 function socialShare(type, description, ID, JSONKey)
 {
-  shareRating(JSONKey, true);
-
   var content =  '';
   description = encodeURI(description);
 
@@ -8972,7 +8189,7 @@ function socialShare(type, description, ID, JSONKey)
             for(var address in allAddresses)
 	    {
               $.ajax({url:"./email.php", 
-	      data: {id: user[0].inID, name: '', email: allAddresses[address], cc_list: cc_list, from: myName, subject: "Check out my interview feedback on InterviewRing.com", MsgHTML: userHTML, attachResume: '0'},
+	      data: {id: user[0].inID, name: '', email: allAddresses[address], cc_list: cc_list, subject: "Check out my interview feedback on InterviewRing.com", MsgHTML: userHTML, attachResume: '0'},
               type:'post',
               async:false
               });
@@ -8986,95 +8203,6 @@ function socialShare(type, description, ID, JSONKey)
       });//Msg.show
   }
 }
-
-
-
-
-function inviteOthers()
-{
- 
-  var myFirst = productStore.getById(user[0].inID).data.first;
-  var myLast = productStore.getById(user[0].inID).data.last;
-  var myName = myFirst + ' ' + myLast;
-
-      var msg = '<div>Please enter the email addresses of the people you wish to invite<br>to become members. (seperated by spaces and/or commas)<br /><br /><label for="emailAddressesText">Email Addresses:</label><input id="emailAddressesText" name="emailAddressesText" type="textbox" style="width: 466px;"/>';
-      msg += '<br><label for="emailShareComment">Comment:</label><textarea name="emailShareComment" id="emailShareComment" placeholder="Leave a message here" style="height: 80px; width: 466px; resize: none;"></textarea>';
-      msg += '</div>';
-
-      var addresses = '';
-
-      var mbox = Ext.Msg.show({
-        title:    'Invite others to become interviewring.com members',
-        msg:      msg,
-        buttons:  Ext.MessageBox.OKCANCEL,
-        icon: Ext.Msg.QUESTION,
-	callback: function(btn, text, cfg )
-        {
-          if( btn == 'ok')
-          {
-
-            addresses = Ext.get('emailAddressesText').getValue();
-            var comment = Ext.get('emailShareComment').getValue();
-            var allowEmailAddresses = document.getElementById('acceptEmailAddresses') ? document.getElementById('acceptEmailAddresses').checked : false;
-
-            var exp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            var regexp = new RegExp(exp);
-
-            //console.log(addresses);
-
-            var allAddresses = addresses.split(/[\s,;]+/);
-            var validEmail = true;
-            for(var address in allAddresses)
-	    {
-	      //console.log("->"+allAddresses[address]+"<-");
-              validEmail &= allAddresses[address].match(regexp) ? true : false;
-              //console.log(validEmail);
-	    }
-
-            //console.log("ALLOW: " + allowEmailAddresses);
-            if(!addresses)
-	    {
-              var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'You must specify at least one email address' + '</span>' + '<br><br>' + cfg.msg;
-              Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
-	    }
-            else if(!validEmail && !allowEmailAddresses)
-	    {
-              //console.log(cfg.msg);
-              //console.log(addresses);
-              cfg.msg = cfg.msg.replace('name="emailAddressesText"', 'name="emailAddressesText" value="' + addresses + '"');
-              //console.log(addresses);
-              var newMsg = cfg.msg.match(/error/) ? cfg.msg : '<span style="color:red;" class="error">' + 'One or more of your email addresses does not seem to be a valid email address' + '</span>' + '<br><br><input type="checkbox" name="acceptEmailAddresses" id="acceptEmailAddresses"/><label for="acceptEmailAddresses">These email addresses are valid</label><br><br>' + cfg.msg;
-              Ext.Msg.show(Ext.apply({}, { msg: newMsg }, cfg));
-	    }
-            else
-	    {
-
-              var URL = 'http://www.interviewring.com';
-
-              var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>I\'d like to invite you to become a member of interviewring.com.</h1><h2>Click <a href="' + URL +'">this</a> link to get started.</h2></div><br><br><br><div><h3>This email was sent via interviewring.com on behalf of ' + myName + '<br>-The InterviewRing.com team<br><br><br>Message:<br>' + comment + '</div></h3></body></html>';
-
-	    var cc_list = new Array();
-	    cc_list[0] = user[0].email;
-            for(var address in allAddresses)
-	    {
-              $.ajax({url:"./email.php", 
-	      data: {id: user[0].inID, name: '', email: allAddresses[address], cc_list: cc_list, from: myName, subject: "Invitation to become an InterviewRing.com member", MsgHTML: userHTML, attachResume: '0'},
-              type:'post',
-              async:false
-              });
-	    }
-	    }
-
-
-
-	  }
-        }
-      });//Msg.show
-
-}
-
-
-
 
 
 function populateShareElement()
@@ -9087,24 +8215,21 @@ function populateShareElement()
 
   if(productStore.getById(ID))
   {
-    //console.log("HERE");
     feedback = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
-    //console.log(feedback);
     JSONStr = Ext.JSON.encode(feedback[JSONKey]);
     //console.log(JSONKey);
   }
 
 
-  console.log(JSONStr);
-  console.log(JSONKey);
-  console.log(ID);
+  //console.log(JSONStr);
+  //console.log(JSONKey);
+  //console.log(ID);
 
   var split = JSONKey.split(/\:/);
   var myID = split[0];
   var day = split[1];
 
-  //if(feedback[JSONKey] && settings[myID]['share'][JSONKey])
-  if(feedback[JSONKey])
+  if(feedback[JSONKey] && settings[myID]['share'][JSONKey])
   {
     historyClicked(JSONStr,JSONKey,ID,true);
   }
@@ -9129,27 +8254,16 @@ function populateShareElement()
 
 function populateRateForm()
 {
-  var JSONKey = returnParameters.KEY;
   var ID = returnParameters.ID;
 
   var showPrevious = false;
   var name = '';
   var ratingObj;
 
-  //TTJ
-
-  //Check if user has already seen the feedback
-  var seen = false;
-  if(productStore.getById(ID))
-  {
-    feedbackObj = productStore.getById(ID).data.feedback ? Ext.JSON.decode(productStore.getById(ID).data.feedback) : {};
-    seen = feedbackObj[JSONKey]['seen'];
-  }
-
 
   var rateFormImg = document.getElementById("rateFormImg");
   var rateForm = document.getElementById("rateForm");
-  rateForm.style.marginLeft = 17 + 'px';
+  rateForm.style.marginLeft = 20 + 'px';
 
   if(productStore.getById(ID))
   {
@@ -9161,7 +8275,7 @@ function populateRateForm()
     name = first + ' ' + last;
   }
 
-  if(ratingObj && !seen)
+  if(ratingObj)
   {
     var rating = Math.ceil(ratingObj.average);
     var rates = ratingObj.total || 0;
@@ -9236,16 +8350,10 @@ function populateRateForm()
 
 
 
-      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #ffffff; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #444444;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
+      innerHTML += '<br><div class="ratingComment gradient-ltblue"><div class="x-window-default"><span style="color: #4A5612; font-size: 14px; font-weight: bold;">' + dateStr + '</span><br><span style="color: #73841D;">' + commentName + '</span></div>' + commentRatingStr + '<span style="display: block; margin-top: 20px;">' + comment + '</span></div>';
 
     }
-    rateForm.innerHTML = '<div style="display: block; margin: 10px auto;" ><h2 style="text-align: center;">Rate: ' + name + '</h2>' + ratingStr + '<form id="myRating" name="myRating" style="position: absolute; top: 84px; left: 50px;"><textarea name="comment" placeholder="After rating this provider you can enter your comments here" style="height: 80px; width: 566px; resize: none;"></textarea><div class="a-button a-button-large" style="height: 61px; position: absolute; top: 90px; float: left; left: 140px; z-index: 51;" onclick="rateSubmit(this.parentNode.name,\'' + ID + '\',\'' + JSONKey + '\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Submit</span></span></div></form>' + '<div class="gradient-darkGrey" style="position: absolute; bottom: 10px; left: 50px; height: 250px; width: 570px; overflow: auto; border: 1px solid; border-color: #777777 #444444 #222222; border-radius: 3px;">' + innerHTML + '</div></div>';
-  }
-  else if(seen)
-  {
-    rateForm.innerHTML = '<img src="./images/403.png" style="height: 380px; display: inline-block; margin-right: 125px;"/><h1 style="text-align: center; display: inline-block;">You have already seen your feedback for this appointment</h1>';
-    rateFormImg.style.display = 'none';
-    rateForm.style.marginLeft = -120 + 'px';
+    rateForm.innerHTML = '<div style="display: block; margin: 10px auto;" ><h2 style="text-align: center;">Rate: ' + name + '</h2>' + ratingStr + '<form id="myRating" name="myRating" style="position: absolute; top: 84px; left: 50px;"><textarea name="comment" placeholder="After rating this provider you can enter your comments here" style="height: 80px; width: 566px; resize: none;"></textarea><div class="a-button a-button-large" style="height: 61px; position: absolute; top: 90px; float: left; left: 140px; z-index: 51;" onclick="rateSubmit(this.parentNode.name,\'' + ID +'\');"><span class="a-button-inner" style="padding-top: 22px;"><span class="a-button-text">Submit</span></span></div></form>' + '<div class="gradient-darkGrey" style="position: absolute; bottom: 10px; left: 50px; height: 250px; width: 570px; overflow: auto; border: 1px solid; border-color: #73841D #C7E520 #73841D #4A5612; border-radius: 3px;">' + innerHTML + '</div></div>';
   }
   else
   {
@@ -9265,7 +8373,6 @@ function populateRateForm()
 
 function populateFeedbackForm()
 {
-  //console.log("populateFeedbackForm");
   var JSONKey = returnParameters.KEY;
 
   var split = JSONKey.split(/\:/);
@@ -9273,46 +8380,16 @@ function populateFeedbackForm()
   var day = split[1];
   var feedbackFormImg = document.getElementById("feedbackFormImg");
   var feedbackForm = document.getElementById("feedbackFormForm");
-  feedbackForm.style.marginLeft = 17 + 'px';
+  feedbackForm.style.marginLeft = 20 + 'px';
 
 
 
   var feedback = productStore.getById(user[0].inID).data.feedback ? Ext.JSON.decode(productStore.getById(user[0].inID).data.feedback) : {};
   var fbKey = JSONKey;
 
-  var historyItems = productStore.getById(user[0].inID).data.providerHistory ? Ext.JSON.decode(productStore.getById(user[0].inID).data.providerHistory) : {};
-  //console.log(historyItems[JSONKey]);
 
 
-  var status;
-  var date = {};
-  date = getDateIndexes(day);
-
-  var d = parseInt(date.dayIndex, 10);
-  var m = parseInt(date.monthIndex, 10);
-  var y = parseInt(date.year, 10);
-  //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
-  var x=new Date();
-  x.setFullYear(y,m-1,d);
-  var t = new Date();
-
-  if (x>t)
-  {
-    status = 'Scheduled';
-  }
-  else
-  {
-    status = 'Waiting Feedback';
-  }
-
-
-
-
-
-
-
-
-  if(productStore.getById(ID) && historyItems[JSONKey] && status != 'Scheduled')
+  if(productStore.getById(ID))
   {
 
     var first = productStore.getById(ID).data.first;
@@ -9346,8 +8423,7 @@ function populateFeedbackForm()
         ratingStr += '<img src="images/0.gif" onclick="javascript:addStar(\'' + i + '\',\'' + starID + '\');" onmouseover="this.style.cursor = \'pointer\';" style="z-index: 999;  position: relative; top: -30px; left: 208px; margin-right: -4px; height: 14px;"/>';
         ratingStr += '<img id="' + starID + '" src="images/filledStar.png" style="z-index: 19;  position: relative; top: -30px; left: 218px; margin-right: -6px; height: 15px;"/>';
       }
-      ratingStr += '<span style="position: relative; top: -30px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied</span>';
-      ratingStr += '<span style="position: relative; top: -30px; left: 440px; font-size:9px; color:#606060; white-space: pre;">Very Satisfied</span></div>';
+      ratingStr += '<span style="position: relative; top: -45px; left: 315px; font-size:9px; color:#606060; white-space: pre;">Very Dissatisfied                                                              Very Satisfied</span></div>';
 
       var comment = '';
       if(feedback) {if(feedback[fbKey]) {if(feedback[fbKey][key]) {comment = feedback[fbKey][key].comment || '';}}}
@@ -9363,12 +8439,6 @@ function populateFeedbackForm()
 
 
     feedbackForm.innerHTML = innerHTML + '<div class="a-button a-button-large" style="position: relative; height: 61px; margin-top: 20px; bottom: 0px; float: right; right: 20px; z-index: 51;" onclick="feedbackSubmit(this.parentNode.name,\'' + JSONKey + '\');"><span class="a-button-inner" style="padding-top: 24px;"><span class="a-button-text">Submit</span></span></div></form>';
-  }
-  else if(historyItems[JSONKey])
-  {
-    feedbackForm.innerHTML = '<img src="./images/403.png" style="height: 380px; display: inline-block; margin-right: 125px;"/>';
-    feedbackFormImg.style.display = 'none';
-    feedbackForm.style.marginLeft = -120 + 'px';
   }
   else
   {
@@ -9443,7 +8513,7 @@ function getStars(baseID)
 }
 
 
-function rateSubmit(fID, inID, JSONKey)
+function rateSubmit(fID, inID)
 {
   //console.log(fID);
   //console.log(document.fID.comment.value);
@@ -9469,7 +8539,7 @@ function rateSubmit(fID, inID, JSONKey)
 	    //console.log("YES");
             //console.log(inID);
             rateForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
-            updateRating(inID, rating, comment, JSONKey);
+            updateRating(inID, rating, comment);
           }
         }
       });
@@ -9478,7 +8548,7 @@ function rateSubmit(fID, inID, JSONKey)
   {
     //console.log('Submitting...');
     rateForm.innerHTML = '<div style="text-align: center; margin-top: 250px;"><h1>Your Feedback has been submitted...</h1><h2>Thank You!</h2></div>';
-    updateRating(inID, rating, comment, JSONKey);
+    updateRating(inID, rating, comment);
   }
   
   
@@ -9737,7 +8807,6 @@ function updateConfidentiality(checked)
   //console.log(checked);
   settings[inID]['identity'] = checked;
   setGroup("infoConfidential", settings[inID]['identity']);
-  setGroup("sbInfoConfidential", settings[inID]['identity']);
   $.ajax({url:"./saveSettings.php", 
        data: {id: inID, settings: JSON.stringify(settings[inID]) },
        type:'post',
@@ -9746,7 +8815,7 @@ function updateConfidentiality(checked)
 
 }
 
-function updateRating(inID, myRating, myComment, JSONKey)
+function updateRating(inID, myRating, myComment)
 {
   var rating = 0;
 
@@ -9775,7 +8844,7 @@ function updateRating(inID, myRating, myComment, JSONKey)
   ratingObj.average = average;
 
   var myCommentTimeStamp = new Date().getTime();
-  var key = user[0].inID + ':' + myCommentTimeStamp + ':' + JSONKey;
+  var key = user[0].inID + ':' + myCommentTimeStamp;
   comments[key] = myRating + ':' + myComment;
   ratingObj.comments = comments;
 
@@ -9786,13 +8855,6 @@ function updateRating(inID, myRating, myComment, JSONKey)
        type:'post',
        async:true
   });
-
-
-  var first = productStore.getById(inID).data.first;
-  var last = productStore.getById(inID).data.last;
-  var name = myFirst + ' ' + myLast;
-
-  var email = productStore.getById(inID).data.email;
 
 
   var myFirst = productStore.getById(user[0].inID).data.first;
@@ -9811,47 +8873,9 @@ function updateRating(inID, myRating, myComment, JSONKey)
   saveMail(inID, true, msgs);
 
 
-
-  var date = JSONKey.split(':')[1];
-  var synopsis = 'Overall Feedback:<br>' + myRating + '/5 stars<br>Comment: ' + myComment;
-  var userEmail = '<br>Rating Synopsis for ' + date + '<br>' + synopsis;
-  //console.log(userEmail);
-
-  var userHTML = '<html><head><link rel="stylesheet" type="text/css" href="http://www.interviewring.com/css/email.css"></head><body style="background: #f8f4f3;color: #787c6b;min-width: 960px;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div><img style="height:50px;" src="http://www.interviewring.com/images/logo.png"/></div><div><h1>Congratulations! You got rated for your appointment with ' + myName + '</h1><h2>You can view this rating at anytime by logging in to InterviewRing.com,<br>finding yourself under \'Find Interviewers\' on the home page,<br>and clicking on your ratings</h2><h2></div><br><br><br><div><h3>Thank you for choosing InterviewRing.com<br>-The InterviewRing.com team</div>' + userEmail + '</h3></body></html>';
-
-  $.ajax({url:"./email.php", 
-    //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
-    data: {id: user[0].inID, name: first, email: email, from: 'The InterviewRing Team', subject: "InterviewRing.com user, " + myName + ", rated you for an appointment", MsgHTML: userHTML, attachResume: '0'},
-    type:'post',
-    async:false
-  });
-
-
-
-
 }
 
 
-
-
-function markFeedbackSeen(inID, JSONKey)
-{
-  var feedbackObj;
-  //console.log(JSONKey);
-
-  if(productStore.getById(inID)) {feedbackObj = productStore.getById(inID).data.feedback ? Ext.JSON.decode(productStore.getById(inID).data.feedback) : {};}
-  if(!feedbackObj) {return;}
-
-  feedbackObj[JSONKey]['seen'] = true;
-
-  productStore.getById(inID).data.feedback = JSON.stringify(feedbackObj);
-
-  $.ajax({url:"./saveFeedback.php", 
-       data: {id: inID, feedback: JSON.stringify(feedbackObj) },
-       type:'post',
-       async:true
-  });
-}
 
 
 
@@ -9918,7 +8942,7 @@ function updateFeedback(inID, JSONKey, myFeedback)
 
   $.ajax({url:"./email.php", 
     //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
-    data: {id: user[0].inID, name: first, email: email, from: 'The InterviewRing Team', subject: "InterviewRing.com user, " + myName + ", gave you feedback from your appointment", MsgHTML: userHTML, attachResume: '0'},
+    data: {id: user[0].inID, name: first, email: email, subject: "InterviewRing.com user, " + myName + ", gave you feedback from your appointment", MsgHTML: userHTML, attachResume: '0'},
     type:'post',
     async:false
   });
@@ -9934,8 +8958,6 @@ function updateFeedback(inID, JSONKey, myFeedback)
 
 function pingSubmit(fID, inID, day)
 {
-
-
   var comment = document.pingProviderForm.comment.value;
 
   var first = productStore.getById(inID).data.first;
@@ -9980,13 +9002,12 @@ function pingSubmit(fID, inID, day)
 
   $.ajax({url:"./email.php", 
     //data: {name: user[0].first, email: user[0].email, cc_list: '', subject: "Your Purchase from interviewring.com", MsgHTML: userHTML},
-    data: {id: user[0].inID, name: first, email: email, from: 'The InterviewRing Team', subject: "InterviewRing.com user, " + myName + ", pinged you about an appointment", MsgHTML: userHTML, attachResume: '0'},
+    data: {id: user[0].inID, name: first, email: email, subject: "InterviewRing.com user, " + myName + ", pinged you about an appointment", MsgHTML: userHTML, attachResume: '0'},
     type:'post',
     async:false
   });
 
-  var window = document.getElementById(fID);
-  window.innerHTML = '<h1 style="margin-top:150px; margin-left: 300px;">Ping Successful!</h1>';
+
 
 }
 
@@ -10037,29 +9058,8 @@ function showSettings()
 function doQuickLink(key, item)
 {
   clearAllFilters();
-  setFilter(key, item, 'Filter');
+  setFilter(key, item);
   doSearch();
-
-}
-
-
-
-function doHistoryQuickLink(key, item, type)
-{
-  //First time through to get info for populateFilters()
-  type == 'interviewer' ? doProviderHistory() : doHistory();
-  showProfile();
-  populateFilters();
-  collapseAllFilters();
-  clearAllFilters();
-  setFilter(key, item, 'Filter');
-  type == 'interviewer' ? doProviderHistory() : doHistory();
-
-  if(document.getElementById("viewFeedback"))
-  {
-    document.getElementById("viewFeedback").parentNode.removeChild(document.getElementById("viewFeedback"));
-  }
-
 }
 
 
@@ -10137,7 +9137,7 @@ function addFilterTypeToList(type, elID)
 {
   elID = elID || "searchFilterList";
 
-  //console.log(elID);
+
   var atLeastOneChecked = false;
   var filtered = new Array();
 
@@ -10259,44 +9259,6 @@ function pruneFilters()
 
 
 
-function pruneHistoryFilters()
-{
-
-  for(var key in historyFilters)
-  {
-    var filterName = key + 'Filter';
-    var filterValues = new Array();
-    var el = document.getElementById(key);
-    //console.log("INNER: " + el.innerHTML);
-    var innerHTML = '';
-    //console.log(obj);
-    for(var j = 0; j < historyItemKeyArray.length; j++)
-    {
-      //historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter}); 
-      var currValue = historyItemKeyArray[j][key];
-      var found = 0;
-      for(var i = 0; i < filterValues.length; i++) {if(filterValues[i] === currValue) found++;}
-      if(!found) {filterValues.push(currValue);}
-    }
-    for(var i = 0; i < filterValues.length; i++)
-    {
-      //console.log(key + obj[key]);
-      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + filterValues[i] + '" onclick="historyType==\'interviewee\' ? doHistory() : doProviderHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + filterValues[i] + '<br>';
-      //innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + filterValues[i] + '" onclick="doSearch();"/>' +  filterValues[i] + '<br>';
-    }
-    //console.log(initStr.length);
-    //console.log(innerHTML);
-    if(!innerHTML) {innerHTML = 'No Results';}
-    el.innerHTML = innerHTML;
-    //console.log(el.innerHTML);
-  }
-}
-
-
-
-
-
-
 function populateFilters()
 {
   for(var key in filters)
@@ -10328,7 +9290,7 @@ function populateFilters()
     for(var key in obj)
     {
       //console.log(key + obj[key]);
-      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="historyType==\'interviewee\' ? doHistory() : doProviderHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
+      innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
     }
     el.innerHTML = innerHTML;
   }
@@ -10393,7 +9355,7 @@ function showHistoryFilter(filter)
       for(var key in obj)
       {
         //console.log("FILTER: " + filter + "KEY:" + key + "=" + obj[key]);
-        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="historyType==\'interviewee\' ? doHistory() : doProviderHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
+        innerHTML += '<input type="checkbox" name="' + filterName + '" value="' + obj[key] + '" onclick="doHistory(); addFilterTypeToList(this.name, \'' + "historyFilterList" + '\');"/>' + obj[key] + '<br>';
     
       }
       el.innerHTML = innerHTML;
@@ -10411,11 +9373,10 @@ function showHistoryFilter(filter)
 
 
 
-function setFilter(key, item, type)
+function setFilter(key, item)
 {
   //console.log(key + " " + item);
-  var filterName = key + type;
-  //console.log(filterName);
+  var filterName = key + 'Filter';
   var r = document.getElementsByName(filterName);
   for (var i = 0; i < r.length; i++)
   {

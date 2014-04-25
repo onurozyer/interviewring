@@ -7,6 +7,7 @@ require './connect.php';
 
 $name = $_POST['name'];
 $email = $_POST['email'];
+$from = $_POST['from'];
 $subject = $_POST['subject'];
 $cc_list = json_decode($_POST['cc_list'], true);
 $MsgHTML = $_POST['MsgHTML'];
@@ -66,16 +67,16 @@ $mail->Username   = "info@interviewring.com";  // GMAIL username
 $mail->Password   = "ttjozo123";             // GMAIL password
 
 $address = "info@interviewring.com";
-$mail->SetFrom($address, 'Interviewring Appt.');
+$mail->SetFrom($address, $from);
 
-$mail->AddReplyTo($address, 'Interviewring Appt.');
+$mail->AddReplyTo($address, $from);
 
 $mail->Subject = $subject;
 
 $mail->MsgHTML($MsgHTML);
 $mail->AltBody = $MsgTEXT;
 
-$mail->AddAddress($address, "Interviewring Appt.");
+$mail->AddAddress($address, $from);
 $address = $email;
 $mail->AddAddress($address, $name);
 
@@ -84,7 +85,8 @@ foreach ($cc_list as $key => $value)
   $mail->AddAddress($value, "");
 }
 
-if($attachResume)
+clearstatcache();
+if($attachResume && filesize($filename))
 {
   $mail->addAttachment($filename);
 }

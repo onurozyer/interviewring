@@ -236,15 +236,15 @@ session_start();
 
 <!--
       <div id="exploreWrapper" style="position: relative; top: 5px; left: 130px; z-index: 30;">
-        <input type="text" id="explore" class="explore" style="height: 50px; width: 655px; position: absolute; top:0px; left:0px;" value="FIND INTERVIEWERS FROM DIVERSE INDUSTRIES AND COMPANIES" onclick="this.value=''; this.style.color='#000000'; this.style.fontStyle='normal';" onkeyup="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('explore').value,2)}, 500);" oninput="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('explore').value,2)}, 500);"></input>
-        <img class="gradient-darkGrey" src="./images/search.png" style="position: absolute; top:0px; left:662px;" onmouseover="this.style.cursor='pointer';" onclick="window.showSearch(document.getElementById('explore').value,2);"/>
+        <input type="text" id="explore" class="explore" style="height: 50px; width: 655px; position: absolute; top:0px; left:0px;" value="FIND INTERVIEWERS FROM DIVERSE INDUSTRIES AND COMPANIES" onclick="this.value=''; this.style.color='#000000'; this.style.fontStyle='normal';" onkeyup="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('explore').value,2)}, 500);" oninput="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none";) {window.showSearch(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);"></input>
+        <img class="gradient-darkGrey" src="./images/search.png" style="position: absolute; top:0px; left:662px;" onmouseover="this.style.cursor='pointer';" onclick='if(document.getElementById("profile").style.display == "none";) {window.showSearch(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'/>
       </div>
 -->
 
       <div id="exploreWrapper" style="position: absolute; top: 75px; z-index: 30; font-size: 32px; line-height: 32px; text-align: center; margin-left: 110px;">
       <div>
-        <input type="text" id="explore" class="explore" style="height: 32px; width: 700px; position: relative; align-self: center;top:0px; display: inline;margin: 0 auto;" value="Search For Interviewers..." onclick="this.value=''; this.style.color='#000000'; this.style.fontStyle='normal';" onkeyup="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('explore').value,2)}, 500);" oninput="if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){window.showSearch(document.getElementById('explore').value,2)}, 500);">
-        <img class="gradient-darkGrey" src="./images/search.png" style="position: relative; top: 10px; cursor: pointer; height: 30px; width: 34px; margin: 0px 0px 1px -11px; display: inline-block;" onmouseover="this.style.cursor='pointer';" onclick="window.showSearch(document.getElementById('explore').value,2);">
+        <input type="text" id="explore" class="explore" style="height: 32px; width: 700px; position: relative; align-self: center;top:0px; display: inline;margin: 0 auto;" value="Search For Interviewers..." onclick="this.value=''; this.style.color='#000000'; this.style.fontStyle='normal';" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showSearch(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showSearch(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);'>
+        <img class="gradient-darkGrey" src="./images/search.png" style="position: relative; top: 10px; cursor: pointer; height: 30px; width: 34px; margin: 0px 0px 1px -11px; display: inline-block;" onmouseover="this.style.cursor='pointer';" onclick='if(document.getElementById("profile").style.display == "none") {window.showSearch(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'>
       </div>
       </div>
 
@@ -274,6 +274,7 @@ session_start();
 
 
 
+  <div id="sideBarMenu" class="quickLinks"></div>
 
 
 
@@ -488,10 +489,10 @@ session_start();
 
         <div id="apptScheduler" class="scheduler-header gradient-darkGray" style="display: none; width: 320px; z-index: 56; position: absolute; top: -90px; float: right; margin-left: 312px; color: #ffffff;">
           <div style="position: absolute; float: right; right: 0px; padding: 4px;">
-            <div class="close-up" onmouseover="this.style.cursor='pointer'; this.className='close-dn';" onmouseout="this.className='close-up';" onclick="this.parentNode.parentNode.style.display='none'; document.getElementById('scrollbar').style.zIndex = 55; if(document.getElementById('screen')) {document.getElementById('screen').style.display='none';}">
+            <div class="close-up" onmouseover="this.style.cursor='pointer'; this.className='close-dn';" onmouseout="this.className='close-up';" onclick="unlocalizeApptScheduler(); this.parentNode.parentNode.style.display='none'; document.getElementById('scrollbar').style.zIndex = 55; if(document.getElementById('screen')) {document.getElementById('screen').style.display='none';}">
             </div>
           </div>
-          <table style="width: 300px; color: #ffffff; padding: 0px;"><td id="myApptHeader" class="scheduler-header gradient-grey" style="width: 300px; height: 30px;">Choose the hours/services for this appointment</td></table>
+          <table style="width: 300px; color: #ffffff; padding: 0px;"><td id="myApptHeader" class="scheduler-header gradient-grey" style="width: 300px; height: 40px;"><span id="myApptHeaderDate"></span><span>Choose the hours/services for this appointment</span></td></table>
           <table id="myAppts" border="0" cellpadding="0" cellspacing="0" class="tablesorter" style="width: 300px;">
             <thead>
               <tr>
@@ -773,7 +774,7 @@ session_start();
           </select>
 
           <div style="position: absolute; top: 6px; margin-left: 300px; width: 120px; color: #555;">
-            <input type="checkbox" name="clearAllHistoryFilters" onclick='this.checked=false; clearAllFilters(); doHistory(); document.getElementById("historyFilterList").innerHTML = "[]";' style="color:#555;"/>Clear All Filters
+            <input type="checkbox" name="clearAllHistoryFilters" onclick='this.checked=false; clearAllFilters(); historyType=="interviewee" ? doHistory() : doProviderHistory(); document.getElementById("historyFilterList").innerHTML = "[]";' style="color:#555;"/>Clear All Filters
             <span id="historyFilterList" style="position:absolute; top:4px; left: 114px; width:400px;">[]</span>
           </div>
 
@@ -922,8 +923,8 @@ session_start();
       <div class="highlight">
         <div class="clearfix">
           <div class="featured" style="top: 100px;">
-            <div id="rateFormImg" class="circular" style="margin-top: 60px;"></div>
-            <div id="rateForm" class="formPage gradient-ltblue">
+            <div id="XXrateFormImg" class="circular" style="margin-top: 60px;"></div>
+            <div id="XXrateForm" class="formPage gradient-ltblue">
             </div>
           </div><!--featured-->
         </div><!--clearfix-->
@@ -937,8 +938,8 @@ session_start();
       <div class="highlight">
         <div class="clearfix">
           <div class="featured" style="top: 100px;">
-            <div id="feedbackFormImg" class="circular" style="margin-top: 60px;"></div>
-            <div id="feedbackFormForm" class="formPage gradient-ltblue">
+            <div id="XXfeedbackFormImg" class="circular" style="margin-top: 60px;"></div>
+            <div id="XXfeedbackFormForm" class="formPage gradient-ltblue">
             </div>
           </div><!--featured-->
         </div><!--clearfix-->
@@ -1294,7 +1295,7 @@ session_start();
         <div class="a-button a-button-xsmall connect" style="margin-right: 6px; margin-top: 22px;" onclick=''><span class="a-button-inner" style="padding-top: 0px;"><img class="socialicon" style="margin-left:-32px; padding:0;" src="images/twitter.png" alt="twitter"/></span></div>
 
 
-        <span style="position: relative; float: right; margin-top: 30px; color: #788699;">Contact Us</span>
+        <span style="position: relative; float: right; margin-top: 30px; color: #788699;"><a style="color: #788699;" href="mailto:info@interviewring.com?Subject=Contact%20Us" target="_none">Contact Us</a></span>
       </div>
       </div>
     </div>

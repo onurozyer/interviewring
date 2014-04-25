@@ -56,6 +56,11 @@
 
       //document.getElementById('explore').value = "Find interviewers from diverse industries and companies";
       //document.getElementById('explore').style.color = '#898989';
+
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
+
+
     }
 
 
@@ -109,6 +114,8 @@
       document.getElementById("step2").onclick=function() {showSearch();};
       document.getElementById("step3").onclick=function() {showCheckOut();};
 
+      document.getElementById("quickLinks").style.display = '';   
+      document.getElementById("sideBarMenu").style.display = 'none';
 
       populateFilters();
       collapseAllFilters();
@@ -120,7 +127,7 @@
 
 
 
-    function showProfile(n)
+    function showProfile(arg, n)
     {
       if(!user[0] && 0)
       {
@@ -165,10 +172,14 @@
       //document.getElementById("step1").onclick=function() {showHome();};
       //document.getElementById("step2").onclick=function() {showSearch();};
 
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
+
       populateFilters();
       collapseAllFilters();
       clearAllFilters();
-      doHistory();
+      //productStore.getById(user[0].inID).data.role=='find' ? doHistory(arg || "") : doProviderHistory(arg || "");
+      historyType=='interviewee' ? doHistory(arg || "") : doProviderHistory(arg || "");
     }
 
 
@@ -210,6 +221,8 @@
       document.getElementById("scrollbar").style.zIndex = 55;
       if(document.getElementById("screen")) {document.getElementById("screen").style.display='none';}
 
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
       loadCartItems("cartItems", false);
     }
 
@@ -242,6 +255,8 @@
       //document.getElementById("returnLogin").style.display='';
 
       waitLoading4();
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
     }
 
 
@@ -273,6 +288,8 @@
       //document.getElementById("returnLogin").style.display='';
 
       waitLoading5();
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = 'none';
 
     }
 
@@ -305,6 +322,8 @@
       //document.getElementById("returnLogin").style.display='';
 
       waitLoading6();
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
 
     }
 
@@ -337,6 +356,8 @@
       //document.getElementById("returnLogin").style.display='';
 
       waitLoading7();
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
 
     }
 
@@ -379,6 +400,8 @@
 
       document.getElementById("step").src="./images/step2_helper.png";
 
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
       showServices();
 
 /*
@@ -424,6 +447,8 @@
 
       document.getElementById("step").src="./images/step3_helper.png";
 
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
       loadSchedule();
       dayNumber = today.getDay();
       dayIndex = today.getDate();
@@ -479,6 +504,9 @@
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "";
       document.getElementById("step").src="./images/step3_helper.png";
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = '';
+
       //console.log(JSON.stringify(mail));
       //console.log(user[0].inID);//FE77HfB5Pw
 
@@ -511,18 +539,18 @@
       {
         var myNewRecord = [
         {
-          inID: user[0].inID,
-          role: 'give',
-          providedServices: JSON.stringify(services),
-          calendar: JSON.stringify(schedule)
+          inID: user[0].inID
         }];
         productStore.loadData(myNewRecord, true);
       }
-      productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
-      productStore.getById(user[0].inID).data.providedServices = JSON.stringify(services);
+      productStore.getById(user[0].inID).data.linkedINprofile = Ext.JSON.encode(user[0].linkedINprofile);
+      productStore.getById(user[0].inID).data.tzName = tzName;
       productStore.getById(user[0].inID).data.email = user[0].email;
       productStore.getById(user[0].inID).data.education = user[0].education;
       productStore.getById(user[0].inID).data.role = 'give';
+      productStore.getById(user[0].inID).data.providedServices = JSON.stringify(services);
+      productStore.getById(user[0].inID).data.calendar = JSON.stringify(schedule);
+
       productStore.getById(user[0].inID).data.first = user[0].first;
       productStore.getById(user[0].inID).data.last = user[0].last;
       productStore.getById(user[0].inID).data.company = user[0].company;
@@ -547,5 +575,7 @@
       document.getElementById("selectServices").style.display = "none";
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "none";
+      document.getElementById("quickLinks").style.display = 'none';   
+      document.getElementById("sideBarMenu").style.display = 'none';
     }
 

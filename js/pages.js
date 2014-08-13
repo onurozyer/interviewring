@@ -11,9 +11,13 @@
     {
       document.getElementById('explore').value = '';
 
+      document.getElementById('filters').style.display = 'none';
+      document.getElementById('sort').style.display = 'none';
+
       document.getElementById("home").style.display = "";
       document.getElementById("howItWorks").style.display = "none";
-      document.getElementById("search").style.display = "none";
+      document.getElementById("findInterviews").style.display = "none";
+      document.getElementById("giveInterviews").style.display = "none";
       document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
@@ -25,40 +29,9 @@
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "none";
 
-      if(!give)
-      {
-      document.getElementById("step").src="./images/step1.png";
-/*
-      document.getElementById("step2").onmouseover=function() {this.style.cursor="pointer"; showSearch();};
-      document.getElementById("step2").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step2").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 2;};
-      document.getElementById("step3").onmouseover=function() {this.style.cursor="pointer"; showCheckOut();};
-      document.getElementById("step3").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step3").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 3;};
-*/
-      document.getElementById("step2").onclick=function() {showSearch();};
-      document.getElementById("step3").onclick=function() {showCheckOut();};
-      }
-      else
-      {
-      document.getElementById("step").src="./images/step1_helper.png";
-/*
-      document.getElementById("step2").onmouseover=function() {this.style.cursor="pointer"; showSelectServices();};
-      document.getElementById("step2").onmouseout=function() {if(step==1){showHome(true);} else if(step==2){showSelectServices();} else if(step==3){showSelectAvailability();}};
-      document.getElementById("step2").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 2;};
-      document.getElementById("step3").onmouseover=function() {this.style.cursor="pointer"; showSelectAvailability();};
-      document.getElementById("step3").onmouseout=function() {if(step==1){showHome(true);} else if(step==2){showSelectServices();} else if(step==3){showSelectAvailability();}};
-      document.getElementById("step3").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 3;};
-*/
-      document.getElementById("step2").onclick=function() {showSelectServices();};
-      document.getElementById("step3").onclick=function() {showSelectAvailability();};
-      }
 
-      //document.getElementById('explore').value = "Find interviewers from diverse industries and companies";
-      //document.getElementById('explore').style.color = '#898989';
-
-      document.getElementById("quickLinks").style.display = 'none';   
-      document.getElementById("sideBarMenu").style.display = '';
+      //document.getElementById("quickLinks").style.display = 'none';   
+      //document.getElementById("sideBarMenu").style.display = '';
 
 
     }
@@ -67,27 +40,18 @@
 
 
 
-    function showSearch(arg, n)
+    function showFindInterviews(arg)
     {
-      if(!user[0] && 0)
-      {
-        Ext.MessageBox.show({
-          title:    'Login Required',
-          msg:      'You must first login to access this page',
-          buttons:  Ext.MessageBox.OK,
-          icon:     Ext.Msg.WARNING
-        });
-
-        return;
-      }
-      if(n) {step = n;}
  
       document.getElementById('explore').value = '';
 
+      document.getElementById('filters').style.display = '';
+      document.getElementById('sort').style.display = '';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
-      document.getElementById("search").style.display = "";
+      document.getElementById("findInterviews").style.display = "";
+      document.getElementById("giveInterviews").style.display = "none";
       document.getElementById("slider").style.display = "";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
@@ -99,56 +63,75 @@
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "none";
 
-      document.getElementById("step").src="./images/step2.png";
 
 
-/*
-      document.getElementById("step1").onmouseover=function() {this.style.cursor="pointer"; showHome();};
-      document.getElementById("step1").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step1").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 1;};
-      document.getElementById("step3").onmouseover=function() {this.style.cursor="pointer"; showCheckOut();};
-      document.getElementById("step3").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step3").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 3;};
-*/
-      document.getElementById("step1").onclick=function() {showHome();};
-      document.getElementById("step2").onclick=function() {showSearch();};
-      document.getElementById("step3").onclick=function() {showCheckOut();};
 
-      document.getElementById("quickLinks").style.display = '';   
-      document.getElementById("sideBarMenu").style.display = 'none';
 
-      populateFilters();
-      collapseAllFilters();
-      clearAllFilters();
-      doSearch(arg || "");
+      //document.getElementById("quickLinks").style.display = '';   
+      //document.getElementById("sideBarMenu").style.display = 'none';
+
+      //populateFilters();
+      //collapseAllFilters();
+      //clearAllFilters();
+      //doSearch(arg || "");
+      addFilterOptions('filter_industry', app.filters.industry);
+      addFilterOptions('filter_company', app.filters.company);
+
+      doSearchInterviewers(arg);
 
     }
 
 
 
 
-    function showProfile(arg, n)
+    function showGiveInterviews()
     {
-      if(!user[0] && 0)
-      {
-        Ext.MessageBox.show({
-          title:    'Login Required',
-          msg:      'You must first login to access this page',
-          buttons:  Ext.MessageBox.OK,
-          icon:     Ext.Msg.WARNING
-      });
-
-        return;
-      }
-
-
+ 
       document.getElementById('explore').value = '';
 
-      if(n) {step = n;}
+      document.getElementById('filters').style.display = '';
+      document.getElementById('sort').style.display = '';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
-      document.getElementById("search").style.display = "none";
+      document.getElementById("findInterviews").style.display = "none";
+      document.getElementById("giveInterviews").style.display = "";
+      document.getElementById("slider").style.display = "";
+      document.getElementById("profile").style.display = "none";
+      document.getElementById("checkOut").style.display = "none";
+      document.getElementById("return").style.display = "none";
+      document.getElementById("socialShare").style.display = "none";
+      document.getElementById("rateMe").style.display = "none";
+      document.getElementById("feedbackForm").style.display = "none";
+      document.getElementById("selectServices").style.display = "none";
+      document.getElementById("selectAvailability").style.display = "none";
+      document.getElementById("completeGiveHelp").style.display = "none";
+
+
+      //document.getElementById("quickLinks").style.display = '';   
+      //document.getElementById("sideBarMenu").style.display = 'none';
+
+      //populateFilters();
+      //collapseAllFilters();
+      //clearAllFilters();
+      //doSearch(arg || "");
+
+    }
+
+
+
+
+    function showProfile(arg)
+    {
+      document.getElementById('explore').value = '';
+
+      document.getElementById('filters').style.display = 'none';
+      document.getElementById('sort').style.display = 'none';
+
+      document.getElementById("home").style.display = "none";
+      document.getElementById("howItWorks").style.display = "none";
+      document.getElementById("findInterviews").style.display = "none";
+      document.getElementById("giveInterviews").style.display = "";
       document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "";
       document.getElementById("checkOut").style.display = "none";
@@ -160,26 +143,31 @@
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "none";
 
-      //document.getElementById("step").src="./images/step3.png";
-/*
-      document.getElementById("step1").onmouseover=function() {this.style.cursor="pointer"; showHome();};
-      document.getElementById("step1").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step1").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 1;};
-      document.getElementById("step2").onmouseover=function() {this.style.cursor="pointer"; showSearch();};
-      document.getElementById("step2").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step2").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 2;};
-*/
-      //document.getElementById("step1").onclick=function() {showHome();};
-      //document.getElementById("step2").onclick=function() {showSearch();};
 
-      document.getElementById("quickLinks").style.display = 'none';   
-      document.getElementById("sideBarMenu").style.display = '';
+      //document.getElementById("quickLinks").style.display = 'none';   
+      //document.getElementById("sideBarMenu").style.display = '';
 
-      populateFilters();
-      collapseAllFilters();
-      clearAllFilters();
+      //populateFilters();
+      //collapseAllFilters();
+      //clearAllFilters();
       //productStore.getById(user[0].inID).data.role=='find' ? doHistory(arg || "") : doProviderHistory(arg || "");
-      historyType=='interviewee' ? doHistory(arg || "") : doProviderHistory(arg || "");
+      //historyType=='interviewee' ? doHistory(arg || "") : doProviderHistory(arg || "");
+
+
+
+      doShowProfile();
+
+
+      var dtPRV = new timezoneJS.Date();
+      //console.log(app.DAYS[dtPRV.getDay()]);
+
+      var opts = new Array();
+      opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
+      opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
+      opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
+      addOptions("calSelect", opts);
+
+
     }
 
 

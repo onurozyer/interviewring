@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!--[if IE 7]> <html lang="en" class="ie7"> <![endif]-->
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+    <link href='http://fonts.googleapis.com/css?family=Poiret+One|Ubuntu:300,700|Open+Sans&subset=latin,latin-ext,greek-ext' rel='stylesheet' type='text/css'>
+    <title>Interview Ring</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- CSS Global Compulsory-->
+    <link type="text/css" rel="stylesheet" href="css/bootstrap/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="css/fonts.css" />
+    <link type="text/css" rel="stylesheet" href="style.css" />
+    <link type="text/css" rel="stylesheet" href="css/bootstrap/bootstrap-responsive.css" />
+    <link type="text/css" rel="stylesheet" href="css/flexslider/flexslider.css" />
+
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/jquery/jquery.widget.min.js"></script>
+    <script src="js/metro.min.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="css/metro-bootstrap.css">
+    <link href="js/prettify/prettify.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <link href="css/iconFont.css" rel="stylesheet">
+    <!--<link href="css/metro-bootstrap-responsive.css" rel="stylesheet">-->
+
+    <script src="js/application.js"></script>
+    <script src="js/members.js"></script>
+
+    <script>
+      var app = new application();
+      console.log(app.DAYS[2]);       
+      console.log(app.SHORT_DAYS[2]);       
+
+      var thisID = 'abcdefg';
+      var profile = {'firstName':'Jack', 'lastName':'Jones','positions':{'values':[{'company':{'name':'Cypress'}}]}};
+      var newMember = new members.member(thisID);
+      console.log(members.getMember(thisID).getID());
+      newMember.profile = profile;
+      console.log(members.getMember(thisID).getFirstName());
+      console.log(members.getMember(thisID).getLastName());
+      console.log(members.getMember(thisID).getFullName());
+      console.log(members.getMember(thisID).getCompany());
+      console.log(members.getMember(thisID).getCompanyTenure('Cypress'));
+      console.log(members.getMember(thisID).getImage());
+      console.log(members.getMember(thisID).getIndustry());
+      console.log(newMember.getCompany());
+      console.log(newMember.getFullName());
+      console.log(members.VERSION);
+
+    </script>
+
+
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="container">
+                <div class="row-fluid">
+                    <div class="span5">
+                        <div class="logo">
+                            <a href="#"><img src="img/logo_white.png" alt="logo" /></a>
+                        </div>
+                    </div>
+                    <div class="span7">
+                        <div class="menu">
+                            <div class="navbar">
+                                <div class="navbar-inner">
+                                    <a class="btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                    </a>
+                                    <div class="nav-collapse">
+                                        <ul class="nav">
+                                            <li class="current-menu-item"><a href="#">home</a></li>
+                                            <li><a href="#">about</a></li>
+                                            <li><a href="#">interviewers</a></li>
+                                            <li><a href="#">recruiters</a></li>
+                                            <li><a href="#">my account</a></li>
+                                            <li><a href="#">sign in</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+    <div class="holder" style="margin-top: 0px;">
+        <section class="slider">
+            <div class="flexslider">
+                <div class="slider-content text-center hidden-phone">
+                    <form class="form-search">
+                        <input type="text" class="input-xxlarge" placeholder="search for interviewers">
+                        <button type="submit" class="btn">&#128270;</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+      </div>
+
+
+
+        </div>
+    </header>
+
+
+
+        <div class="holder-top" style="padding-top: 145px;">
+            <div class="container">
+              <p>Main page content</p>
+              <p>goes here...</p>
+            </div>
+        </div>
+
+
+            <footer>
+                <div class="holder-bottom">
+                    <div class="container">
+                        <div class="row-fluid">
+                            <div class="footer-section fs1">
+                                <h6>Explore</h6>
+                                <ul>
+                                    <li><a href="#">About</a></li>
+                                    <li><a href="#">Pricing</a></li>
+                                    <li><a href="#">News</a></li>
+                                    <li><a href="#">Contact</a></li>
+                                    <li><a href="#">Terms of Use Privacy</a></li>
+                                </ul>
+                            </div>
+                            <div class="footer-section fs2">
+                                <h6>Sign Up</h6>
+                                <button class="footer-button">interviewer signup</button>
+                                <button class="footer-button">recruiter signup</button>
+                            </div>
+                            <div class="footer-section fs3">
+                                <h6>Stay in touch</h6>
+                                <div class="share">
+                                    <ul>
+                                        <li class="fb"><a href="#">Facebook</a></li>
+                                        <li class="tw"><a href="#">Twitter</a></li>
+                                        <li class="in"><a href="#">Linkedin</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="footer-section fs4 footer-contact-us">
+                                <h6>Contact Us</h6>
+                                <form action="#">
+                                    <input type="text" placeholder="your name" />
+                                    <input type="email" placeholder="your e-mail" />
+                                    <button class="footer-button">contact us</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <script type="text/javascript" src="js/bootstrap/bootstrap.js"></script>
+            <!--<script type="text/javascript" src="js/flexslider/jquery.flexslider.js"></script>-->
+            <!--<script type="text/javascript" src="js/custom.js"></script>-->
+        </div>
+</body>
+</html>

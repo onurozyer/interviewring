@@ -1,0 +1,233 @@
+
+#calContainer {
+	width: 350px;
+	min-height: 100px;
+	margin: 0 auto;
+	font: 12px "Segoe UI", "Lucida Grande", "Trebuchet MS", Verdana, sans-serif;
+	color: #eee;
+	color: #333;
+	background-color: #007070;
+	background-color: #ff5100;
+	background-color: transparent;
+}
+
+#ical, #nav-calendar {
+	width: 290px;
+	min-height: 50px;
+	margin: 0 auto;
+}
+
+#ical {
+	padding-top: 40px;
+}
+
+#year, #month {
+	text-align: center;
+}
+
+.year-buttons {
+	opacity: 0;
+	-moz-opacity: 0;
+	filter:alpha(opacity=0);
+}
+
+#nav-calendar:hover .year-buttons {
+	opacity: 1;
+	-moz-opacity: 1;
+	filter:alpha(opacity=1);
+}
+
+#year-left-arrow, #year-right-arrow {
+	display: inline-block;
+	width: 19px;
+	height: 19px;
+	cursor: pointer;
+	margin-bottom: -5px;
+}
+
+#year-left-arrow {
+	background-image: url('img/small-left-arrow.png');
+	margin-right: 55px;
+}
+
+#year-right-arrow {
+	background-image: url('img/small-right-arrow.png');
+	margin-left: 55px
+}
+
+#month-left-arrow, #month-right-arrow {
+	display: inline-block;
+	width: 23px;
+	height: 23px;
+	cursor: pointer;
+	margin-top: 6px;
+	opacity: 0.3;
+	-moz-opacity: 0.3;
+	filter:alpha(opacity=3);
+}
+
+#month-left-arrow:hover, #month-right-arrow:hover {
+	opacity: 1;
+	-moz-opacity: 1;
+	filter:alpha(opacity=1);
+}
+
+#month-left-arrow {
+	background-image: url('img/left-arrow.png');
+	float: left;
+	margin-left: 7px;
+}
+
+#month-right-arrow {
+	background-image: url('img/right-arrow.png');
+	float: right;
+	margin-right: 7px;
+}
+
+#currentmonth {
+	font-size: 22px;
+}
+
+.today {
+	background-color: #4cc4d2;
+	color: #eee;
+	border-radius: 20px;
+	cursor: default;
+}
+
+.date_has_event {
+	color: #eee;
+	background-color: #007070;
+	/*border: 2px solid #eee;*/
+	border-radius: 20px;
+	width: 26px;
+	height: 25px;
+	cursor: pointer;
+}
+
+.date_mouseover {
+	color: #eee;
+	background-color: #ff5100;
+	/*border: 2px solid #eee;*/
+	border-radius: 20px;
+	width: 26px;
+	height: 25px;
+	cursor: pointer;
+}
+
+.date_click {
+	color: #eee;
+	background-color: #ff5100;
+	/*border: 2px solid #eee;*/
+	border-radius: 20px;
+	width: 26px;
+	height: 25px;
+	cursor: pointer;
+}
+
+
+.date_click:after {
+  position: absolute;
+  display: block;
+  content: "";
+  border-top: 14px solid #ff5100;
+  border-top: 14px solid transparent;
+  border-left: 14px solid transparent;
+  margin-top: -22px;
+  margin-left: 17px;
+/*
+  top: 0;
+  right: 0;
+*/
+  
+  z-index: 101;
+}
+.date_click:before {
+  position: absolute;
+  display: block;
+  content: "\e003";
+  content: url(img/check.png);
+  color: #fff;
+  /*font-family: 'metroSysIcons';*/
+  font-size: 9pt;
+  font-weight: normal;
+  margin-top: -10px;
+  margin-left: 20px;
+/*
+  top: -5px;
+  right: 0px;
+*/
+  z-index: 102;
+}
+
+
+
+table {
+	text-align: center;
+	margin: 0 auto;
+	border-spacing: 8px 0px;
+	border-collapse:separate;
+}
+
+th {
+	text-transform: uppercase;
+	font-size: 10px;
+	font-weight: normal;
+}
+
+table td {
+	width: 30px;
+	height: 29px;
+	padding-top: 1px;
+}
+
+#week-days {
+	height: 25px;
+}
+
+#separator {
+	padding: 0;
+	border-spacing: 10px 10px;
+	border
+	margin: 5px 0;
+	width: 100%;
+	height: 1px;
+	background-color: #eee;
+	background-color: #333;
+}
+
+#clear-separator {
+	height: 5px;
+}
+
+.events {
+	position: absolute;
+}
+
+.events ul {
+	text-align: center;
+	position: absolute;
+	display: none;
+	z-index: 1000;
+	padding: 15px;
+	background: rgba(17, 17, 17, 0.9);
+	color: white;
+	font-size: 15px;
+	width: 200px;
+	list-style: none;
+	color: #eee;
+}
+
+.events li {
+	padding-bottom: 5px;
+}
+
+.events li span {
+	display: block;
+	font-size: 12px;
+	color: #eee;
+}
+
+.events li span.title {
+	color: #eee;
+}

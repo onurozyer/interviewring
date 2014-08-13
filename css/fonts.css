@@ -1,0 +1,57 @@
+@font-face {
+    font-family: 'MyriadProRegular';
+    src: url('fonts/MyriadProRegular.eot');
+    src: url('fonts/MyriadProRegular.eot') format('embedded-opentype'),
+         url('fonts/MyriadProRegular.woff') format('woff'),
+         url('fonts/MyriadProRegular.ttf') format('truetype'),
+         url('fonts/MyriadProRegular.svg#MyriadProRegular') format('svg');
+}
+@font-face {
+    font-family: 'OpensansBold';
+    src: url('fonts/OpensansBold.eot');
+    src: url('fonts/OpensansBold.eot') format('embedded-opentype'),
+         url('fonts/OpensansBold.woff') format('woff'),
+         url('fonts/OpensansBold.ttf') format('truetype'),
+         url('fonts/OpensansBold.svg#OpensansBold') format('svg');
+}
+@font-face {
+    font-family: 'OpenSansLight';
+    src: url('fonts/OpenSansLight.eot');
+    src: url('fonts/OpenSansLight.eot') format('embedded-opentype'),
+         url('fonts/OpenSansLight.woff') format('woff'),
+         url('fonts/OpenSansLight.ttf') format('truetype'),
+         url('fonts/OpenSansLight.svg#OpenSansLight') format('svg');
+}
+@font-face {
+    font-family: 'OpensansRegular';
+    src: url('fonts/OpensansRegular.eot');
+    src: url('fonts/OpensansRegular.eot') format('embedded-opentype'),
+         url('fonts/OpensansRegular.woff') format('woff'),
+         url('fonts/OpensansRegular.ttf') format('truetype'),
+         url('fonts/OpensansRegular.svg#OpensansRegular') format('svg');
+}
+@font-face {
+    font-family: 'OpensansSemiBold';
+    src: url('fonts/OpensansSemiBold.eot');
+    src: url('fonts/OpensansSemiBold.eot') format('embedded-opentype'),
+         url('fonts/OpensansSemiBold.woff') format('woff'),
+         url('fonts/OpensansSemiBold.ttf') format('truetype'),
+         url('fonts/OpensansSemiBold.svg#OpensansSemiBold') format('svg');
+}
+@font-face {
+    font-family: 'PhilosopherRegular';
+    src: url('fonts/PhilosopherRegular.eot');
+    src: url('fonts/PhilosopherRegular.eot') format('embedded-opentype'),
+         url('fonts/PhilosopherRegular.woff') format('woff'),
+         url('fonts/PhilosopherRegular.ttf') format('truetype'),
+         url('fonts/PhilosopherRegular.svg#PhilosopherRegular') format('svg');
+}
+@font-face {
+    font-family: 'RobotoSlabRegular';
+    src: url('fonts/RobotoSlabRegular.eot');
+    src: url('fonts/RobotoSlabRegular.eot') format('embedded-opentype'),
+         url('fonts/RobotoSlabRegular.woff') format('woff'),
+         url('fonts/RobotoSlabRegular.ttf') format('truetype'),
+         url('fonts/RobotoSlabRegular.svg#RobotoSlabRegular') format('svg');
+}
+

@@ -226,7 +226,7 @@ session_start();
             <div class="main-page-photo-div">
                 <div class="main-page-video-div ">
                     <div class="how-it-works-div">how it works ?</div>
-                    <iframe class="video-frame" width="100%" height="306" src="http://www.youtube.com/embed/-URR4IL0jEI?rel=0" frameborder="0" allowfullscreen="1"></iframe>
+                    <iframe class="video-frame" width="100%" height="306" src="http://www.youtube.com/embed/kk00IAP7cqw?rel=0" frameborder="0" allowfullscreen="1"></iframe>
                     <div>
                         <button class="main-page-signin-linkedin">
                             <div class="main-page-signin-linkedin-content-div">

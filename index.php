@@ -306,6 +306,7 @@ session_start();
 
 
     <div class="holder-top">
+<<<<<<< HEAD
 
       <!--HOME-->
       <div id="home" class="main-page-top-div">

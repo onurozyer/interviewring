@@ -1847,7 +1847,7 @@ footer {
 }
 
 .search-form-div {
-    float: right;
+	float: right;
     height: 40px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -1858,7 +1858,7 @@ footer {
 
 .form-search {
 	height: 100%;
-        margin: 0px 10px;
+    margin: 0px 10px;
 }
 
 .search-form-div .form-search input[type="text"] {
@@ -1867,8 +1867,8 @@ footer {
     color: #999999;
     height: 38px;
     padding-left: 10px;
-    float: left;
     width: 450px;
+    float:left;
 	font-size: 1.3em;
 	margin: 0px;
 	-webkit-appearance: none;    

@@ -34,11 +34,14 @@
 
 
     this.inID = null;
+    this.providerID = null;
+    this.apptDay = null;
     this.paymentReturn = false;
     this.socialShareReturn = false;
     this.rateReturn = false;
     this.feedbackReturn = false;
     this.returnParameters = {};
+    this.cartItems = {};
 
     this.usersLoaded = false;
     this.sortedFilteredList = [];
@@ -50,6 +53,10 @@
   {
     constructor: application
     ,getUserID: function () { return this.inID; }
+
+    ,getProviderID: function () { return this.providerID; }
+
+    ,getApptDay: function () { return this.apptDay; }
 
     ,loadUsers: function ()
     {
@@ -267,9 +274,6 @@
 
       var me = this;
       //console.log("searchInterviewers");
-      //console.log(productStore.getById(user[0].inID).data.role);
-      //if(!productStore.getById(user[0].inID).data.role) {exp = '--NULL--';}
-      //if(productStore.getById(user[0].inID).data.role != 'give') {exp = '--NULL--';}
 
       //console.log('loadSearchItems');
       var regExp = exp || ".";
@@ -290,7 +294,6 @@
 
 	var ID = item.get('ID');
 	//console.log(ID);
-	//if(inID == user[0].inID && item.get('role') == 'find') {return true;}
 	//console.log(inID);
 	var first = item.getFirstName();
         //console.log("FIRST: " + first);
@@ -523,7 +526,7 @@
 
 	//var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(JSON.parse(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
 	//ratingStr += '<div style="right: -6px;">';
-	var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+	var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
 	ratingStr += '<div style="right: -6px;">';
 	for(var i = 0; i < rating; i++)
 	{
@@ -533,7 +536,7 @@
 	{
 	  ratingStr += '<img src="./img/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
 	}
-	ratingStr += '</div></div></div>';
+	ratingStr += '</div></div></div></a>';
         //console.log(ratingStr);
         
 	// --Name--
@@ -578,7 +581,9 @@
 	var window = document.createElement("div");
 	window.className = "interviewer-card";
 	window.id = "searchItem" + index;
-	window.onclick = function() {makeAppt(this.id);};
+	//window.onclick = function() {makeAppt(this.id);};
+	//window.onclick = new Function() ('showCheckOut(\'' + ID + '\');');
+        window.onclick = new Function( 'showCheckOut(\'' + ID + '\')');
 
 	var itemImage = document.createElement("div");
 	itemImage.className = "circular-small";
@@ -1044,7 +1049,8 @@
       var icLeftName = document.createElement("div");
       icLeftName.className = "ic-left-name";
       var linkToReviews = document.createElement("a");
-      linkToReviews.name = "link-to-reviews";
+      //linkToReviews.name = "link-to-reviews";
+      linkToReviews.id = "link-to-reviews";
       linkToReviews.style.textDecoration = "none";
       linkToReviews.style.color = "#ff5100";
       linkToReviews.innerHTML = 'reviews';
@@ -1092,7 +1098,7 @@
 
         var dateStr = weekDay + ', ' + month + ' ' + day + ', ' + year; 
 
-        var ratingStr = '<div style="clear:both;"><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+        var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
         ratingStr += '<div style="right: -6px;">';
         for(var i = 0; i < rating; i++)
         {
@@ -1102,7 +1108,7 @@
         {
 	  ratingStr += '<img src="./img/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
         }
-        ratingStr += '</div></div></div>';
+        ratingStr += '</div></div></div></a>';
 
         var reviewDivRight = document.createElement("div");
         reviewDivRight.className = "review-div-right";
@@ -1271,7 +1277,7 @@
 	   var checkBox = document.createElement("input");
            checkBox.type = "checkbox";
            checkBox.name = "serviceTime";
-           checkBox.value = i;
+           checkBox.value = pad(i,2);
 
 
 	   var timeObj = convertTimeTo12(i + ':' + '00');
@@ -1365,137 +1371,732 @@
 
 
 
+    ,populateScheduleItems: function(ID)
+    {
+      //console.log('populateScheduleItems: ' + ID);
+      var me = this;
+
+
+
+      var member = members.getMember(ID);
+
+      var feedbackObj = member.getFeedback();
+      var numFeedbacks = Object.size(feedbackObj);
+      var interviewsStr = '<div style="position: absolute; top: 6px; width: 200px; color: #555;">Interviews: ' + numFeedbacks + '</div>';
+
+      var charityCoins = member.getCoins();
+      var charityCoinStr = '<div style="position: absolute; top: 30px; width: 200px; color: #555;"><img style="float:left; position: absolute; top:4px;" src="./img/coins.png"/><span style="position:absolute; top: -12px; left: -2px;">Charity Coins</span><span style="position:absolute; top:28px; left: 0px; width: 36px; text-align: center; border: 0px solid #00ff00;">' + charityCoins + '</span></div>';
+
+
+      // --Rating--
+      //var ratingStr = '';
+      var ratingObj = member.getReviews();
+
+      var rating = Math.ceil(ratingObj.average);
+      var rates = ratingObj.total || 0;
+      //console.log(ratingObj.comments);
+      if(!rating) {rating = 0;}
+
+      //var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(JSON.parse(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
+      //ratingStr += '<div style="right: -6px;">';
+      var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+      ratingStr += '<div style="right: -6px;">';
+      for(var i = 0; i < rating; i++)
+      {
+        ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      for(var i = rating; i < 5; i++)
+      {
+        ratingStr += '<img src="./img/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+      }
+      ratingStr += '</div></div></div></a>';
+      //console.log(ratingStr);
+      
+      // --Name--
+      var name = member.getFullName();
+      var url = member.getURL();
+      var link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a href="' + url + '" target="_blank" style="font-size:12px; font-weight:700; text-align: center;">LinkedIn Profile</a><hr></div>';
+
+      //console.log(member.getProfile());
+
+
+      // --Services--
+      services = member.getProvidedServices();
+      //console.log(services);
+
+      // --Company--
+      var company = member.getCompany() || '--';
+      var companyTenure = member.getCompanyTenure(company);
+
+      // --Industry--
+      var industry = member.getIndustry() || '--';
+      var industryTenure = member.getIndustryTenure(industry);
+
+      // --Position--
+      var position = member.getTitle() || '--';
+
+      var education = member.getEducation() || '--';
+      //  Only display most recent education
+      var split = education.split('<br>');
+      education = split[0];
+
+      // --Image--
+      var image = member.getImageSmall;
+      //var image = productStore.getById(ID).data.image || 'http://m.c.lnkd.licdn.com/mpr/mpr/shrink_200_200/p/2/000/1a8/1fc/3597e0f.jpg';
+
+      //if(settings[ID]['identity']) {name = ""; image = "./images/ghostSmall.png"; link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><a target="_blank" style="font-size:12px; font-weight:100; text-align: center;">--</a><hr></div>';}
+
+
+
+
+
+
+      var window = document.getElementById("schedule-page-interviewer-card");
+      window.innerHTML = '';
+
+      var itemImage = document.createElement("div");
+      itemImage.className = "circular-small";
+      itemImage.style.background = 'url(' + image + ') no-repeat center center';
+      //itemImage.style.background = 'url(' + image + ') no-repeat';
+      //window.appendChild(itemImage);
+
+
+      var itemInfoWrapper = document.createElement("div");
+      itemInfoWrapper.id = "itemInfoWrapper";
+      //itemInfoWrapper.style.height = 110 + 'px';
+      //itemInfoWrapper.style.height = 60 + 'px';
+      itemInfoWrapper.style.overflow = 'hidden';
+      //itemInfoWrapper.style.marginTop = -18 + "px";
+      //itemInfoWrapper.style.border = "1px solid #00ff00";
+    
+      var icLeft = document.createElement("div");
+      icLeft.className = "ic-left";
+      icLeft.style.height = 330 + 'px';
+
+      var itemName = document.createElement("div");
+      itemName.className = "ic-left-name";
+      itemName.innerHTML = name;
+      icLeft.appendChild(itemName);
+
+
+
+      var icLeftInfo = document.createElement("div");
+      icLeftInfo.className = "ic-left-info";
+
+      var icLeftInfoLeft = document.createElement("div");
+      //icLeftInfoLeft.style = "width: 80px; text-align: right; float:left; border-right: 1px dotted #ff5100; padding-right: 4px;";
+      icLeftInfoLeft.style.width = 80 + 'px';
+      icLeftInfoLeft.style.textAlign = 'right';
+      icLeftInfoLeft.style.float = 'left';
+      icLeftInfoLeft.style.borderRight = 1 + 'px dotted #ff5100';
+      icLeftInfoLeft.style.paddingRight = 4 + 'px';
+
+      var itemIndustry = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemIndustry.innerHTML = '<p>' + 'industry' + '</p>';
+      icLeftInfoLeft.appendChild(itemIndustry);
+
+      var itemCompany = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemCompany.innerHTML = '<p>' + 'company' + '</p>';
+      icLeftInfoLeft.appendChild(itemCompany);
+
+      var itemPosition = document.createElement("div");
+      //itemPosition.style.textAlign = "left";
+      itemPosition.innerHTML = '<p>' + 'title' + '</p>';
+      icLeftInfoLeft.appendChild(itemPosition);
+
+      var itemTenure = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemTenure.innerHTML = '<p>' + 'tenure' + '</p>';
+      icLeftInfoLeft.appendChild(itemTenure);
+
+      var itemEducation = document.createElement("div");
+      //itemEducation.style.textAlign = "left";
+      itemEducation.innerHTML = '<p>' + 'education' + '</p>';
+      icLeftInfoLeft.appendChild(itemEducation);
+
+
+
+      var icLeftInfoRight = document.createElement("div");
+      //icLeftInfoRight.style = "text-align: left; float: left; padding-left: 4px;";
+      icLeftInfoRight.style.textAlign = 'left';
+      icLeftInfoRight.style.float = 'left';
+      icLeftInfoRight.style.paddingLeft = 4 + 'px';
+      icLeftInfoRight.style.overflow = 'hidden';
+      icLeftInfoRight.style.width = 550 + 'px';
+
+      var itemIndustry = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemIndustry.innerHTML = '<p>' + industry + '</p>';
+      icLeftInfoRight.appendChild(itemIndustry);
+
+      var itemCompany = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemCompany.innerHTML = '<p>' + company + '</p>';
+      icLeftInfoRight.appendChild(itemCompany);
+
+      var itemPosition = document.createElement("div");
+      //itemPosition.style.textAlign = "left";
+      itemPosition.innerHTML = '<p>' + position + '</p>';
+      icLeftInfoRight.appendChild(itemPosition);
+
+      var itemTenure = document.createElement("div");
+      //itemCompany.style.textAlign = "left";
+      itemTenure.innerHTML = '<p>company: ' + companyTenure + 'yrs, industry: ' + industryTenure + 'yrs</p>';
+      icLeftInfoRight.appendChild(itemTenure);
+
+      var itemEducation = document.createElement("div");
+      //itemEducation.style.textAlign = "left";
+      itemEducation.innerHTML = '<p>' + education + '</p>';
+      icLeftInfoRight.appendChild(itemEducation);
+
+      icLeftInfo.appendChild(icLeftInfoLeft);
+      icLeftInfo.appendChild(icLeftInfoRight);
+
+      var itemRating = document.createElement("div");
+      itemRating.innerHTML = ratingStr;
+      icLeftInfo.appendChild(itemRating);
+
+
+      icLeft.appendChild(icLeftInfo);
+      itemInfoWrapper.appendChild(icLeft);
+
+
+
+
+
+
+
+      var icRight = document.createElement("div");
+      icRight.className = "ic-right";
+      icRight.style.height = 330 + 'px';
+
+      var itemName = document.createElement("div");
+      itemName.className = "ic-right-name";
+      itemName.innerHTML = 'ask ' + member.getFirstName() + ' a question';
+      icRight.appendChild(itemName);
+
+
+
+      var icRightInfo = document.createElement("div");
+      icRightInfo.className = "ic-right-info";
+      icRightInfo.innerHTML = '<textarea class="schedule-textarea">write your question here...</textarea>';
+
+      icRight.appendChild(icRightInfo);
+
+      var icRightBottom = document.createElement("div");
+      icRightBottom.className = "sc-right-bottom";
+      icRightBottom.style.marginTop = 50 + 'px';
+      icRightBottom.innerHTML = '<button class="sc-right-send">send</button>';
+      icRight.appendChild(icRightBottom);
+
+      itemInfoWrapper.appendChild(icRight);
+
+      window.appendChild(itemInfoWrapper);
+
+
+
+      var itemLink = document.createElement("div");
+      itemLink.innerHTML = link;
+      //window.appendChild(itemLink);
+
+      var numInterviews = document.createElement("div");
+      numInterviews.innerHTML = interviewsStr;
+      numInterviews.style.textAlign = 'left';
+      //window.appendChild(numInterviews);
+
+      var numCharityCoins = document.createElement("div");
+      numCharityCoins.innerHTML = charityCoinStr;
+      numCharityCoins.style.textAlign = 'left';
+      //window.appendChild(numCharityCoins);
+
+
+      var itemServices = document.createElement("div");
+      //itemServices.innerHTML = help;
+      //window.appendChild(itemServices);
+
+      //document.getElementById("scheduleItems").appendChild(window);
+
+
+
+
+
+
+
+      //var schedulePageCard = document.createElement("div");
+      //schedulePageCard.className = "schedule-page-card-div";
+
+      var schedulePageCard = document.getElementById("schedule-page-reviews");
+      schedulePageCard.innerHTML = '';
+
+      var scLeft = document.createElement("div");
+      scLeft.className = "sc-left";
+
+      var icLeftName = document.createElement("div");
+      icLeftName.className = "ic-left-name";
+      var linkToReviews = document.createElement("a");
+      //linkToReviews.name = "link-to-reviews";
+      linkToReviews.id = "link-to-reviews";
+      linkToReviews.style.textDecoration = "none";
+      linkToReviews.style.color = "#ff5100";
+      linkToReviews.innerHTML = 'reviews';
+      icLeftName.appendChild(linkToReviews);
+
+      scLeft.appendChild(icLeftName);
+
+
+
+      var comments = member.getReviews().comments;
+      //console.log(comments);
+
+      for (var key in comments)
+      {
+	//console.log(key);
+        var inID = key.split(/:/)[0];
+        //console.log(inID);
+        var timeStamp = key.split(/:/)[1];
+        var rating = comments[key].split(/:/)[0];
+        var comment = comments[key].split(/:/)[1];
+        //console.log(inID);
+        //console.log(timeStamp);
+        //console.log(rating);
+        //console.log(comment);
+
+        var reviewDiv = document.createElement("div");
+        reviewDiv.className = "review-div";
+
+        var member = members.getMember(ID);
+
+        var name = member.getFullName();
+
+        var reviewDivLeftPhoto = document.createElement("div");
+        reviewDivLeftPhoto.className = "review-div-left-photo";
+        var reviewDivLeftImg = document.createElement("img");
+        reviewDivLeftImg.src = member.getImageSmall();
+        reviewDivLeftPhoto.appendChild(reviewDivLeftImg);
+
+        var commentDate = new Date(+timeStamp);
+        var year =  commentDate.getFullYear();
+        var month =  this.MONTHS[commentDate.getMonth()+1];
+        var weekDay = this.DAYS[commentDate.getDay()];
+        var day =  commentDate.getDate();
+        var hours =  commentDate.getHours();
+        var minutes =  commentDate.getMinutes();
+        var seconds =  commentDate.getSeconds();
+
+        var dateStr = weekDay + ', ' + month + ' ' + day + ', ' + year; 
+
+        var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+        ratingStr += '<div style="right: -6px;">';
+        for(var i = 0; i < rating; i++)
+        {
+	  ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+        }
+        for(var i = rating; i < 5; i++)
+        {
+	  ratingStr += '<img src="./img/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+        }
+        ratingStr += '</div></div></div></a>';
+
+        var reviewDivRight = document.createElement("div");
+        reviewDivRight.className = "review-div-right";
+
+        var reviewDirNameDate = document.createElement("div");
+        reviewDirNameDate.className = "review-dir-name-date";
+        reviewDirNameDate.innerHTML = name + ' - ' + dateStr;
+
+        var reviewDirStars = document.createElement("div");
+        reviewDirStars.className = "review-dir-stars";
+        reviewDirStars.innerHTML = ratingStr;
+
+        var reviewDirText = document.createElement("div");
+        reviewDirText.className = "review-dir-text";
+        reviewDirText.innerHTML = comment;
+
+        reviewDivRight.appendChild(reviewDirNameDate);
+        reviewDivRight.appendChild(reviewDirStars);
+        reviewDivRight.appendChild(reviewDirText);
+
+        reviewDiv.appendChild(reviewDivLeftPhoto);
+        reviewDiv.appendChild(reviewDivRight);
+        scLeft.appendChild(reviewDiv);
+
+      }
+      schedulePageCard.appendChild(scLeft);
+
+      var itemLink = document.createElement("div");
+      itemLink.innerHTML = link;
+      //window.appendChild(itemLink);
+
+      var numInterviews = document.createElement("div");
+      numInterviews.innerHTML = interviewsStr;
+      numInterviews.style.textAlign = 'left';
+      //window.appendChild(numInterviews);
+
+      var numCharityCoins = document.createElement("div");
+      numCharityCoins.innerHTML = charityCoinStr;
+      numCharityCoins.style.textAlign = 'left';
+      //window.appendChild(numCharityCoins);
+
+
+      var itemServices = document.createElement("div");
+      //itemServices.innerHTML = help;
+      //window.appendChild(itemServices);
+
+      //document.getElementById("scheduleItems").appendChild(window);
+      document.getElementById("scheduleItems").appendChild(schedulePageCard);
+
+
+      var childID = "full_itemInfoWrapper";
+      var popup = document.createElement("div");
+      popup.className = "darkBlue";
+      popup.onmouseout=function() { document.getElementById(this.id).style.display = 'none'; }; 
+      popup.style.position = 'absolute';
+      popup.style.top = 96 + 'px';
+      popup.style.width = 200 + 'px';
+      popup.style.height = 206 + 'px';
+      popup.style.display = 'none';
+      popup.id = childID;
+      popup.innerHTML = itemInfoWrapper.innerHTML;
+      //window.appendChild(popup);
+
+      var options = new Array();
+      options.push('Select a service...');
+      for (var key in services)
+      {
+	options.push(key + ' ' + '$' + services[key].price + '/hr');
+        var descID = 'scheduleDescription_' + key.toLowerCase();
+        descID = descID.replace(/ /g, '');
+        descID = descID.replace(/\-/g, '');
+        //console.log(descID + ': found(' + (document.getElementById(descID) ? 'true' : 'false') + ')');
+        if(document.getElementById(descID)) {document.getElementById(descID).style.display = '';}
+      }
+
+      addOptions2("selectServiceComboBox", options);
+
+      if(services['In-person Interview'])
+      {
+        document.getElementById("scheduleLocality").innerHTML = services['In-person Interview'].locality + ', ' + services['In-person Interview'].province;
+      }
+
+
+      var scheduleTime = document.getElementById("scheduleTime");
+      scheduleTime.innerHTML = '';
+      scheduleTime.style.lineHeight = 0 + 'px';
+      var timeCheckBoxesDiv = document.createElement("div");
+      for(var i = 7; i < 20; i++)
+      {
+        var checkBox = document.createElement("input");
+        checkBox.type = "checkbox";
+        checkBox.name = "serviceTime";
+        checkBox.value = pad(i,2);
+        checkBox.onclick = new Function( 'getSubTotal()');
+        checkBox.style.lineHeight = 0 + 'px';
+
+        var timeObj = convertTimeTo12(i + ':' + '00');
+        var hour = timeObj.hour;
+        var minute = timeObj.minute;
+        var ampm = timeObj.ampm;
+        localTimeStr = hour + ':' + minute + ampm;
+
+        var timeObj = convertTimeTo12((i+1) + ':' + '00');
+        var hour = timeObj.hour;
+        var minute = timeObj.minute;
+        var ampm = timeObj.ampm;
+        localTimeStrPlusOne = hour + ':' + minute + ampm;
+
+        var textNode = localTimeStr + ' - ' + localTimeStrPlusOne;
+        var label= document.createElement("label");
+        label.id = 'label' + pad(i,2);
+        var description = document.createTextNode(textNode);
+        var description = document.createElement("span");
+        description.innerHTML = textNode;
+        label.appendChild(checkBox);   // add the box to the element
+        label.appendChild(description);// add the description to the element
+        timeCheckBoxesDiv.appendChild(label);
+        timeCheckBoxesDiv.appendChild(document.createElement("br"));  
+      }
+      scheduleTime.appendChild(timeCheckBoxesDiv);
+
+      getSubTotal();
+
+      var cal = $("#scheduleCal").ical({
+        startOnSunday: true,
+        click: function(d)
+        {
+          //console.log('SELECTED: ' + d);
+          var split = d.split(".");
+          var year = parseInt(split[2],10);
+          var month = parseInt(split[1],10);
+          var day = parseInt(split[0],10);
+      
+          //console.log(year+'/'+month+'/'+day);
+
+          var dtPRV = new timezoneJS.Date(year, month-1, day);
+          //console.log(app.DAYS[dtPRV.getDay()]);
+
+          app.apptDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
+
+          
+
+          var provider = members.getMember(app.getProviderID());
+          //console.log(provider.getCalendar());
+          var cal = provider.getCalendar();
+
+          var date = pad(day, 2)+'/'+pad(month, 2)+'/'+year;
+          //console.log(date);
+          var providerSchedule = cal[date];
+          //console.log('PROVIDER SCHEDULE: ' + providerSchedule);
+
+
+          var member = members.getMember(app.getUserID());
+          //console.log(member.getCalendar());
+          var cal = member.getCalendar();
+
+          var date = pad(day, 2)+'/'+pad(month, 2)+'/'+year;
+          //console.log(date);
+          var mySchedule = cal[date];
+          //console.log(mySchedule);
+
+          showApptScheduler(providerSchedule, mySchedule, day, month, year);
+
+	  /*
+          var opts = new Array();
+          opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
+          opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
+          opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
+          addOptions("calSelect", opts);
+	  */
+        } // fired when user clicked on day, in "d" stored date
+      });
+
+      var scheduleDates = new Array();
+      var provider = members.getMember(app.getProviderID());
+      var cal = provider.getCalendar();
+      for(var key in cal)
+      {
+        var split = key.split('/');
+        var d = parseInt(split[0], 10);
+        var m = parseInt(split[1], 10);
+        var y = parseInt(split[2], 10);
+        var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
+        var lsObj = localizeSch(cal[key], app.getProviderID(), d, m, y);
+        var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+        //console.log(localizedAppt);
+
+	scheduleDates.push({date: dateStr, title: '', desc: lsObj.sch});
+      }
+
+      $("#scheduleCal").ical.changeEventDates(scheduleDates);
+
+      //{"date": "2012-08-08", "title": "My birthday", "desc": "Its my birthday!"},
+
+
+      function showApptScheduler(providerSchedule, mySchedule, day, month, year)
+      {
+	var r = document.getElementsByName("serviceTime");
+	for (var i = 0; i < r.length; i++)
+	{
+	  r[i].checked = false;
+	}
+
+	localizeApptScheduler(day, month, year);
+
+	var controlValue = {};
+        if(providerSchedule)
+	{
+	  var split = providerSchedule.split('<br>');
+	  split.shift();
+	  for(var i = 0; i < split.length; i++)
+          {
+            if(split[i])
+	    {
+              var timeStr = Number(split[i].match(/^(\d+)/)[1]) + ':00' + ' ' + split[i].match(/([ap]m)/);
+              timeStr = timeStr.replace(/\,[ap]m$/,'');
+	      split[i] = convertTimeTo24(timeStr).hour;
+	      //console.log(split[i]);
+	      controlValue[split[i]] = true;
+	    }
+	  }
+	}
+	enableGroup("serviceTime");
+	//enableGroup("selectService");
+	//addOptions("selectService", selected);
+	disableGroup("serviceTime", controlValue);
+	//disableGroup("selectService", controlValue);
+
+	//Show previously selected options
+	if(mySchedule) {setGroupsFromSchedule("serviceTime", mySchedule);}
+	if(Object.size(this.cartItems))
+	{
+	  var cartItemsSchedule = convertCartItemKeys(this.cartItems);
+	  setGroupsFromSchedule("serviceTime", cartItemsSchedule);
+	}
+
+	//Disable previously scheduled hours from other providers
+	if(mySchedule) {disableGroupsFromSchedule("serviceTime", mySchedule);}
+
+	//getSubTotal();
+
+      }
+
+
+
+
+
+
+
+
+    } //populateScheduleItems()
+
+
+
+
+    ,makePayment: function(vendor)
+    {
+  //console.log("makePayment: " + vendor);
+  
+      var me = this;
+      var itemStr = '';
+      var idx = 1;
+
+      //var returnUrl = "http://www.interviewring.com/index.php?return&ID=" + app.getUserID() + "&CODE=" + document.getElementById('promoForm').value;
+      var returnUrl = "http://www.interviewring.com/index.php?return&ID=" + app.getUserID() + "&CODE=" + 'NONE';
+      //console.log(returnUrl);
+      //return;
+
+      var currentDate = new Date();
+      var year = currentDate.getFullYear();
+      var month = currentDate.getMonth()+1;
+      var day = currentDate.getDate();
+      var hours = currentDate.getHours();
+      var minutes = currentDate.getMinutes();
+      var seconds = currentDate.getSeconds();
+      var orderID = year + '.' + month + '.' + day + '.' + hours + '.' + minutes + '.' + seconds;
+
+      var total = getSubTotal();
+
+      var myTotal = currencyFormatted(total);
+
+      ga('ecommerce:addTransaction', {
+	 'id': orderID,                    // Transaction ID. Required.
+	 'affiliation': 'interviewring',   // Affiliation or store name.
+	 'revenue': myTotal,               // Grand Total.
+         'shipping': '0',                  // Shipping.
+         'tax': '0'                        // Tax.
+      });
+
+      for (var key in me.cartItems)
+      {
+        var split = key.split(/\:/);
+	var ID = split[0];
+	var item = me.cartItems[key];
+        if(!item) {continue;}
+        //console.log("ITEM: " + item + " KEY: " + key);
+        var date = key.split(':')[1];
+	//console.log(date);
+        var dateObj = getDateIndexes(date)
+
+        var d = parseInt(dateObj.dayIndex, 10);
+        //console.log(d);
+        var m = parseInt(dateObj.monthIndex-1, 10);
+        var y = parseInt(dateObj.year, 10);
+        var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
+        var lsObj = localizeCartItem(item, app.getProviderID(), d, m, y);
+        var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+        //console.log(localizedAppt);
+
+	var sku = 'sku' + idx;
+	var desc = localizedAppt;
+        //console.log("DESC: " + desc);
+	desc = desc.replace(/"/g, '\\"');
+        desc = desc.replace(/'/g, "\\'");
+        desc = desc.replace(/\<br\>/g, "\n");
+        //console.log("DESC2: " + desc);
+
+	var unitPrice = getSubTotalFromSch(item, ID);
+	var quantity = 1;
+	var discounted = 0;
+	var customStr = '';
+
+	itemStr += '<input type="hidden" name="item_name_' + idx + '" value="' + desc + '"><input type="hidden" name="amount_' + idx + '" value="' + unitPrice + '"><input type="hidden" name="quantity_' + idx + '" value="' + quantity + '"><input type="hidden" name="discount_amount_' + idx + '" value="' + discounted + '">';
+
+
+        //console.log(itemStr);
+	//returnUrl += encodeURI(key) + "=" + encodeURI(me.cartItems[key]) + "&";
+
+	// add item might be called for every item in the shopping cart
+	// where your ecommerce engine loops through each item in the cart and
+	// prints out _addItem for each
+
+	ga('ecommerce:addItem', {
+           'id': orderID,              // Transaction ID. Required.
+	   'name': desc,               // Product name. Required.
+           'sku': sku,                 // SKU/code.
+           'category': 'service',      // Category or variation.
+           'price': unitPrice,         // Unit price.
+           'quantity': quantity        // Quantity.
+        });
+	idx++;
+      }
+
+
+      var cbtStr = "Confirm your purchase from interviewring.com";
+      var ppID = "XD9GN72N4QU38";
+
+      //console.log("TOTAL: " + total);
+
+      if(! total)
+      {
+    
+	var pre = '<form name="paymentSubmit" action="' + returnUrl + '" method="post">';
+	var disc = '<input type="hidden" name="custom" value="' + customStr + '">';
+	var post = '<input class="submitDummy" type="image" name="submit" border="0" src="./img/0.gif" onclick="ga(\'send\', \'event\', \'button\', \'click\', \'submit\');"/></form>';
+
+
+	var form = document.createElement("div");
+	form.id = "paymentForm";
+	form.innerHTML = pre + itemStr + disc + post;
+	document.body.appendChild(form);
+
+	//document.getElementById('paymentForm').innerHTML = pre + itemStr + disc + post;
+  
+	ga('ecommerce:send');   //submits transaction to the Analytics servers
+	document.paymentSubmit.submit();
+
+	return;
+      }
+
+      var notifyURL = "http://www.interviewring.com/ipn_listner.php";
+
+      var pre = '<form name="paymentSubmit" action="https://www.paypal.com/cgi-bin/webscr" method="post"><input type="hidden" name="cmd" value="_cart"> <input type="hidden" name="upload" value="1"> <input type="hidden" name="business" value="' + ppID + '"> <input type="hidden" name="cpp_header_image" value="http://www.interviewring.com/images/logo150x50.png"> <input type="hidden" name="return" value="' + returnUrl + '"> <input type="hidden" name="rm" value="2"> <input type="hidden" name="cbt" value="' + cbtStr + '"> <input type="hidden" name="notify_url" value="' + notifyURL + '">';
+
+      var disc = '<input type="hidden" name="custom" value="' + customStr + '">';
+  
+      var post = '<input class="submitDummy" type="image" name="submit" border="0" src="./img/0.gif" onclick="ga(\'send\', \'event\', \'button\', \'click\', \'submit\');"/></form>';
+
+      //console.log(returnUrl);
+      //console.log(pre + itemStr + disc + post);
+
+      var form = document.createElement("div");
+      form.id = "paymentForm";
+      form.innerHTML = pre + itemStr + disc + post;
+      document.body.appendChild(form);
+
+      //document.getElementById('paymentForm').innerHTML = pre + itemStr + disc + post;
+  
+      ga('ecommerce:send');   //submits transaction to the Analytics servers
+      document.paymentSubmit.submit();
+
+    }//makePayment()
+
+
+
+
   }//application.prototype
 
 
 
-
-
-function addFilterOptions(id, options)
-{
-  if(!id || !options) {return;}
-
-  //console.log("ID: " + id);
-  var r = document.getElementById(id);
-  //console.log(r);
-    //removeChildren(r[i]);
-    //console.log(options.length);
-    for(var j = 0; j < options.length; j++)
-    {
-      //console.log("ADDING: " + selected[j]);
-      var opt = document.createElement('option');
-      opt.value = options[j];
-      opt.innerHTML = options[j];
-      if(!r.disabled) {r.appendChild(opt);}
-    }
-}
-
-function addEditServiceOptions(id, options)
-{
-  if(!id || !options) {return;}
-
-  //console.log("ID: " + id);
-  var r = document.getElementById(id);
-  //console.log(r);
-    //removeChildren(r[i]);
-    //console.log(options.length);
-    for(var j = 0; j < options.length; j++)
-    {
-      //console.log("ADDING: " + selected[j]);
-      var opt = document.createElement('option');
-      opt.value = options[j];
-      opt.innerHTML = options[j];
-      if(!r.disabled) {r.appendChild(opt);}
-    }
-}
-
-function addOptions(groupName, selected)
-{
-  var r = document.getElementsByName(groupName);
-  //console.log(r);
-  for (var i = 0; i < r.length; i++)
-  {
-    removeChildren(r[i]);
-    //console.log(selected.length);
-    for(var j = 0; j < selected.length; j++)
-    {
-      //console.log("ADDING: " + selected[j]);
-      var opt = document.createElement('option');
-      opt.value = selected[j];
-      opt.innerHTML = selected[j];
-      if(!r[i].disabled) {r[i].appendChild(opt);}
-    }
-  }
-}
-
-function removeChildren(el)
-{
-  //console.log("ID: " + id);
-  var cell = el;
-  if(!cell) {return;}
-  if ( cell.hasChildNodes() )
-  {
-    while ( cell.childNodes.length >= 1 )
-    {
-      cell.removeChild( cell.firstChild );       
-    } 
-  }
-}
-
-
-function pad(number, length, padChar)
-{
-  padChar = padChar || '0';
-  var str = '' + number;
-  while (str.length < length) {str = padChar + str;}
-  return str;
-}
-
-function convertTimeTo24(time)
-{
-  //console.log("CONVERT TIME: " + time);
-  var hours = Number(time.match(/^(\d+)/)[1]);
-  var minutes = Number(time.match(/:(\d+)/)[1]);
-  var AMPM = time.match(/\s(.*)$/)[1].toUpperCase();
-  if(AMPM == "PM" && hours<12) hours = hours+12;
-  if(AMPM == "AM" && hours==12) hours = hours-12;
-  var sHours = pad(hours.toString(),2);
-  var sMinutes = pad(minutes.toString(),2);
-  //console.log(sHours + ":" + sMinutes);
-  return {hour: sHours, minute: sMinutes};
-}
-
-
-function convertTimeTo12(time)
-{
-  //console.log("CONVERT TIME: " + time);
-  var hours = Number(time.match(/^(\d+)/)[1]);
-  var minutes = Number(time.match(/:(\d+)/)[1]);
-  var AMPM = '';
-  if(hours<12) {AMPM = 'am';}
-  else if(hours==24) {AMPM = 'am'; hours = hours-12;}
-  else if(hours==12) {AMPM = 'pm';}
-  else {AMPM = 'pm'; hours = hours-12;}
-  //if(hours == 0) {hours = 24;}
-  var sHours = pad(hours.toString(),2);
-  var sMinutes = pad(minutes.toString(),2);
-  //console.log(sHours + ":" + sMinutes);
-  return {hour: sHours, minute: sMinutes, ampm: AMPM};
-}
-
-if (!Object.size)
-{
-
-  Object.size = function(obj)
-  {
-    var size = 0, key;
-    for (key in obj)
-    {
-      if (obj.hasOwnProperty(key) && obj[key]) size++;
-    }
-
-    return size;
-  };
-}
 
 

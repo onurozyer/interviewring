@@ -9,16 +9,16 @@
 
     function showHome(give)
     {
+      window.scrollTo(0, 0);
+
       document.getElementById('explore').value = '';
 
-      document.getElementById('filters').style.display = 'none';
-      document.getElementById('sort').style.display = 'none';
+      document.getElementById('filterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -42,17 +42,16 @@
 
     function showFindInterviews(arg)
     {
- 
+      window.scrollTo(0, 0);
+
       document.getElementById('explore').value = '';
 
-      document.getElementById('filters').style.display = '';
-      document.getElementById('sort').style.display = '';
+      document.getElementById('filterSortBar').style.display = '';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("findInterviews").style.display = "";
       document.getElementById("giveInterviews").style.display = "none";
-      document.getElementById("slider").style.display = "";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -86,17 +85,16 @@
 
     function showGiveInterviews()
     {
+      window.scrollTo(0, 0);
  
       document.getElementById('explore').value = '';
 
-      document.getElementById('filters').style.display = '';
-      document.getElementById('sort').style.display = '';
+      document.getElementById('filterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "";
-      document.getElementById("slider").style.display = "";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -123,16 +121,16 @@
 
     function showProfile(arg)
     {
+      window.scrollTo(0, 0);
+
       document.getElementById('explore').value = '';
 
-      document.getElementById('filters').style.display = 'none';
-      document.getElementById('sort').style.display = 'none';
+      document.getElementById('filterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -171,14 +169,18 @@
     }
 
 
-    function showCheckOut()
+    function showCheckOut(ID)
     {
+      window.scrollTo(0, 0);
+
       document.getElementById('explore').value = '';
+
+      document.getElementById('filterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
-      document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
+      document.getElementById("findInterviews").style.display = "none";
+      document.getElementById("giveInterviews").style.display = "";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "";
       document.getElementById("return").style.display = "none";
@@ -189,29 +191,20 @@
       document.getElementById("selectAvailability").style.display = "none";
       document.getElementById("completeGiveHelp").style.display = "none";
 
+      //document.getElementById("quickLinks").style.display = 'none';   
+      //document.getElementById("sideBarMenu").style.display = '';
+      app.providerID = ID;
 
-      document.getElementById("step").src="./images/step3.png";
-/*
-      document.getElementById("step1").onmouseover=function() {this.style.cursor="pointer"; showHome();};
-      document.getElementById("step1").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step1").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 1;};
-      document.getElementById("step2").onmouseover=function() {this.style.cursor="pointer"; showSearch();};
-      document.getElementById("step2").onmouseout=function() {if(step==1){showHome();} else if(step==2){showSearch();} else if(step==3){showCheckOut();}};
-      document.getElementById("step2").onclick=function() {this.onmouseover=""; this.onmouseout=""; step = 2;};
-*/
-      document.getElementById("step1").onclick=function() {showHome();};
-      document.getElementById("step2").onclick=function() {showSearch();};
-      document.getElementById("step3").onclick=function() {showCheckOut();};
+      var provider = members.getMember(ID);
+      var tzPRV = provider.getTZname();
 
+      //var dtPRV = new timezoneJS.Date(year, month, day, hour, minute, tzPRV);
+      var dtPRV = new timezoneJS.Date(tzPRV);
+      var tzAbbreviation = dtPRV.getTimezoneAbbreviation() || tzPRV;
 
-      if(document.getElementById("showCal")) {document.getElementById("showCal").style.display = 'none';}
-      if(document.getElementById("apptScheduler")) {document.getElementById("apptScheduler").style.display='none';}
-      document.getElementById("scrollbar").style.zIndex = 55;
-      if(document.getElementById("screen")) {document.getElementById("screen").style.display='none';}
+      document.getElementById("scheduleTimezone").innerHTML = tzAbbreviation;
 
-      document.getElementById("quickLinks").style.display = 'none';   
-      document.getElementById("sideBarMenu").style.display = '';
-      loadCartItems("cartItems", false);
+      app.populateScheduleItems(ID);
     }
 
 
@@ -223,7 +216,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "";
@@ -256,7 +248,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -290,7 +281,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -324,7 +314,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -376,7 +365,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -423,7 +411,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
@@ -554,7 +541,6 @@
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "";
       document.getElementById("search").style.display = "none";
-      document.getElementById("slider").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";

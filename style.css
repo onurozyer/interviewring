@@ -20,11 +20,11 @@ button {
     box-sizing: border-box; /* Opera/IE 8+ */
     font-weight: 100;
     font-size: 20px;
-    padding: 10px 25px;
+    padding: 0px;
+	margin: 0px;
 }
 
 .header-top {
-    border-top: 0px solid #4cc4d2;
     position: fixed;
     top: 0;
     left: 0;
@@ -50,6 +50,12 @@ button {
 
 .menu-item-4 {
     background-color: #0277bd;
+}
+
+.header-container {
+    margin: auto;
+    min-width: 985px;
+    padding-left: 20px;
 }
 
 .logo-div {
@@ -147,8 +153,8 @@ button {
 .header-top .menu {
 }
 
-.holder {
-    margin-top: 81px;
+.holder-top {
+    margin-top: 60px;
     z-index: 99998;
 
 }
@@ -166,6 +172,75 @@ button {
         color: white;
         font-size: 20px;
     }
+
+.search-bar-div {
+    background-color: #ebebeb;
+}
+
+.search-bar-div-content {
+    margin: auto;
+    overflow: auto;
+    min-width: 985px;
+}
+
+.search-bar-div-content-interviewers {
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+    overflow: auto;
+}
+
+.sort-by-div {
+    float: right;
+    font-size: 1.3em;
+    line-height: 44px;
+    color: #3D3D3D;
+    margin-left: 40px;
+}
+
+.sort-by-combo-box-div {
+    float: right;
+    width: 11%;
+}
+
+.search-form-div {
+    float: left;
+}
+
+.filter-by-status-label-div {
+    float: right;
+    font-size: 1.5em;
+    line-height: 40px;
+}
+
+.filter-by-status-combobox {
+    float: right;
+    font-size: 1.5em;
+    margin: 5px 5px;
+    margin-right: 0px;
+}
+
+.ask-be-interviewer-div {
+    float: right;
+    line-height: 44px;
+    font-size: 1.2em;
+}
+
+.be-interviewer-button-div button {
+    float: right;
+    padding: 2px 10px;
+    background-color: #6e6e6e;
+    color: white;
+    border: 5px solid #383838;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
+    font-weight: 100;
+    font-size: 20px;
+    margin-top: 3px;
+    margin-left: 5px;
+}
+
 /*slider-content*/
 .slider-content {
     background: url("img/slider-content-overlay.png") repeat-x scroll 0 0 / 100% auto rgba(0, 0, 0, 0);
@@ -224,7 +299,7 @@ button {
 }
 
 .about-parent {
-    width: 1170px;
+    width: 1140px;
     margin: auto;
     padding-top: 80px;
     padding-bottom: 80px;
@@ -234,7 +309,8 @@ button {
 .about-left-div {
     width: 50%;
     float: left;
-    padding-left: 100px;
+    /*padding-left: 100px;*/
+    padding-right: 70px;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
@@ -243,38 +319,57 @@ button {
 .about-right-div {
     width: 50%;
     float: left;
-    padding-left: 100px;
+    padding-left: 70px;
+    /*padding-left: 100px;*/
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
 }
 
 .about-title-div {
+    text-align: center;
     width: 100%;
-    font-family: 'Ubuntu', sans-serif;
-    font-size: 50px;
-    padding-bottom: 30px;
+    font-size: 2.5em;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
     color: #ff5100;
     border-bottom: 1px solid #999999;
 }
 
 .about-bullets {
     width: 100%;
-    font-family: 'Ubuntu', sans-serif;
     color: #383838;
     font-size: 20px;
+    overflow: auto;
+    padding-left: 20px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
 
-    .about-bullets p {
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
+.about-bullets-right {
+    padding-left: 60px !important;
+}
 
-    .about-bullets span {
-        font-size: 50px;
-        float: left;
-        color: #999999;
-    }
+.about-bullets p {
+    float: left;
+    margin: 20px 0px;
+    text-align: center;
+}
+
+.about-bullets span {
+    font-size: 35px;
+    float: left;
+    color: #ff5100;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.about-one-bullet {
+    overflow: auto;
+}
 /**************************************************************/
 
 /*holder*/
@@ -285,9 +380,41 @@ button {
 }
 
 .main-container {
-    width: 1170px;
+    width: 1140px;
     margin: auto;
 }
+
+.main-page-top-div {
+    background-color: #f4f4f4;
+    background-image: url(img/banner-2.jpg);
+    background-size: cover;
+    width: 100%;
+    padding: 20px 0px;
+}
+
+.main-page-photo-div {
+    width: 1140px;
+    margin-right: auto;
+    margin-left: auto;
+    overflow: auto;
+}
+
+.main-page-video-div {
+    float: left;
+    padding: 40px 0px;
+}
+
+.how-it-works-div {
+    font-size: 40px;
+    font-weight: 100;
+    text-align: center;
+    color: #6e6e6e;
+}
+
+.video-frame {
+    margin: 30px 0;
+}
+
 
     .holder-top .container {
         width: 100%;
@@ -337,8 +464,20 @@ button {
                 padding-bottom: 50px;
             }
 
+.testimonials-main-div {
+    background-color: white;
+    width: 100%;
+}
+
+    .testimonials-main-div .testimonials-container-div {
+        width: 1140px;
+        margin-right: auto;
+        margin-left: auto;
+        padding-top: 90px;
+        padding-bottom: 90px;
+    }
+
 .quote {
-    font-family: 'Ubuntu', sans-serif;
 }
 
 .holder {
@@ -351,12 +490,14 @@ button {
     box-shadow: 0 4px 4px -4px #222222;
     text-align: center;
 }
+
 .holder, .holder-top h4.spl {
-    color: #383838;
+    color: #6e6e6e;
     font-family: 'Ubuntu', sans-serif;
-    font-size: 40px;
+    font-size: 4em;
     padding-bottom: 0px;
     text-align: center;
+	font-weight: 100;
 }
 
 .holder .box h5 {
@@ -432,32 +573,37 @@ button {
 
 
 .main-page-signin-linkedin {
-    height: 70px;
-    line-height: 70px;
-    width: 490px;
+    height: 76px;
+    /*line-height: 70px;*/
+    width: 496px;
     margin: auto;
-    margin-top: 30px;
-    padding-left: 50px;
-    padding-bottom: 3px;
-    background-color: rgba(244, 244, 244, 0.68);
-    font-family: 'Ubuntu', sans-serif;
+    background-color: white;/*rgba(247, 109, 71, 0.68);*/
+    color: black;
     font-size: 35px;
-    border: 3px solid #ff5100;
-    /*padding-top: 10px;*/
-    /*padding-bottom: 6px;*/
+    border: 4px solid #ff5100;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
+    padding: 0px;
+    cursor: pointer;
+}
+
+.main-page-signin-linkedin-content-div {
+    margin: auto;
+    display: table;
 }
 
 .box-2-3-left {
-    display: inline-block;
+    float: left;
     margin-right: 10px;
-    padding-left: 20px;
-    line-height: 50px;
+	position: relative;
+    top: 4px;
 }
 
 .box-2-3-right {
-    display: inline-block;
+    float: left;
     position: relative;
-    top: -4px;
+    top: 5px;
 }
 
     .box-2-3-right .img {
@@ -512,57 +658,52 @@ button {
     color: #306eff;
 }
 
-.test h4 {
+.testimonials-container-div h4 {
     color: #ff5100;
-    font-family: 'Ubuntu', sans-serif;
     font-size: 35px;
     font-weight: 100;
     padding-top: 20px;
     padding-bottom: 40px;
 }
 
-.test p.quote {
+.testimonials-container-div p.quote {
     background: url("img/quote.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
     color: #3D3D3D;
-    font-family: 'Ubuntu', sans-serif;
     font-size: 15px;
     line-height: 1.6;
     padding-left: 47px;
 }
 
-.test p {
+.testimonials-container-div p {
     color: #3D3D3D;
-    font-family: 'Ubuntu', sans-serif;
     font-size: 15px;
     line-height: 1.6;
 }
 
-    .test p.ash {
-        font-family: 'Ubuntu', sans-serif;
+    .testimonials-container-div p.ash {
         color: #b5b5b5;
         font-size: 15px;
         text-align: center;
     }
 
-    .test p.name {
+    .testimonials-container-div p.name {
         text-align: center;
     }
 
-    .test p span {
+    .testimonials-container-div p span {
         color: #6f98cd;
     }
 
-.test img {
+.testimonials-container-div img {
     border: 1px solid #999999;
     padding: 7px;
     border-radius: 45px;
 }
 
 .holder-bottom {
-    padding: 15px;
-    width: 1170px;
-    margin: auto;
-
+    width: 1140px;
+    margin: 50px auto;
+    overflow: auto;
 }
 
     .holder-bottom h6 {
@@ -570,23 +711,17 @@ button {
         /*font-family: 'OpensansSemiBold';*/
         font-size: 15px;
         text-transform: uppercase;
-        padding-bottom: 20px;
+        margin-top: 0px;
     }
 
     .holder-bottom ul {
         margin: 0;
+        padding-left: 0px;
     }
 
         .holder-bottom ul li {
             list-style: none;
-            padding: 4px 0;
         }
-
-            .holder-bottom ul li a {
-                color: #727272;
-                font-size: 13px;
-                /*/*font-family: 'OpensansRegular';*/ */ text-decoration: none;
-            }
 
     .holder-bottom .sign a.one {
         background: url("img/sign-pink.png") no-repeat scroll 20px 13px #4CC4D2;
@@ -611,22 +746,35 @@ button {
     }
 
     .holder-bottom .share ul li.fb {
-        background: url("img/fb-logo.png") no-repeat scroll 0 7px rgba(0, 0, 0, 0);
+        background: url("img/fb-logo.png") no-repeat scroll 0 0px rgba(0, 0, 0, 0);
         background-size: 35px 35px;
-        padding: 10px 55px;
+        height: 35px;
+		margin-bottom: 10px;
+		padding-left: 60px;
     }
 
     .holder-bottom .share ul li.tw {
-        background: url("img/twitter-logo.png") no-repeat scroll 0 7px rgba(0, 0, 0, 0);
+        background: url("img/twitter-logo.png") no-repeat scroll 0 0px rgba(0, 0, 0, 0);
         background-size: 35px 35px;
-        padding: 10px 55px;
-    }
+        height: 35px;
+		margin-bottom: 10px;
+		padding-left: 60px;
+	}
 
     .holder-bottom .share ul li.in {
-        background: url("img/linkedin-logo.png") no-repeat scroll 0 7px rgba(0, 0, 0, 0);
+        background: url("img/linkedin-logo.png") no-repeat scroll 0 0px rgba(0, 0, 0, 0);
         background-size: 35px 35px;
-        padding: 10px 55px;
-    }
+    	height: 35px;
+		margin-bottom: 10px;
+		padding-left: 60px;
+	}
+
+	.holder-bottom a {
+		line-height: 35px;
+		color: #727272;
+        font-size: 13px;
+        text-decoration: none;
+	}
 
     .holder-bottom form {
     }
@@ -1245,15 +1393,14 @@ footer {
 .footer-button {
     background-color: #6e6e6e;
     color: white;
-    height: 60px;
-    width: 260px;
+    height: 50px;
+    width: 65%;
     border: 5px solid #ff5100;
     margin-bottom: 10px;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
-    font-family: 'Ubuntu', sans-serif;
-    font-size: 25px;
+    font-size: 1.3em;
 }
 
 .footer-contact-us input {
@@ -1265,10 +1412,42 @@ footer {
 
 .footer-section {
     float: left;
-    width: 25%;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
+}
+
+.footer-section-1 {
+    width: 20%;
+}
+
+.footer-section-2 {
+    width: 30%;
+    padding-right: 20px;
+}
+
+.footer-section-3 {
+    width: 25%;
+    padding-left: 50px;
+}
+
+.footer-section-4 {
+    width: 25%;
+}
+
+    .footer-section-4 input {
+        font-size: 18px;
+    }
+
+
+    .footer-section-4 input {
+        width: 260px;
+        margin-bottom: 10px;
+    }
+
+
+.three-testimonials-div {
+    overflow: auto;
 }
 
 .testimonial-div {
@@ -1277,6 +1456,11 @@ footer {
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
+}
+
+.testimonials-container {
+    width: 1140px;
+    margin: auto;
 }
 
 .testimonial-image-div {
@@ -1288,15 +1472,17 @@ footer {
     border-bottom: 1px solid #3D3D3D;
     padding-bottom: 30px;
     margin-bottom: 50px;
-    font-size: 40px;
+    font-size: 2.5em;
     color: #ff5100;
 }
 
 .testimonial-text-div {
     width: 100%;
     padding: 0 30px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
-
 
 
 
@@ -1564,32 +1750,33 @@ footer {
     }
 
 .filter {
-    float: right;
-    width: 14.9%;
+    float: left;
+    width: 120px;
     /*padding-left: 53px;*/
     /*margin-left: 10px;*/
     /*margin-right: 10px;*/
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
-    padding-top: 17px;
+    margin-top: -40px;
     text-align: right;
 }
 
 
 
     .filter select {
-        width: 130px;
-        font-size: 20px;
+        width: 110px;
+        font-size: 16px;
     }
 
 .filters-div-content {
     /*margin: 0px 300px;*/
     overflow: auto;
     height: 100%;
-    width: 70%;
-    margin-left: 15%;
-    margin-right: 15%;
+    width: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
+    border-top: 1px solid #6f6f6f;
 }
 
 
@@ -1650,6 +1837,45 @@ footer {
 
 .search-form-div {
     float: left;
+	float: right;
+}
+
+.form-search {
+	height: 60px;
+}
+
+.search-form-div .form-search input[type="text"] {
+    background: #fff;
+    border: 0px solid #dfdfdf;
+    color: #999999;
+    height: 60px;
+    padding-left: 20px;
+    width: 450px;
+	font-size: 1.7em;
+	margin: 0px;
+	position: relative;	
+	top: -22px;
+	right: -4px;
+	-webkit-appearance: none;    
+	-moz-appearance:none;
+}
+
+.search-form-div .form-search .btn {
+	-webkit-appearance: none;    
+	-moz-appearance:none;
+	background: url("img/search.png") no-repeat #ff5100;
+	background-size: 30px 30px;
+	background-position: 15px 15px;
+    border: 0px solid #df5100;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 1em;
+    height: 60px;
+    width: 60px;
+    font-family: 'Segoe UI Symbol';
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
 
 .filter-by-status-label-div {
@@ -2107,14 +2333,11 @@ footer {
   color: #ffffff;
 }
 
-button {
-    background-color: #6e6e6e;
-    color: white;
-    border: 5px solid #383838;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box; /* Firefox, other Gecko */
-    box-sizing: border-box; /* Opera/IE 8+ */
-    font-weight: 100;
-    font-size: 20px;
-    padding: 10px 25px;
+#link-to-reviews {
+    padding-top: 80px;
+    margin-top: -80px;
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
 }
+

@@ -125,7 +125,7 @@
 	cursor: pointer;
 }
 
-
+/*
 .date_click:after {
   position: absolute;
   display: block;
@@ -135,11 +135,6 @@
   border-left: 14px solid transparent;
   margin-top: -22px;
   margin-left: 17px;
-/*
-  top: 0;
-  right: 0;
-*/
-  
   z-index: 101;
 }
 .date_click:before {
@@ -148,18 +143,13 @@
   content: "\e003";
   content: url(img/check.png);
   color: #fff;
-  /*font-family: 'metroSysIcons';*/
   font-size: 9pt;
   font-weight: normal;
   margin-top: -10px;
   margin-left: 20px;
-/*
-  top: -5px;
-  right: 0px;
-*/
   z-index: 102;
 }
-
+*/
 
 
 table {
@@ -177,6 +167,7 @@ th {
 
 table td {
 	width: 30px;
+        min-width: 30px;
 	height: 29px;
 	padding-top: 1px;
 }
@@ -211,7 +202,6 @@ table td {
 	z-index: 1000;
 	padding: 15px;
 	background: rgba(17, 17, 17, 0.9);
-	color: white;
 	font-size: 15px;
 	width: 200px;
 	list-style: none;
@@ -223,6 +213,7 @@ table td {
 }
 
 .events li span {
+        margin-left: 335px;
 	display: block;
 	font-size: 12px;
 	color: #eee;

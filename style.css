@@ -21,8 +21,12 @@ button {
     font-weight: 100;
     font-size: 20px;
     padding: 0px;
+<<<<<<< HEAD
     margin: 0px;
     cursor: pointer;
+=======
+	margin: 0px;
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
 }
 
 .header-top {
@@ -2334,6 +2338,7 @@ footer {
   background-color: #ff5100;
   color: #ffffff;
 }
+<<<<<<< HEAD
 
 #link-to-reviews {
     padding-top: 80px;
@@ -2343,3 +2348,5 @@ footer {
     background-clip: padding-box;
 }
 
+=======
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb

@@ -150,9 +150,18 @@ session_start();
             </div>
 
 
+<<<<<<< HEAD
             <div id="filterSortBar" class="holder" style="margin-top: 60px; display:none;">
                     <div class="filters-div-content">
                         <div style="float: left; width: 120px; font-size: 46px;">filters</div>
+=======
+            <div class="holder" style="margin-top: 60px; display:none;">
+                <div id="filters" class="filters-div" style="display:none;">
+                    <div class="filters-div-content">
+                        <div class="filters-label">
+                            <p>filters</p>
+                        </div>
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
                         <div class="filter">
                             <select id="filter_price" onchange="doSearchInterviewers();">
                                 <option value="price">price</option>
@@ -205,6 +214,7 @@ session_start();
                                 <option value="industry">industry</option>
                             </select>
                         </div>
+<<<<<<< HEAD
 
 
                     <div style="float: left; width: 90px; font-size: 46px; margin-left: 50px;">sort</div>
@@ -318,6 +328,30 @@ session_start();
             </div><!--three-testimonials-div-->
           </div><!--testimonials-container-div-->
         </div><!--testimonials-main-div-->
+=======
+                    </div>
+                </div>
+
+                <div id="sort" class="search-bar-div" style="display: none;">
+                    <div class="search-bar-div-content-interviewers">
+                        <div class="sort-by-combo-box-div filter">
+                            <select id="sortSearch" onchange="doSearchInterviewers();">
+                                <option value="company">company</option>
+                                <option value="rating">rating</option>
+                                <option value="price">price</option>
+                                <option value="experience">experience</option>
+                            </select>
+                        </div>
+                        <div class="sort-by-div">sort by</div>
+                        <div class="be-interviewer-button-div">
+                            <button>be an interviewer ?</button>
+                        </div>
+                        <div class="ask-be-interviewer-div">would you like to </div>
+                    </div>
+                </div>
+
+            </div><!--holder-->
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
 
       </div><!--main-page-top-div-->
       <!--HOME-->
@@ -329,6 +363,7 @@ session_start();
       </div>
       <!--FIND INTERVIEWS-->
 
+<<<<<<< HEAD
       <!--GIVE INTERVIEWS-->
       <div id="giveInterviews" style="display:none; margin-top: 100px;">
       </div>
@@ -498,6 +533,49 @@ session_start();
                         <label for="slides_2"></label>
                         <label for="slides_3"></label>
                         <label for="slides_4"></label>
+=======
+        </div>
+    </header>
+
+    <div class="holder-top">
+        <div class="main-page-top-div ">
+            <div class="main-page-photo-div">
+                <div class="main-page-video-div ">
+                    <div class="how-it-works-div">how it works ?</div>
+                    <iframe class="video-frame" width="100%" height="306" src="http://www.youtube.com/embed/kk00IAP7cqw?rel=0" frameborder="0" allowfullscreen="1"></iframe>
+                    <div>
+                        <button class="main-page-signin-linkedin">
+                            <div class="main-page-signin-linkedin-content-div">
+                                <div class="box-2-3-left">
+                                    sign in with
+                                </div>
+                                <div class="box-2-3-right">
+                                    <img src="img/linkedinsiyah.png" style="height:38px; width:152px;" alt="linkedin" />
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+		</div>        
+		<div class="container-about">
+                <div class="about-parent">
+                    <div class="about-left-div">
+                        <div class="about-title-div">find interviewers</div>
+                        <div class="about-bullets">
+                            <p>&nbsp;&nbsp;Connect with professionals from top companies</p>
+                            <p>&nbsp;&nbsp;Gain interview experience with mock interviews</p>
+                            <p>&nbsp;&nbsp;Get feedback and share the results</p>
+                        </div>
+                    </div>
+                    <div class="about-right-div">
+                        <div class="about-title-div">be an interviewer</div>
+                        <div class="about-bullets about-bullets-right">
+                            <p>&nbsp;&nbsp;Expand your network with new talents</p>
+                            <p>&nbsp;&nbsp;Help new talents by interviewing them</p>
+                            <p>&nbsp;&nbsp;feedback and promote the talents you like</p>
+                        </div>
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
                     </div>
                     <!--<div class="navigation">
                         <div>
@@ -509,6 +587,7 @@ session_start();
                         </div>
                     </div>-->
                 </div>
+<<<<<<< HEAD
                 <div id="schedule-page-reviews" class="schedule-page-card-div">
                 </div>
                 </div>
@@ -582,6 +661,134 @@ session_start();
                         <li class="in"><a href="#">Linkedin</a></li>
                     </ul>
                 </div>
+=======
+                <div class="testimonials-main-div">
+                    <div class="testimonials-container-div">
+                        <div class="testimonials-title-div">testimonials</div>
+                        <div class="three-testimonials-div">
+                            <div class="testimonial-div">
+                                <div class="testimonial-image-div">
+                                    <img src="img/test-1.png" alt="test" />
+                                </div>
+                                <div class="testimonial-text-div">
+                                    <p class="quote"> Pellentesque et pulvinar enim. Quisque at tempor ligula. Donec ut purus sed tortor malesuada.</p>
+                                    <p class="name">Davie Johnson</p>
+                                    <p class="ash">Art Director /<span> lorem ipsum</span></p>
+                                </div>
+                            </div>
+                            <div class="testimonial-div">
+                                <div class="testimonial-image-div">
+                                    <img src="img/test-2.png" alt="test" />
+                                </div>
+                                <div class="testimonial-text-div">
+                                    <p class="quote"> Pellentesque et pulvinar enim. Quisque at tempor ligula. Donec ut purus sed tortor malesuada.</p>
+                                    <p class="name">Davie Johnson</p>
+                                    <p class="ash">Art Director /<span> lorem ipsum</span></p>
+                                </div>
+                            </div>
+                            <div class="testimonial-div">
+                                <div class="testimonial-image-div">
+                                    <img src="img/test-3.png" alt="test" />
+                                </div>
+                                <div class="testimonial-text-div">
+                                    <p class="quote"> Pellentesque et pulvinar enim. Quisque at tempor ligula. Donec ut purus sed tortor malesuada.</p>
+                                    <p class="name">Davie Johnson</p>
+                                    <p class="ash">Art Director /<span> lorem ipsum</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        
+        <!--HOME-->
+        <!--FIND INTERVIEWS-->
+        <div id="findInterviews" style="display:none; margin-top: 140px;">
+            <div id="searchItems" class="main-container">
+            </div>
+        </div>
+        <!--FIND INTERVIEWS-->
+        <!--GIVE INTERVIEWS-->
+        <div id="giveInterviews" style="display:none; margin-top: 100px;">
+        </div>
+        <!--GIVE INTERVIEWS-->
+        <!--HOW IT WORKS-->
+        <div id="howItWorks" style="display:none;">
+        </div>
+        <!--HOW IT WORKS-->
+        <!--SLIDER-->
+        <div id="slider" style="display:none;">
+        </div>
+        <!--SLIDER-->
+        <!--PROFILE-->
+        <div id="profile" style="display:none; margin-top: -90px;">
+            <div id="profileItems" class="main-container">
+            </div>
+        </div>
+        <!--PROFILE-->
+        <!--CHECK OUT-->
+        <div id="checkOut" style="display:none;">
+        </div>
+        <!--CHECK OUT-->
+        <!--RETURN-->
+        <div id="return" style="display:none;">
+        </div>
+        <!--RETURN-->
+        <!--SOCIAL SHARE-->
+        <div id="socialShare" style="display:none;">
+        </div>
+        <!--SOCIAL SHARE-->
+        <!--RATE ME-->
+        <div id="rateMe" style="display:none;">
+        </div>
+        <!--RATE ME-->
+        <!--FEEDBACK FORM-->
+        <div id="feedbackForm" style="display:none;">
+        </div>
+        <!--FEEDBACK FORM-->
+        <!--SELECT SERVICES-->
+        <div id="selectServices" style="display:none;">
+        </div>
+        <!--SELECT SERVICES-->
+        <!--SELECT AVAILABILITY-->
+        <div id="selectAvailability" style="display:none;">
+        </div>
+        <!--SELECT AVAILABILITY-->
+        <!--COMPLETE GIVE HELP-->
+        <div id="completeGiveHelp" style="display:none;">
+        </div>
+        <!--COMPLETE GIVE HELP-->
+
+    </div><!--container-->
+
+    <footer>
+        <div class="holder-bottom">
+            <div class="footer-section footer-section-1">
+                <h6>Explore</h6>
+                <ul>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">News</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Terms of Use Privacy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section footer-section-2">
+                <h6>Sign Up</h6>
+                <button class="footer-button">interviewer signup</button>
+                <button class="footer-button">recruiter signup</button>
+            </div>
+            <div class="footer-section footer-section-3">
+                <h6>Stay in touch</h6>
+                <div class="share">
+                    <ul>
+                        <li class="fb"><a href="#">Facebook</a></li>
+                        <li class="tw"><a href="#">Twitter</a></li>
+                        <li class="in"><a href="#">Linkedin</a></li>
+                    </ul>
+                </div>
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
             </div>
             <div class="footer-section footer-section-4">
                 <h6>Contact Us</h6>
@@ -602,11 +809,15 @@ session_start();
 
 
 
+<<<<<<< HEAD
 //$(window).load(function() {
 //  $('.flexslider').flexslider({
 //    animation: "slide"
 //  });
 //});
+=======
+
+>>>>>>> a6535d527f0abd6f2bcd0116182585118f5646fb
 
 
     $(function () {

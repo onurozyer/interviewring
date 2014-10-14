@@ -59,6 +59,30 @@ function getGroup(groupName, controlValue)
 }
 
 
+function getTimeGroup(groupName, controlValue)
+{
+  var itemStr = '';
+  var r = document.getElementsByName(groupName);
+  for (var i = 0; i < r.length; i++)
+  {
+    //if(r[i].checked == controlValue) {itemStr += r[i].value + '\n';}
+    if(r[i].checked == controlValue)
+    {
+      var timeObj = convertTimeTo12(r[i].value + ':' + '00');
+      var hour = timeObj.hour;
+      var minute = timeObj.minute;
+      var ampm = timeObj.ampm;
+      localTimeStr = hour + ampm;
+
+      itemStr += localTimeStr + '<br>';
+    }
+  }
+  return itemStr ? itemStr : '';
+}
+
+
+
+
 function getGroupSelections(checkbox, combobox, controlValue)
 {
   var itemStr = '';
@@ -74,6 +98,27 @@ function getGroupSelections(checkbox, combobox, controlValue)
   }
   //console.log("ITEMSTR: " + itemStr);
   return itemStr;
+}
+
+
+function setGroupFromTimeZone(combobox, timeZone)
+{
+
+  var combo = document.getElementsByName(combobox);
+
+  //var comboItems = {};
+
+  for (var j = 0; j < combo[0].options.length; j++)
+  {
+    if(combo[0].options[j])
+    {
+      //console.log("COMBO: " + combo[0].options[j].text + ' === ' + timeZone);
+      if(combo[0].options[j].text === timeZone) {combo[0].selectedIndex = j; continue;}
+      //comboItems[combo[j].options[j].text] = j;
+    }
+  }
+
+  //combo[j].selectedIndex = comboItems[timeZone];}
 }
 
 
@@ -294,6 +339,78 @@ function convertTimeTo12(time)
 }
 
 
+//Value parameter - required. All other parameters are optional.
+function isDate(value, sepVal, dayIdx, monthIdx, yearIdx)
+{
+  try {
+        //Change the below values to determine which format of date you wish to check. It is set to dd/mm/yyyy by default.
+        var DayIndex = dayIdx !== undefined ? dayIdx : 0; 
+        var MonthIndex = monthIdx !== undefined ? monthIdx : 1;
+        var YearIndex = yearIdx !== undefined ? yearIdx : 2;
+ 
+        value = value.replace(/-/g, "/").replace(/\./g, "/"); 
+        var SplitValue = value.split(sepVal || "/");
+
+        //console.log(SplitValue[DayIndex]);
+        //console.log(SplitValue[MonthIndex]);
+        //console.log(SplitValue[YearIndex]);
+        var OK = true;
+        if (!(SplitValue[DayIndex].length == 1 || SplitValue[DayIndex].length == 2))
+        {
+          OK = false;
+        }
+        if (OK && !(SplitValue[MonthIndex].length == 1 || SplitValue[MonthIndex].length == 2))
+        {
+          OK = false;
+        }
+        if (OK && SplitValue[YearIndex].length != 4)
+        {
+          OK = false;
+        }
+        //console.log(OK);
+        if (OK)
+        {
+          var Day = parseInt(SplitValue[DayIndex], 10);
+          var Month = parseInt(SplitValue[MonthIndex], 10);
+          var Year = parseInt(SplitValue[YearIndex], 10);
+          //console.log(Day + "/" + Month + "/" + Year);
+ 
+          if (OK = ((Year > 1900) && (Year >= new Date().getFullYear())))
+          {
+            if (OK = (Month <= 12 && Month > 0))
+            {
+	      //console.log(OK);
+              var LeapYear = (((Year % 4) == 0) && ((Year % 100) != 0) || ((Year % 400) == 0));   
+                    
+              if(OK = Day > 0)
+              {
+                if (Month == 2)
+                {  
+                  OK = LeapYear ? Day <= 29 : Day <= 28;
+                } 
+                else
+                {
+                  if ((Month == 4) || (Month == 6) || (Month == 9) || (Month == 11))
+		  {
+                    OK = Day <= 30;
+                  }
+                  else
+		  {
+                    OK = Day <= 31;
+                  }
+                }
+              }
+            }
+          }
+        }
+        //console.log(OK);
+        return OK;
+      }//try
+      catch (e)
+      {
+        return false;
+      }
+} 
 
 
 function startRead()
@@ -475,7 +592,11 @@ function getDateIndexes(longDateStr)
   {
     if(monthName == app.MONTHS[i]) {monthIndex = i+1; break;}
   }  
-  return {dayIndex: dayIndex, monthIndex: monthIndex, year: year};
+  for(var i = 0; i < app.DAYS.length; i++)
+  {
+    if(weekDay == app.DAYS[i]) {weekDay = i; break;}
+  }  
+  return {dayIndex: dayIndex, monthIndex: monthIndex, year: year, weekDay: weekDay};
 }
 
 
@@ -488,6 +609,9 @@ function localizeTime(time, day, month, year)
 
   var tzPRV = provider.getTZname();
   var tzUSR = member.getTZname();
+
+  //console.log("PROVIDER TIME ZONE: " + tzPRV);
+  //console.log("USER TIME ZONE: " + tzUSR);
 
   var timeStr = Number(time.match(/^(\d+)/)[1]) + ':00' + ' ' + time.match(/([ap]m)/);
   timeStr = timeStr.replace(/\,[ap]m$/,'');
@@ -839,3 +963,120 @@ function localizeCartItem(item, inID, thisDayIndex, thisMonthIndex, thisYear)
   return {sch: split.join('<br>'), dateStr: dateStr};
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+function waitGeolocation()
+{
+  if(!app.localityObj.locality)
+  {
+    //console.log('Waiting...Locality: ' + app.localityObj.locality);
+    countdown = setTimeout('waitGeolocation()', 500);
+  }
+  else
+  {
+    //console.log(app.localityObj);
+    //console.log(app.localityObj.locality);
+    var opts = new Array();
+    opts.push(app.localityObj.locality);
+    opts.push(app.localityObj.postalCode + ' area code');
+    opts.push(app.localityObj.county);
+    opts.push(app.localityObj.province);
+    addOptions('localitySelect', opts);
+  }
+}
+
+
+
+function getServiceFromSchedule(schedule)
+{
+  //07:00pm -- Interview Mentoring<br>08:00pm -- Interview Mentoring<br> 
+  var split = schedule.split('<br>');
+  var duration = split.length-1;
+  var service = split[0].split(/\s*--\s*/)[1];
+  return {service: service, duration: duration};
+}
+
+
+
+
+function getLocality()
+{
+  getCurrentPosition();
+}
+
+
+function getCurrentPosition()
+{
+  //console.log("getLocality");
+  if (navigator.geolocation)
+  {
+    navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+  }
+  else
+  {
+    app.localityObj.locality = "unknown";
+  }
+}
+
+
+
+
+
+//Get the latitude and the longitude;
+function successFunction(position)
+{
+    var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+    codeLatLng(lat, lng);
+    //console.log(app.localityObj.locality);
+}
+
+function errorFunction()
+{
+  //alert("Geocoder failed");
+}
+
+
+function codeLatLng(lat, lng)
+{
+
+  var geocoder = new google.maps.Geocoder();
+  var latlng = new google.maps.LatLng(lat, lng);
+  var locality;
+  var province;
+  var postalCode;
+  var county;
+  geocoder.geocode({'latLng': latlng}, function(results, status)
+  {
+    if (status == google.maps.GeocoderStatus.OK)
+    {
+      //console.log(results)
+      if (results[2])
+      {
+        postalCode = results[2].address_components[0].long_name;
+        locality = results[2].address_components[1].long_name;
+        county = results[2].address_components[2].long_name;
+        province = results[2].address_components[3].long_name;
+      }
+      //console.log("postalCode: " + postalCode);
+      //console.log("locality: " + locality);
+      //console.log("county: " + county);
+      //console.log("province: " + province);
+    }
+    app.localityObj.postalCode = postalCode;
+    app.localityObj.county = county;
+    app.localityObj.province = province;
+    app.localityObj.locality = locality;
+
+  });
+}

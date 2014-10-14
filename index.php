@@ -53,6 +53,7 @@ session_start();
     <script type="text/javascript" src="js/jstz-1.0.4.js"></script>
     <script type="text/javascript" src="js/date.js"></script>
     <script type="text/javascript" src="js/flexslider/jquery.flexslider.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script> 
     <script src="js/utils.js"></script>
 
     <script src="js/application.js"></script>
@@ -136,7 +137,7 @@ session_start();
                     <ul class="nav">
                         <li class="menu-item-1"><a onclick="showHome();">home</a></li>
                         <li class="menu-item-2"><a onclick="showProfile();">my account</a></li>
-                        <li class="menu-item-3"><a onclick="showHome();">my history</a></li>
+                        <li class="menu-item-3"><a onclick="showHistory();">my history</a></li>
                         <li class="menu-item-4" id="login"><a onclick="IN.User.authorize();">sign in</a></li>
                     </ul>
                 </div>
@@ -349,6 +350,13 @@ session_start();
           </div>
       </div>
       <!--PROFILE-->
+
+      <!--HISTORY-->
+      <div id="history" style="display:none; margin-top: -0px;">
+          <div id="historyItems" class="main-container">
+          </div>
+      </div>
+      <!--HISTORY-->
 
       <!--CHECK OUT-->
       <div id="checkOut" style="display:none;">

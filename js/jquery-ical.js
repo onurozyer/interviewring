@@ -223,18 +223,20 @@
                         var datejson = jsondates[k];
                         options.beforeDay(formatdate);
                         
-                        //alert(datejson.title);
+                        //console.log(datejson.title);
                             
                         var str = "<li><span class='title'>"+ datejson.title +"</span><span class='desc'>"+ datejson.desc +"</span></li>"
-                        
+			  //console.log(str);
                         if (firstEvent)
                         {
-                            $(".icaltable tr:last", obj).append("<td class='date_has_event " + datejson.className + "' id = '"+ formatdate +"'>"+i+"<div class='events'><ul id ='ul-"+ formatdate +"'>"+ str +"</ul></div></td>"); //add day  
+                            $(".icaltable tr:last", obj).append("<td class='date_has_event " + datejson.className + "' id = '"+formatdate+"' onmouseover='if(this.className.indexOf(\"date_has_event\") > -1) {this.className=\"date_mouseover date_has_event \" + this.className} else{this.className=\"date_mouseover \" + this.className}' onmouseout='if(this.className.indexOf(\"date_has_event\") > -1) {this.className=\"date_has_event\"} else{if(this.className.indexOf(\"today\") > -1) {this.className=\"today\"} else {this.className=\"\"}}' onclick='if(!multiSelect){$(\".icaltable\").find(\"td\").not(this).removeClass(\"date_mouseover date_click\");} if(this.className.indexOf(\"date_click\") > -1) {if(this.className.indexOf(\"today\") > -1) {this.className=\"today date_mouseover\"} else {this.className=\"date_mouseover\"}} else {this.className=\"date_click \" + this.className} dayClick(this.innerHTML + \".\" + (currDate.getMonth()+1) + \".\" + currDate.getFullYear());' >"+i+"<div class='events'><ul id ='ul-"+ formatdate +"'>"+ str +"</ul></div></td>"); //add day  
                             firstEvent = false;
+                            //console.log('First');
                         }
                         else
                         {
                             $("#ul-" + formatdate, obj).append(str);
+                            //console.log('Appending');
                         }
                     }
                 }
@@ -269,6 +271,7 @@
         function highlightToday(obj){
             var today = new Date();
             today = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+            options.click(today);
             $("#"+today, obj).addClass("today");
         };
         
@@ -360,8 +363,9 @@
         
         function codabubble(){ //Stefano Verna
             $('.date_has_event').each(function () {
+		//console.log(this);
                 // options
-                var distance = 10;
+                var distance = 20;
                 var time = 250;
                 var hideDelay = 175;
 
@@ -373,9 +377,10 @@
 
                 var trigger = $(this);
                 var popup = $('.events ul', this).css('opacity', 0);
-
+                //console.log('PopUp');
                 // set the mouseover and mouseout on both element
                 $([trigger.get(0), popup.get(0)]).mouseover(function () {
+		    //console.log('mouseover');
                     // stops the hide event if we move from the trigger to the popup element
                     if (hideDelayTimer) clearTimeout(hideDelayTimer);
 

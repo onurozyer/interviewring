@@ -36,6 +36,7 @@
     this.inID = null;
     this.providerID = null;
     this.apptDay = null;
+    this.serviceDay = null;
     this.paymentReturn = false;
     this.socialShareReturn = false;
     this.rateReturn = false;
@@ -46,6 +47,7 @@
     this.usersLoaded = false;
     this.sortedFilteredList = [];
     this.currInterviewer = 0;
+    this.localityObj = {};
   }
 
   // Implements methods for Class
@@ -57,6 +59,8 @@
     ,getProviderID: function () { return this.providerID; }
 
     ,getApptDay: function () { return this.apptDay; }
+
+    ,getServiceDay: function () { return this.serviceDay; }
 
     ,loadUsers: function ()
     {
@@ -1033,10 +1037,48 @@
       icRight.appendChild(icRightInfo);
 
 
+
+
+
+         var feeRow = document.createElement("div");
+         feeRow.className = "fee-row";
+         feeRow.style.marginTop = -50 + 'px';
+         feeRow.style.marginLeft = 20 + 'px';
+         var location = document.createElement("p");
+         location.innerHTML = 'location';
+         var locationSelect = document.createElement("select");
+         locationSelect.id = "localitySelect";
+         locationSelect.name = "localitySelect";
+         feeRow.appendChild(location);
+         feeRow.appendChild(locationSelect);
+         icRight.appendChild(feeRow);
+
+         var feeRow = document.createElement("div");
+         feeRow.className = "fee-row";
+         feeRow.style.marginTop = -30 + 'px';
+         feeRow.style.marginLeft = 20 + 'px';
+         var timezone = document.createElement("p");
+         timezone.innerHTML = 'timezone';
+         var timezoneSelect = document.createElement("select");
+         timezoneSelect.id = "timezoneSelect";
+         timezoneSelect.name = "timezoneSelect";
+         feeRow.appendChild(timezone);
+         feeRow.appendChild(timezoneSelect);
+         icRight.appendChild(feeRow);
+
+
+
+
+
+
+
       itemInfoWrapper.appendChild(icRight);
 
       window.appendChild(itemInfoWrapper);
 
+        getLocality();
+        waitGeolocation();
+        getZones();
 
 
 
@@ -1180,9 +1222,39 @@
 
       addFilterOptions("serviceEditComboBox", options);
 
+        function getZones()
+        {
+	  var timeZoneNames = new Array();
+	  $.getJSON("js/timeZoneNames.json", function(data, Status, xhr )
+	  {
+	    //console.log(Status);
+	    //console.log(data);
+	    // data is a JavaScript object now. Handle it as such
+	    //console.log("OK");
+	    var zoneObj = data.main.en.dates.timeZoneNames.zone;
+	    //console.log(zoneObj);
+	    for(zone in zoneObj)
+	    {
+	      for(name in zoneObj[zone])
+	      {
+		//console.log(zone + '/' + name);
+		timeZoneNames.push(zone + '/' + name);
+	      }
+	    }
+	    addOptions("timezoneSelect", timeZoneNames);
+
+	    var zoneGuess = jstz.determine().name(); // Determines the time zone of the browser client
+	    //console.log(zoneGuess);
+	    setGroupFromTimeZone("timezoneSelect", zoneGuess);
+
+	  });
+	}
+
+
 
       function showItemToEdit(service)
       {
+	 var me = this;
 	 if(document.getElementById("schedulePageCard")) {document.getElementById("schedulePageCard").parentNode.removeChild(document.getElementById("schedulePageCard"));}
          
          var schedulePageCard = document.createElement("div");
@@ -1209,28 +1281,12 @@
          hourlyFee.innerHTML = 'hourly fee $';
          var hourlyFeeTextBox = document.createElement("input");
          hourlyFeeTextBox.className = "fee-text-box";
+         hourlyFeeTextBox.id = "hourlyFeeTextBox";
          hourlyFeeTextBox.type = "text";
          feeRow.appendChild(hourlyFee);
          feeRow.appendChild(hourlyFeeTextBox);
          profilePageFee.appendChild(feeRow);
 
-         var feeRow = document.createElement("div");
-         feeRow.className = "fee-row";
-         var location = document.createElement("p");
-         location.innerHTML = 'location';
-         var locationSelect = document.createElement("select");
-         feeRow.appendChild(location);
-         feeRow.appendChild(locationSelect);
-         profilePageFee.appendChild(feeRow);
-
-         var feeRow = document.createElement("div");
-         feeRow.className = "fee-row";
-         var timezone = document.createElement("p");
-         timezone.innerHTML = 'timezone';
-         var timezoneSelect = document.createElement("select");
-         feeRow.appendChild(timezone);
-         feeRow.appendChild(timezoneSelect);
-         profilePageFee.appendChild(feeRow);
 
 
          var scLeftInfoTitle = document.createElement("div");
@@ -1261,6 +1317,7 @@
          var calSelect = document.createElement("select");
          calSelect.style.marginLeft = 4 + 'px';
          calSelect.name = "calSelect";
+         calSelect.id = "calSelect";
          var lineBreak = document.createElement("br");
          hoursAppliesTo.appendChild(appliesTo);
          hoursAppliesTo.appendChild(lineBreak);
@@ -1307,6 +1364,8 @@
          saveScheduleDiv.style.left = 160 + "px";
          var saveSchedule = document.createElement("button");
          saveSchedule.innerHTML = "save schedule";
+         saveSchedule.onclick = function() {saveService(service);};
+         //saveSchedule.onclick = new Function( 'saveService()');
          saveScheduleDiv.appendChild(saveSchedule);
 
          timeSelection.appendChild(hoursAppliesTo);
@@ -1343,6 +1402,7 @@
 
 	     var dtPRV = new timezoneJS.Date(year, month-1, day);
 	     //console.log(app.DAYS[dtPRV.getDay()]);
+             app.serviceDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
 
 	     var opts = new Array();
 	     opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
@@ -1361,7 +1421,195 @@
 	opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
 	opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
 	addOptions("calSelect", opts);
+ 
 
+
+
+
+
+        function saveService(service)
+	{
+          var price = currencyFormatted(Math.abs(document.getElementById('hourlyFeeTextBox').value));
+          //console.log(price);
+          var locality = document.getElementById('localitySelect').value;
+          //console.log(locality);
+          var timeZone = document.getElementById('timezoneSelect').value;
+          //console.log(timeZone);
+
+          //var province = Ext.get('serviceProvinceText').getValue();
+          //var postalCode = Ext.get('servicePostalCodeText').getValue();
+          //var radius = Ext.get('serviceRadiusText').getValue();
+
+          var member = members.getMember(app.getUserID());
+          member.tzName = timeZone;
+
+          //TODO:  Pull this out and add to onchange for timezoneSelect element
+          //Save tzName to database
+          $.ajax({url:"./php/saveTZname.php", 
+            data: {id: app.getUserID(), tzName: timeZone },
+            type:'post',
+            async:true
+          });
+
+          var providedServices = member.getProvidedServices();
+
+          //console.log("SERVICE: " + service);
+          providedServices[service].price = price;
+          providedServices[service].locality = locality;
+          member.providedServices = providedServices;
+          //Save providedServices to database
+          $.ajax({url:"./php/saveServices.php", 
+	    data: {id: app.getUserID(), services: JSON.stringify(providedServices) },
+            type:'post',
+            async:true
+          });
+
+
+          saveCalendar();
+
+
+	}
+
+
+
+	 function saveCalendar()
+	 {
+           var member = members.getMember(app.getUserID());
+           var calendar = member.getCalendar();
+
+  	   var e = document.getElementById("serviceEditComboBox");
+	   var service = e.options[e.selectedIndex].value;
+
+  	   var e = document.getElementById("calSelect");
+	   var opt = e.options[e.selectedIndex].value;
+
+
+
+           //app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
+           var serviceDay = app.getServiceDay();
+
+           console.log(serviceDay);
+	   var dateObj = getDateIndexes(serviceDay);
+
+	   var d = parseInt(dateObj.dayIndex, 10);
+	   //console.log(d);
+	   var m = parseInt(dateObj.monthIndex, 10);
+	   var y = parseInt(dateObj.year, 10);
+           var weekDay = parseInt(dateObj.weekDay, 10);
+
+	   var sch = getTimeGroup('serviceTime', true);
+	   //var availability = "AVAILABLE:\n" + sch;
+	   var availability = "AVAILABLE:<br>" + sch;
+
+           if(e.selectedIndex == 0)
+	   {
+             var currDate = pad(d, 2)+'/'+pad(m, 2)+'/'+y;
+	     //SAVE CALENDAR
+	     console.log("Saving date: " + currDate + " -> " + availability);
+             if(!calendar[service]) {calendar[service] = {};}
+             calendar[service][currDate] = availability;
+	   }
+           else if(e.selectedIndex == 1)
+	   {
+             saveDayThisMonth(d, m, y)
+	   }
+           else
+	   {
+             saveDayThisYear(d, m, y, weekDay)
+	   }
+
+           member.calendar = calendar;
+           //Save calendar to database
+           $.ajax({url:"./php/saveCalendar.php", 
+	      data: {id: app.getUserID(), calendar: JSON.stringify(calendar) },
+              type:'post',
+              async:true
+           });
+
+
+
+
+
+
+           function saveDayThisMonth(d, m, y)
+	   {
+	     var currDay = d;
+             var currDate = d + "/" + m + "/" + y;
+
+	     var today = new Date();
+	     today.setDate(today.getDate()+0);   
+	     //console.log('TODAY: ' + today.getDate());
+	     var thisDate = today.getDate();
+	     var thisMonth = today.getMonth()+1;
+	     var thisYear = today.getFullYear();
+	     console.log(y + " <= " + thisYear + " && " + m + " <= " + thisMonth);
+	     var calMinDate = (y <= thisYear && m <= thisMonth) ? thisDate : 0;
+
+	     console.log(currDay + " >= " + calMinDate);
+        
+	     //rewind day to beginning of month
+	     while(isDate(currDate) && currDay >= calMinDate)
+	     {
+	       currDay = parseInt(currDay, 10) - 7;
+	       currDay = pad(currDay, 2);
+	       //console.log(day + " " + month);
+	       currDate = currDay + "/" + m + "/" + y;
+	       console.log(currDate);
+	     }
+	     currDay = parseInt(currDay, 10) + 7;
+	     currDay = pad(currDay, 2);
+	     //console.log(day + " " + month);
+	     currDate = currDay + "/" + m + "/" + y;
+  
+
+	     while(isDate(currDate))
+	     {
+	       //SAVE CALENDAR
+               var day = pad(currDay, 2)+'/'+pad(m, 2)+'/'+y;
+	       console.log("Saving date: " + currDate);
+               calendar[day] = availability;
+    
+	       currDay = parseInt(currDay, 10) + 7;
+	       currDay = pad(currDay, 2);
+	       //console.log(day + " " + month);
+	       currDate = currDay + "/" + m + "/" + y;
+	     }
+	   } //saveDayThisMonth()
+
+
+
+	   function saveDayThisYear(d, m, y, dayNumber)
+	   {
+	     //console.log('dayNumber: ' + dayNumber);
+	     d = pad(d, 2);
+	     m = pad(m, 2);
+
+	     var tDay = d + "/" + m + "/" + y;
+	     //console.log(tDay);
+	     var currDay = d;
+	     var currMonth = m;
+
+	     //rewind day to beginning of month
+	     while(isDate(tDay))
+	     {
+	       currDay = saveDayThisMonth(currDay, currMonth, y);
+	       var now = new Date(y,currMonth,1);
+	       var firstDay=now.getDay();
+	       //console.log('firstDay: ' + firstDay);
+	       currDay=1+(dayNumber-firstDay+7)%7;
+	       currDay = pad(currDay, 2);
+	       currMonth = parseInt(currMonth, 10) + 1;
+	       currMonth = pad(currMonth, 2);
+	       //console.log(currDay + " " + currMonth);
+	       tDay = currDay + "/" + currMonth + "/" + y;
+	     }
+	   } //saveDayThisYear()
+
+
+
+
+
+	 } //saveCalendar()
 
 
       } //showItemToEdit()
@@ -1821,8 +2069,32 @@
 
       getSubTotal();
 
+
+
+      var scheduleDates = new Array();
+      var provider = members.getMember(app.getProviderID());
+      var cal = provider.getCalendar();
+      for(var key in cal)
+      {
+        var split = key.split('/');
+        var d = parseInt(split[0], 10);
+        var m = parseInt(split[1], 10);
+        var y = parseInt(split[2], 10);
+        var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
+        var lsObj = localizeSch(cal[key], app.getProviderID(), d, m, y);
+        var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+        //console.log(localizedAppt);
+
+	scheduleDates.push({date: dateStr, title: '', desc: lsObj.sch});
+      }
+
+
+
       var cal = $("#scheduleCal").ical({
         startOnSunday: true,
+
+	eventdates: scheduleDates,
+
         click: function(d)
         {
           //console.log('SELECTED: ' + d);
@@ -1871,24 +2143,7 @@
         } // fired when user clicked on day, in "d" stored date
       });
 
-      var scheduleDates = new Array();
-      var provider = members.getMember(app.getProviderID());
-      var cal = provider.getCalendar();
-      for(var key in cal)
-      {
-        var split = key.split('/');
-        var d = parseInt(split[0], 10);
-        var m = parseInt(split[1], 10);
-        var y = parseInt(split[2], 10);
-        var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
-        var lsObj = localizeSch(cal[key], app.getProviderID(), d, m, y);
-        var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-        //console.log(localizedAppt);
-
-	scheduleDates.push({date: dateStr, title: '', desc: lsObj.sch});
-      }
-
-      $("#scheduleCal").ical.changeEventDates(scheduleDates);
+      //$("#scheduleCal").ical.changeEventDates(scheduleDates);
 
       //{"date": "2012-08-08", "title": "My birthday", "desc": "Its my birthday!"},
 
@@ -1906,12 +2161,14 @@
 	var controlValue = {};
         if(providerSchedule)
 	{
+	  console.log(providerSchedule);
 	  var split = providerSchedule.split('<br>');
 	  split.shift();
 	  for(var i = 0; i < split.length; i++)
           {
             if(split[i])
 	    {
+	      console.log(split[i]);
               var timeStr = Number(split[i].match(/^(\d+)/)[1]) + ':00' + ' ' + split[i].match(/([ap]m)/);
               timeStr = timeStr.replace(/\,[ap]m$/,'');
 	      split[i] = convertTimeTo24(timeStr).hour;
@@ -1949,6 +2206,530 @@
 
 
     } //populateScheduleItems()
+
+
+
+
+
+    ,populateMyHistory: function(arg)
+    {
+      var me = this;
+      console.log("populateMyHistory()");
+      arg = arg || document.getElementById('explore').value;
+      document.getElementById('explore').value = arg;
+
+      var el = document.getElementById("historyItems").innerHTML = "";
+      historyItemKeyArray = [];
+      
+      var member = members.getMember(app.getUserID());
+      if(member.getRole() == 'give')
+      {
+        populateProviderHistory(arg);
+      }
+      else if(member.getRole() == 'find')
+      {
+        populateHistory(arg);
+      }
+      else
+      {
+        populateProviderHistory(arg);
+        populateHistory(arg);
+      }
+
+      function populateProviderHistory(exp)
+      {
+
+	var regExp = exp || ".";
+	regExp = regExp.replace(/\s+/g, "|");
+	var matchRE = new RegExp(regExp, "i");
+	//console.log(regExp);
+
+	var companies = new Array();
+	var historyItems = {};
+
+        var member = members.getMember(app.getUserID());
+
+	historyItems = member.getProviderHistory();
+
+
+	for (var key in historyItems)
+        {
+	  console.log("KEY: " + key);
+	  var split = key.split(/\:/);
+	  var ID = split[0];
+	  var day = split[1];
+	  var status = '';
+	  var dateFilter = '';
+
+	  var first = member.getFirstName();
+	  var last = member.getLastName();
+	  var company = member.getCompany();
+	  var position = member.getTitle();
+	  var industry = member.getIndustry();
+
+
+	  var feedback = member.getFeedback();
+	  //var fbKey = user[0].inID + ':' + day;
+	  var fbKey = ID + ':' + day;
+	  //console.log("FBKEY: " + fbKey);
+	  if(feedback[fbKey])
+          {
+	    //console.log("HERE");
+	    status = 'Completed';
+	  }
+	  else
+	  {
+	    //console.log(day);
+
+	    var date = {};
+	    date = getDateIndexes(day);
+
+	    var d = parseInt(date.dayIndex, 10);
+	    var m = parseInt(date.monthIndex, 10);
+	    var y = parseInt(date.year, 10);
+	    //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	    var x=new Date();
+	    x.setFullYear(y,m-1,d);
+	    var t = new Date();
+
+	    if (x>t)
+            {
+	      status = 'Scheduled';
+	    }
+	    else
+            {
+	      status = 'Waiting Feedback';
+	    }
+	  }
+
+	  //"date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago']
+	  var date = {};
+	  date = getDateIndexes(day);
+
+	  var d = parseInt(date.dayIndex, 10);
+	  var m = parseInt(date.monthIndex, 10);
+	  var y = parseInt(date.year, 10);
+	  //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	  var x=new Date();
+	  x.setFullYear(y,m-1,d);
+
+
+	  //'< 1 month ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 1);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '< 1 month ago';}
+
+	  //'1-3 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 3);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '1-3 months ago';}
+
+	  //'4-6 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 6);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '4-6 months ago';}
+
+	  //'7-12 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 12);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '7-12 months ago';}
+
+	  //'> 1 year ago'
+	  if(!dateFilter) {dateFilter = '> 1 year ago';}
+
+	  //console.log(dateFilter);
+
+	  var found = first.match(matchRE);
+	  found += last.match(matchRE);
+	  found += company.match(matchRE);
+	  found += position.match(matchRE);
+	  found += industry.match(matchRE);
+	  //found += summary.match(matchRE);
+	  found += status.match(matchRE);
+	  found += dateFilter.match(matchRE);
+	  if(ID == regExp) {found++;}
+	  //console.log("FOUND: " + found);
+	  if(found)
+	  {
+	    historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter});
+	    var found = 0;
+	    for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+	    if(!found) {companies.push(company);}
+	  }
+
+	}
+	//historyFilters.companyH = companies ? companies.sort() : {};
+
+	//applyHistoryFilters();
+	//historyItemKeyArray.sort(sortHistoryFunction)
+	populateProviderHistoryItems();
+
+	//if(exp) {pruneHistoryFilters();}
+
+
+
+
+        function populateProviderHistoryItems()
+        {
+          console.log("populateProviderHistoryItems()");
+
+	  var companies = new Array();
+	  var elID = "historyItems";
+	  var help = '';
+	  var index = 0;
+	  var historyItems = {};
+	  var member = members.getMember(app.getUserID());
+
+	  historyItems = member.getProviderHistory();
+
+	  for(index = 0; index < historyItemKeyArray.length; index++)
+	  {
+	    var key = historyItemKeyArray[index].key;
+
+	    console.log('KEY: ' + key);
+	    var historyID = elID + index;
+	    var closeHistoryID = 'close' + elID + index;
+	    var blisterHistoryID = 'blister' + elID + index;
+
+	    var split = key.split(/\:/);
+	    var ID = split[0];
+	    var day = split[1];
+            me.providerID = ID;
+            var provider = members.getMember(ID);
+
+	    var image = provider.getImage();
+
+	    var date = {};
+	    date = getDateIndexes(day);
+
+	    var d = parseInt(date.dayIndex, 10);
+	    var m = parseInt(date.monthIndex, 10);
+	    var y = parseInt(date.year, 10);
+
+	    var link = '';
+   
+	    if(!historyItems[key]) {continue;}
+
+	    split = historyItems[key].split('<br>');
+	    split.shift();
+	    var appt = split.join('<br>');
+            console.log(appt);
+	    //console.log(ID);
+	    var feedback = member.getFeedback();
+	    var fbKey = ID + ':' + day;
+
+            var state;
+
+	    //console.log("FBKey: " + fbKey);
+	    //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
+	    //console.log("ID: " + split[1]);
+	    //console.log("SETTING: " + imgID);
+	    //console.log("STR: " + Ext.JSON.encode(feedback[fbKey]));
+	    if(feedback[fbKey])
+	    {
+	      link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:green;"> Completed</span></span><hr></div>';
+              state = 'Completed';
+	    }
+	    else
+	    {
+	      //console.log(day);
+
+	      var date = {};
+	      date = getDateIndexes(day);
+
+	      var d = parseInt(date.dayIndex, 10);
+	      var m = parseInt(date.monthIndex, 10);
+	      var y = parseInt(date.year, 10);
+	      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	      var x=new Date();
+	      x.setFullYear(y,m-1,d);
+	      var t = new Date();
+
+	      if (x>t)
+	      {
+		link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
+                state = 'Scheduled';
+	      }
+	      else
+	      {
+		link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:red;"> Waiting Feedback</span></span><hr></div>';
+                state = 'Waiting Feedback';
+	      }
+	    }
+
+	    // --Rating--
+	    var ratingStr = '';
+	    var ratingObj = provider.getReviews();
+
+	    var rating = Math.ceil(ratingObj.average);
+	    var rates = ratingObj.total || 0;
+	    //console.log(ratingObj.comments);
+	    if(!rating) {rating = 0;}
+
+	    //var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
+	    var ratingStr = '';
+	    ratingStr += '<div style="right: -6px;">';
+	    for(var i = rating; i < 5; i++)
+            {
+	      ratingStr += '<img src="images/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+	    }
+	    for(var i = 0; i < rating; i++)
+	    {
+	      ratingStr += '<img src="images/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+	    }
+	    ratingStr += '</div></div><div style="color: #555; text-align: right; position: absolute; top: 15px; right: 0px;">' + rates + ' Reviews</div></div>';
+
+	    // --Name--
+	    var name = provider.getFullName();
+	    var url = provider.getURL();
+	    var label = name;
+	    //console.log(label);
+
+	    var lsObj = localizeSch(appt,ID,d,m,y);
+	    localDay = lsObj.dateStr;
+            console.log(lsObj.sch);
+            var schObj = getServiceFromSchedule(lsObj.sch);
+            var service = schObj.service;
+	    var duration = schObj.duration;
+	    // --Services--
+	    services = member.getProvidedServices();
+            var locality = services[service].locality;
+            var province = services[service].province;
+	    //console.log(services);
+	    var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + localDay + '</div>' + lsObj.sch;
+	    help += '</div>';
+	    //console.log(help);
+
+	    // --Company--
+	    var company = provider.getCompany();
+	    var found = 0;
+	    for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+	    if(!found) {companies.push(company);}
+	    var companyTenure = provider.getCompanyTenure();
+
+	    // --Industry--
+	    var indsutry = provider.getIndustry();
+	    var industryTenure = member.getIndustryTenure();
+
+	    // --Position--
+	    var position = provider.getTitle();
+
+	    var education = provider.getEducation();
+	    //  Only display most recent education
+	    var split = education.split('<br>');
+	    education = split[0];
+
+	    // --Image--
+	    var image = provider.getImageSmall();
+
+            var privacy = provider.getPrivacy();
+	    if(privacy.identity) {label = ""; image = "./images/ghostSmall.png";}
+
+
+
+
+	    var wrapper = document.createElement("div");
+	    wrapper.className = "history-page-card-div";
+
+	    var window = document.createElement("div");
+	    //window.className = "providerHistoryItem";
+	    window.className = "sc-left";
+	    window.id = "historyItem" + index;
+ 
+	    fbKey = ID + ':' + day;
+	    ID = me.getUserID();
+
+	    //if(link.match('Completed'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+	    //else if(link.match('Waiting'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+
+
+            var historyPageTitle = document.createElement("div");
+            historyPageTitle.className = "history-page-title-div";
+
+            var historyPageTitleLeft = document.createElement("div");
+            historyPageTitleLeft.className = "history-page-title-left-div";
+            historyPageTitleLeft.innerHTML = service + ' -- ' + day;
+	    historyPageTitleLeft.style.fontSize = 26 + 'px';
+
+            var historyPageTitleRight = document.createElement("div");
+            historyPageTitleRight.className = "history-page-title-right-div";
+	    historyPageTitleRight.innerHTML = 'status: <span class="status">' + state + '</span>';
+
+            historyPageTitle.appendChild(historyPageTitleLeft);
+            historyPageTitle.appendChild(historyPageTitleRight);
+
+	    window.appendChild(historyPageTitle);
+
+
+            var scLeftInfo = document.createElement("div");
+            scLeftInfo.className = "sc-left-info";
+            var hourStr = (parseInt(duration,10) > 1) ? 'hours' : 'hour';
+            scLeftInfo.innerHTML = '<p><b>interviewee</b> - ' + name + '</p><p><b>location</b> - ' + locality + ', ' + province + '</p><p><b>duration</b> - ' + duration + ' ' + hourStr + '</p><p><b>CV</b> - <a href="">download</a></p>';
+	    window.appendChild(scLeftInfo);
+
+            var historyPageTextarea = document.createElement("div");
+	    historyPageTextarea.className = "history-page-textarea-div";
+            historyPageTextarea.innerHTML = '<div class="interview-report-title-div">interview report</div><div class="interview-report-div"><textarea class="interview-report-text-area"></textarea></div><div class="share-the-report-div"><button class="share-the-report-button">share the report</button></div></div>';
+	    window.appendChild(historyPageTextarea);
+
+
+            var historyPageTextarea = document.createElement("div");
+	    historyPageTextarea.className = "history-page-textarea-div";
+            historyPageTextarea.innerHTML = '<div class="interview-report-title-div">interviewee feedback</div><div class="interview-report-div"><textarea readonly class="interview-report-text-area"></textarea></div>';
+	    window.appendChild(historyPageTextarea);
+
+            wrapper.appendChild(window);
+
+
+
+	    var itemImage = document.createElement("div");
+	    itemImage.className = "circular-small";
+	    itemImage.style.background = 'url(' + image + ') no-repeat center center';
+	    //itemImage.style.background = 'url(' + image + ') no-repeat';
+    
+
+	    /*
+    var itemName = document.createElement("div");
+    itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
+
+    var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
+    itemPosition.innerHTML = position;
+    window.appendChild(itemPosition);
+
+    var itemCompany = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
+    window.appendChild(itemCompany);
+
+    var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
+    itemEducation.innerHTML = education;
+    window.appendChild(itemEducation);
+
+    var itemLink = document.createElement("div");
+    itemLink.innerHTML = link;
+    window.appendChild(itemLink);
+
+    var itemRating = document.createElement("div");
+    itemRating.innerHTML = ratingStr;
+    window.appendChild(itemRating);
+
+    var itemServices = document.createElement("div");
+    itemServices.innerHTML = help;
+    window.appendChild(itemServices);
+
+
+
+
+
+    var info = document.createElement("div");
+
+
+
+    wrapper.appendChild(window);
+    wrapper.appendChild(info);
+	    */
+
+	    document.getElementById(elID).appendChild(wrapper);
+
+	  }
+
+        }
+      }//populateProviderHistory(exp)
+
+
+      function populateHistory(exp)
+      {
+        function populateHistoryItems()
+        {
+        }
+      }//populateHistory(exp)
+
+
+      function sortHistoryFunction(a, b)
+      {
+	//Compare "a" and "b" in some fashion, and return <0, 0, or >0
+	//Less than 0: Sort "a" to be a lower index than "b"
+	//Zero: "a" and "b" should be considered equal, and no sorting performed.
+	//Greater than 0: Sort "b" to be a lower index than "a".
+
+	var e = document.getElementById("sortHistory");
+	var opt = e.options[e.selectedIndex].value;
+	//console.log(opt);  
+
+	if(opt == 'company')
+	{
+	  if(productStore.getById(a.id).data.company < productStore.getById(b.id).data.company) {return -1;}
+	  if(productStore.getById(a.id).data.company > productStore.getById(b.id).data.company) {return 1;}
+	  return 0;
+	}
+	else if(opt == 'status')
+	{
+	  //console.log(a.status + " > " + b.status);
+	  return a.status > b.status;
+	}
+	else if(opt == 'date')
+	{
+	  var date = {};
+	  date = getDateIndexes(a.day);
+	  var d = parseInt(date.dayIndex, 10);
+	  var m = parseInt(date.monthIndex, 10);
+	  var y = parseInt(date.year, 10);
+	  //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	  var aDate = new Date();
+	  aDate.setFullYear(y,m-1,d);
+
+	  date = getDateIndexes(b.day);
+	  var d = parseInt(date.dayIndex, 10);
+	  var m = parseInt(date.monthIndex, 10);
+	  var y = parseInt(date.year, 10);
+	  //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	  var bDate = new Date();
+	  bDate.setFullYear(y,m-1,d);
+
+	  if (aDate < bDate) {return -1;}
+	  else if(aDate > bDate) {return 1;}
+	  else {return 0;}
+	}
+      }//sortHistoryFunction(a, b)
+
+
+
+
+    }
+
+
 
 
 
@@ -1996,7 +2777,7 @@
         //console.log("ITEM: " + item + " KEY: " + key);
         var date = key.split(':')[1];
 	//console.log(date);
-        var dateObj = getDateIndexes(date)
+        var dateObj = getDateIndexes(date);
 
         var d = parseInt(dateObj.dayIndex, 10);
         //console.log(d);

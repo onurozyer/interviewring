@@ -21,7 +21,8 @@ button {
     font-weight: 100;
     font-size: 20px;
     padding: 0px;
-	margin: 0px;
+    margin: 0px;
+    cursor: pointer;
 }
 
 .header-top {
@@ -79,6 +80,7 @@ button {
             float: left;
             line-height: 60px;
             list-style: none;
+            cursor: pointer;
         }
 
         .top-menu-div .nav li a {

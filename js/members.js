@@ -224,7 +224,102 @@
     getFeedback: function () { return this.feedback; },	
     getReviews: function () { return this.reviews; },	
     getCoins: function () { return this.coins; },	
-    getResume: function () { return this.resume }	
+    getResume: function () { return this.resume },
+
+    getAvailableHistory: function ()
+    {
+      var historyItems = {};
+      var result = this.history;
+      if(result)
+      {
+	if(result.length > 2)
+	{
+	  historyItems = this.history ? this.history : {};
+	}
+      }
+
+      var items = 0;
+      var withFeedback = 0;
+      for (var key in historyItems)
+      {
+	var split = key.split(/\:/);
+	var ID = split[0];
+	var day = split[1];
+
+	items++;
+	//console.log(ID);
+	var feedback = {};
+        var provider = members.getMember(ID);
+
+	if(provider)
+        {
+	  var result = provider.feedback;
+	  if(result.length > 2)
+          {
+	    feedback = provider.feedback ? provider.feedback : {};
+	  }
+	}
+	var fbKey = this.ID() + ':' + day;
+
+	if(feedback[fbKey])
+        {
+	  withFeedback++;
+	}
+      }
+      return {items: items, withFeedback: withFeedback};
+    },
+
+
+
+
+    getAvailableProviderHistory: function ()
+    {
+      var historyItems = {};
+      var result = this.providerHistory;
+      if(result)
+      {
+	if(result.length > 2)
+	{
+	  historyItems = this.providerHistory ? this.providerHistory : {};
+	}
+      }
+
+      var items = 0;
+      var withFeedback = 0;
+      for (var key in historyItems)
+      {
+	var split = key.split(/\:/);
+	var ID = split[0];
+	var day = split[1];
+
+	items++;
+	//console.log(ID);
+	var feedback = {};
+        var provider = members.getMember(ID);
+
+	if(provider)
+        {
+	  var result = provider.feedback;
+	  if(result.length > 2)
+          {
+	    feedback = provider.feedback ? provider.feedback : {};
+	  }
+	}
+	var fbKey = this.ID + ':' + day;
+
+	if(feedback[fbKey])
+        {
+	  withFeedback++;
+	}
+      }
+      return {items: items, withFeedback: withFeedback};
+    }
+
+
+
+
+
+	
 
   };
 }).call(this);

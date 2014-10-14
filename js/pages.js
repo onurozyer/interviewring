@@ -20,6 +20,7 @@
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "none";
       document.getElementById("profile").style.display = "none";
+      document.getElementById("history").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
       document.getElementById("socialShare").style.display = "none";
@@ -53,6 +54,7 @@
       document.getElementById("findInterviews").style.display = "";
       document.getElementById("giveInterviews").style.display = "none";
       document.getElementById("profile").style.display = "none";
+      document.getElementById("history").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
       document.getElementById("socialShare").style.display = "none";
@@ -96,6 +98,7 @@
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "";
       document.getElementById("profile").style.display = "none";
+      document.getElementById("history").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
       document.getElementById("socialShare").style.display = "none";
@@ -132,6 +135,7 @@
       document.getElementById("findInterviews").style.display = "none";
       document.getElementById("giveInterviews").style.display = "";
       document.getElementById("profile").style.display = "";
+      document.getElementById("history").style.display = "none";
       document.getElementById("checkOut").style.display = "none";
       document.getElementById("return").style.display = "none";
       document.getElementById("socialShare").style.display = "none";
@@ -167,6 +171,39 @@
 
 
     }
+
+
+
+
+    function showHistory(arg)
+    {
+      window.scrollTo(0, 0);
+
+      document.getElementById('explore').value = '';
+
+      document.getElementById('filterSortBar').style.display = 'none';
+
+      document.getElementById("home").style.display = "none";
+      document.getElementById("howItWorks").style.display = "none";
+      document.getElementById("findInterviews").style.display = "none";
+      document.getElementById("giveInterviews").style.display = "none";
+      document.getElementById("profile").style.display = "none";
+      document.getElementById("history").style.display = "";
+      document.getElementById("checkOut").style.display = "none";
+      document.getElementById("return").style.display = "none";
+      document.getElementById("socialShare").style.display = "none";
+      document.getElementById("rateMe").style.display = "none";
+      document.getElementById("feedbackForm").style.display = "none";
+      document.getElementById("selectServices").style.display = "none";
+      document.getElementById("selectAvailability").style.display = "none";
+      document.getElementById("completeGiveHelp").style.display = "none";
+
+
+
+      app.populateMyHistory();
+
+    }
+
 
 
     function showCheckOut(ID)

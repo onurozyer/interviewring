@@ -57,10 +57,12 @@ button {
     margin: auto;
     min-width: 985px;
     padding-left: 20px;
+    overflow: auto;
 }
 
 .logo-div {
     float: left;
+    height: 60px;
 }
 
     .logo-div img {
@@ -69,6 +71,7 @@ button {
 
 .top-menu-div {
     float: right;
+    font-size: 0.8em;
 }
 
     .top-menu-div .nav {
@@ -206,7 +209,13 @@ button {
 }
 
 .search-form-div {
-    float: left;
+    float: right;
+    height: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
 
 .filter-by-status-label-div {
@@ -1838,26 +1847,30 @@ footer {
 }
 
 .search-form-div {
-    float: left;
-	float: right;
+    float: right;
+    height: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
 
 .form-search {
-	height: 60px;
+	height: 100%;
+        margin: 0px 10px;
 }
 
 .search-form-div .form-search input[type="text"] {
     background: #fff;
     border: 0px solid #dfdfdf;
     color: #999999;
-    height: 60px;
-    padding-left: 20px;
+    height: 38px;
+    padding-left: 10px;
+    float: left;
     width: 450px;
-	font-size: 1.7em;
+	font-size: 1.3em;
 	margin: 0px;
-	position: relative;	
-	top: -22px;
-	right: -4px;
 	-webkit-appearance: none;    
 	-moz-appearance:none;
 }
@@ -1866,14 +1879,14 @@ footer {
 	-webkit-appearance: none;    
 	-moz-appearance:none;
 	background: url("img/search.png") no-repeat #ff5100;
-	background-size: 30px 30px;
-	background-position: 15px 15px;
+	background-size: 20px 20px;
+	background-position: 10px 10px;
     border: 0px solid #df5100;
     color: #FFFFFF;
     cursor: pointer;
     font-size: 1em;
-    height: 60px;
-    width: 60px;
+    height: 100%;
+    width: 40px;
     font-family: 'Segoe UI Symbol';
 	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */

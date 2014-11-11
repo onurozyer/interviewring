@@ -14,6 +14,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = 'none';
+      document.getElementById('historyFilterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "";
       document.getElementById("howItWorks").style.display = "none";
@@ -48,6 +49,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = '';
+      document.getElementById('historyFilterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
@@ -75,8 +77,8 @@
       //collapseAllFilters();
       //clearAllFilters();
       //doSearch(arg || "");
-      addFilterOptions('filter_industry', app.filters.industry);
-      addFilterOptions('filter_company', app.filters.company);
+      //addFilterOptions('filter_industry', app.filters.industry);
+      //addFilterOptions('filter_company', app.filters.company);
 
       doSearchInterviewers(arg);
 
@@ -92,6 +94,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = 'none';
+      document.getElementById('historyFilterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
@@ -129,6 +132,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = 'none';
+      document.getElementById('historyFilterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
@@ -182,6 +186,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = 'none';
+      document.getElementById('historyFilterSortBar').style.display = '';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";
@@ -213,6 +218,7 @@
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = 'none';
+      document.getElementById('historyFilterSortBar').style.display = 'none';
 
       document.getElementById("home").style.display = "none";
       document.getElementById("howItWorks").style.display = "none";

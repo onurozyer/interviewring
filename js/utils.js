@@ -187,6 +187,15 @@ function getSubTotalFromSch(sch, ID)
 }
 
 
+function prependFilterOption(id, option)
+{
+  if(!id || !option) {return;}
+  var select = document.getElementById(id);
+  var opt = new Option(option, option);
+  select.insertBefore(opt, select.firstChild);
+  select.selectedIndex = 0;
+}
+
 function addFilterOptions(id, options)
 {
   if(!id || !options) {return;}
@@ -194,7 +203,7 @@ function addFilterOptions(id, options)
   //console.log("ID: " + id);
   var r = document.getElementById(id);
   //console.log(r);
-  //removeChildren(r);
+  removeChildren(r);
   //console.log(options.length);
   for(var j = 0; j < options.length; j++)
   {
@@ -277,6 +286,20 @@ function removeChildren(el)
     while ( cell.childNodes.length >= 1 )
     {
       cell.removeChild( cell.firstChild );       
+    } 
+  }
+}
+
+function removeFilterChildren(el)
+{
+  //console.log("ID: " + id);
+  var cell = el;
+  if(!cell) {return;}
+  if ( cell.hasChildNodes() )
+  {
+    while ( cell.childNodes.length > 1 )
+    {
+      cell.removeChild( cell.lastChild );       
     } 
   }
 }

@@ -27,8 +27,11 @@ session_start();
 <head>
     <link href='http://fonts.googleapis.com/css?family=Poiret+One|Ubuntu:300,700|Open+Sans&subset=latin,latin-ext,greek-ext' rel='stylesheet' type='text/css'>
     <title>Interview Ring</title>
-    <link href='./img/x-icon.png' rel='icon' type='image/x-icon'/> 
     <link href='./img/x-icon.png' rel='shortcut icon' type='image/x-icon' />
+    <link rel="shortcut icon" href="./img/x-icon.png" />
+    <link href="./img/x-icon.png" rel="shortcut icon" type="image/vnd.microsoft.icon">
+    <link href="./img/x-icon.png" rel="apple-touch-icon" type="image/png">
+
     <!-- Meta -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,6 +96,14 @@ session_start();
 
 
     <script>
+
+       $('#spinner').ajaxStart(function () {
+          $(this).fadeIn('fast');
+        }).ajaxStop(function () {
+          $(this).stop().fadeOut('fast');
+        });
+
+
         var app = new application();
         app.loadUsers();
 
@@ -120,12 +131,28 @@ session_start();
         }
 
 
+        function doShowHistory() {
+            if (!app.usersLoaded) {
+                //console.log('Waiting...');
+                countdown = setTimeout('doShowHistory()', 500);
+            }
+            else {
+                app.populateHistoryItems();
+            }
+        }
+
+
+  
+
     </script>
 
 
 </head>
 <body>
 
+    <div id="spinner">
+      <img src="img/ajaxLoader.gif" alt="Loading..."/>
+    </div>
 
     <header>
         <div class="header-top">
@@ -142,15 +169,15 @@ session_start();
                     </ul>
                 </div>
                 <div class="search-form-div">
-                    <form class="form-search">
+                    <div class="form-search">
                         <input id="explore" type="text" class="input-xxlarge" placeholder="search for interviewers" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);'>
-                        <button type="submit" class="btn" onclick='if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'></button>
-                    </form>
+                        <img class="btn" onclick='if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'></img>
+                    </div>
                 </div>
             </div>
 
 
-            <div id="filterSortBar" class="holder" style="margin-top: 60px; display:none;">
+            <div id="filterSortBar" class="holder" style="margin-top: 0px; display:none;">
                     <div class="filters-div-content">
                         <div style="float: left; width: 120px; font-size: 46px;">filters</div>
                         <div class="filter">
@@ -223,6 +250,54 @@ session_start();
 
                 </div><!--filters-div-content-->
             </div><!--filterSortBar-->
+
+
+
+            <div id="historyFilterSortBar" class="holder" style="margin-top: 0px; display:none;">
+                    <div class="filters-div-content">
+                        <div style="float: left; width: 120px; font-size: 46px;">filters</div>
+                        <div class="filter">
+                            <select id="historyFilter_status" onchange="doShowHistory();">
+                                <option value="status">status</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="waiting feedback">Waiting Feedback</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter">
+                            <select id="historyFilter_date" onchange="doShowHistory();">
+                                <option value="date">date</option>
+                                <option value="< 1 month ago">< 1 month ago</option>
+                                <option value="1-3 months ago">1-3 months ago</option>
+                                <option value="4-6 months ago">4-6 months ago</option>
+                                <option value="7-12 months ago">7-12 months ago</option>
+                                <option value="> 1 year ago">> 1 year ago</option>
+                            </select>
+                        </div>
+                        <div class="filter">
+                            <select id="historyFilter_company" onchange="doShowHistory();">
+                                <option value="company">company</option>
+                            </select>
+                        </div>
+
+
+                    <div style="float: left; width: 90px; font-size: 46px; margin-left: 50px;">sort</div>
+                    <div class="filter">
+                        <select id="sortSearch" onchange="doShowHistory();">
+                            <option value="status">status</option>
+                            <option value="date">date</option>
+                            <option value="company">company</option>
+                        </select>
+                    </div>
+                    <!--<div class="be-interviewer-button-div">
+                        <button>be an interviewer ?</button>
+                    </div>
+                    <div class="ask-be-interviewer-div">would you like to </div>-->
+
+                </div><!--filters-div-content-->
+            </div><!--historyFilterSortBar-->
+
+
 
 
         </div>

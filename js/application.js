@@ -8,11 +8,15 @@
     if(this === application) {throw "application object must be constructed with 'new'";}
 
     this.VERSION = '0.0.1';
+
+    this.providedServices = ["Remote Interview","In-person Interview","Resume Review"];    
+
+
     this.formItems = {"communication skills":"","technical knowledge":"","seniority level":"","overall feedback":""};
 
     this.filters = {"industry":"", "company":"", "rating":['5 star','4 star','3 star','2 star', '1 star', '0 star'], "experience":['40+ years', '30-39 years', '20-29 years', '10-19 years', '5-9 years', '0-4 years'], "services":['In-person Interview','Remote Interview','Interview Mentoring','Resume Review'], "price":['FREE', '$0.01-49/hr', '$50-99/hr', '$100-149/hr' , '$150-199/hr', '$200-249/hr', '$250+/hr']};
 
-    this.historyFilters = {"status":['Scheduled','Waiting Feedback','Completed'], "date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago'], "companyH":""};
+    this.historyFilters = {"status":['Scheduled','Waiting Feedback','Completed'], "date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago'], "company":""};
 
     this.DAYS = application.Days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -46,6 +50,7 @@
 
     this.usersLoaded = false;
     this.sortedFilteredList = [];
+    this.sortedHistoryFilteredList = [];
     this.currInterviewer = 0;
     this.localityObj = {};
   }
@@ -177,8 +182,8 @@
 	for(var i = 0; i < me.filters.company.length; i++) {if(me.filters.company[i] === company) found++;}
 	if(!found && company) {me.filters.company.push(company);}
 
-	me.filters.industry = me.filters.industry ? me.filters.industry.sort() : {};
-	me.filters.company = me.filters.company ? me.filters.company.sort() : {};
+	me.filters.industry = me.filters.industry ? me.filters.industry.sort() : [];
+	me.filters.company = me.filters.company ? me.filters.company.sort() : [];
       }
     } //createFilters()
 
@@ -361,6 +366,11 @@
       me.applyFilters();
       me.sortedFilteredList.sort(sortfunction)
       me.populateSearchItems();
+      addFilterOptions('filter_industry', me.filters.industry);
+      addFilterOptions('filter_company', me.filters.company);
+      prependFilterOption('filter_industry', 'industry');
+      prependFilterOption('filter_company', 'company');
+
 			     //if(exp) {pruneFilters();}
 
 
@@ -501,6 +511,9 @@
       var me = this;
       var services = {};
       var imgID = '';
+      me.filters.industry = [];
+      me.filters.company = [];
+      
 
       document.getElementById("searchItems").innerHTML = '';
       //document.getElementById("resultsSearch").innerHTML = 'Search Results: ' + me.sortedFilteredList.length;
@@ -510,6 +523,8 @@
 	var ID = me.sortedFilteredList[index].id;
 	//console.log(ID);
 	var member = members.getMember(ID);
+        me.createFilters(member);
+
 
 	var feedbackObj = member.getFeedback();
 	var numFeedbacks = Object.size(feedbackObj);
@@ -802,7 +817,7 @@
 
     ,populateProfileItems: function()
     {
-      //console.log('populateSearchItems');
+      //console.log('populateProfileItems');
       var me = this;
       var services = {};
       var imgID = '';
@@ -1215,10 +1230,18 @@
       //window.appendChild(popup);
 
       var options = new Array();
-      for (var key in services)
+      options.push('Select a service...');
+      //for (var key in services)
+      //{
+      //  options.push(key);
+      //}
+
+      for (var key in me.providedServices)
       {
-	options.push(key);
+	options.push(me.providedServices[key]);
       }
+
+
 
       addFilterOptions("serviceEditComboBox", options);
 
@@ -1454,6 +1477,7 @@
           var providedServices = member.getProvidedServices();
 
           //console.log("SERVICE: " + service);
+          if(!providedServices[service]) {providedServices[service] = {};}
           providedServices[service].price = price;
           providedServices[service].locality = locality;
           member.providedServices = providedServices;
@@ -2220,6 +2244,7 @@
 
       var el = document.getElementById("historyItems").innerHTML = "";
       historyItemKeyArray = [];
+      var companies = new Array();
       
       var member = members.getMember(app.getUserID());
       if(member.getRole() == 'give')
@@ -2244,7 +2269,6 @@
 	var matchRE = new RegExp(regExp, "i");
 	//console.log(regExp);
 
-	var companies = new Array();
 	var historyItems = {};
 
         var member = members.getMember(app.getUserID());
@@ -2379,14 +2403,14 @@
 	  //console.log("FOUND: " + found);
 	  if(found)
 	  {
-	    historyItemKeyArray.push({key: key, id: ID, day: day, status: status, companyH: company, date: dateFilter});
+	    historyItemKeyArray.push({key: key, id: ID, day: day, status: status, company: company, date: dateFilter});
 	    var found = 0;
 	    for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
 	    if(!found) {companies.push(company);}
 	  }
 
 	}
-	//historyFilters.companyH = companies ? companies.sort() : {};
+	me.historyFilters.company = companies ? companies.sort() : {};
 
 	//applyHistoryFilters();
 	//historyItemKeyArray.sort(sortHistoryFunction)
@@ -2401,7 +2425,7 @@
         {
           console.log("populateProviderHistoryItems()");
 
-	  var companies = new Array();
+	  //var companies = new Array();
 	  var elID = "historyItems";
 	  var help = '';
 	  var index = 0;
@@ -2424,6 +2448,7 @@
 	    var day = split[1];
             me.providerID = ID;
             var provider = members.getMember(ID);
+	    if(!provider) {continue;}
 
 	    var image = provider.getImage();
 
@@ -2531,8 +2556,8 @@
 	    // --Company--
 	    var company = provider.getCompany();
 	    var found = 0;
-	    for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
-	    if(!found) {companies.push(company);}
+	    //for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+	    //if(!found) {companies.push(company);}
 	    var companyTenure = provider.getCompanyTenure();
 
 	    // --Industry--
@@ -2669,12 +2694,442 @@
       }//populateProviderHistory(exp)
 
 
+
+
       function populateHistory(exp)
       {
+
+	var regExp = exp || ".";
+	regExp = regExp.replace(/\s+/g, "|");
+	var matchRE = new RegExp(regExp, "i");
+	//console.log(regExp);
+
+	var historyItems = {};
+
+        var member = members.getMember(app.getUserID());
+
+	historyItems = member.getHistory();
+
+
+	for (var key in historyItems)
+        {
+	  console.log("KEY: " + key);
+	  var split = key.split(/\:/);
+	  var ID = split[0];
+	  var day = split[1];
+	  var status = '';
+	  var dateFilter = '';
+          var provider = members.getMember(ID);
+          if(!provider) {continue;}
+
+	  var first = provider.getFirstName();
+	  var last = provider.getLastName();
+	  var company = provider.getCompany();
+	  var position = provider.getTitle();
+	  var industry = provider.getIndustry();
+
+
+	  var feedback = provider.getFeedback();
+	  //var fbKey = user[0].inID + ':' + day;
+	  var fbKey = app.getUserID() + ':' + day;
+	  //console.log("FBKEY: " + fbKey);
+	  if(feedback[fbKey])
+          {
+	    //console.log("HERE");
+	    status = 'Completed';
+	  }
+	  else
+	  {
+	    //console.log(day);
+
+	    var date = {};
+	    date = getDateIndexes(day);
+
+	    var d = parseInt(date.dayIndex, 10);
+	    var m = parseInt(date.monthIndex, 10);
+	    var y = parseInt(date.year, 10);
+	    //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	    var x=new Date();
+	    x.setFullYear(y,m-1,d);
+	    var t = new Date();
+
+	    if (x>t)
+            {
+	      status = 'Scheduled';
+	    }
+	    else
+            {
+	      status = 'Waiting Feedback';
+	    }
+	  }
+
+	  //"date":['< 1 month ago', '1-3 months ago', '4-6 months ago', '7-12 months ago', '> 1 year ago']
+	  var date = {};
+	  date = getDateIndexes(day);
+
+	  var d = parseInt(date.dayIndex, 10);
+	  var m = parseInt(date.monthIndex, 10);
+	  var y = parseInt(date.year, 10);
+	  //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	  var x=new Date();
+	  x.setFullYear(y,m-1,d);
+
+
+	  //'< 1 month ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 1);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '< 1 month ago';}
+
+	  //'1-3 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 3);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '1-3 months ago';}
+
+	  //'4-6 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 6);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '4-6 months ago';}
+
+	  //'7-12 months ago'
+	  var y = new Date();
+	  y.setMonth(y.getMonth() - 12);
+	  var year =  y.getFullYear();
+	  var month =  me.MONTHS[y.getMonth()];
+	  var weekDay = me.DAYS[y.getDay()];
+	  var dayIndex = y.getDate();
+	  var futureDay = weekDay + ' ' + month + ' ' + dayIndex + ', ' + year;
+	  //console.log(y.getMonth()+1);
+	  //console.log("DAY: " + day + " FUTURE: " + futureDay);
+	  if(x > y && !dateFilter) {dateFilter = '7-12 months ago';}
+
+	  //'> 1 year ago'
+	  if(!dateFilter) {dateFilter = '> 1 year ago';}
+
+	  //console.log(dateFilter);
+
+	  var found = first.match(matchRE);
+	  found += last.match(matchRE);
+	  found += company.match(matchRE);
+	  found += position.match(matchRE);
+	  found += industry.match(matchRE);
+	  //found += summary.match(matchRE);
+	  found += status.match(matchRE);
+	  found += dateFilter.match(matchRE);
+	  if(ID == regExp) {found++;}
+	  //console.log("FOUND: " + found);
+	  if(found)
+	  {
+	    historyItemKeyArray.push({key: key, id: ID, day: day, status: status, company: company, date: dateFilter});
+	    var found = 0;
+	    for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+	    if(!found) {companies.push(company);}
+	  }
+
+	}
+	me.historyFilters.company = companies ? companies.sort() : {};
+
+	//applyHistoryFilters();
+	//historyItemKeyArray.sort(sortHistoryFunction)
+	populateHistoryItems();
+
+	//if(exp) {pruneHistoryFilters();}
+
+
+
+
         function populateHistoryItems()
         {
+          console.log("populateHistoryItems()");
+
+	  //var companies = new Array();
+	  var elID = "historyItems";
+	  var help = '';
+	  var index = 0;
+	  var historyItems = {};
+	  var member = members.getMember(app.getUserID());
+
+	  historyItems = member.getHistory();
+
+	  for(index = 0; index < historyItemKeyArray.length; index++)
+	  {
+	    var key = historyItemKeyArray[index].key;
+
+	    console.log('KEY: ' + key);
+	    var historyID = elID + index;
+	    var closeHistoryID = 'close' + elID + index;
+	    var blisterHistoryID = 'blister' + elID + index;
+
+	    var split = key.split(/\:/);
+	    var ID = split[0];
+	    var day = split[1];
+            me.providerID = ID;
+            var provider = members.getMember(ID);
+	    if(!provider) {continue;}
+
+	    var image = provider.getImage();
+
+	    var date = {};
+	    date = getDateIndexes(day);
+
+	    var d = parseInt(date.dayIndex, 10);
+	    var m = parseInt(date.monthIndex, 10);
+	    var y = parseInt(date.year, 10);
+
+	    var link = '';
+   
+	    if(!historyItems[key]) {continue;}
+
+	    split = historyItems[key].split('<br>');
+	    split.shift();
+	    var appt = split.join('<br>');
+            console.log(appt);
+	    //console.log(ID);
+	    var feedback = member.getFeedback();
+	    var fbKey = ID + ':' + day;
+
+            var state;
+
+	    //console.log("FBKey: " + fbKey);
+	    //if(feedback[fbKey]) {console.log(feedback[fbKey]['knowledge']);}
+	    //console.log("ID: " + split[1]);
+	    //console.log("SETTING: " + imgID);
+	    //console.log("STR: " + Ext.JSON.encode(feedback[fbKey]));
+	    if(feedback[fbKey])
+	    {
+	      link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:green;"> Completed</span></span><hr></div>';
+              state = 'Completed';
+	    }
+	    else
+	    {
+	      //console.log(day);
+
+	      var date = {};
+	      date = getDateIndexes(day);
+
+	      var d = parseInt(date.dayIndex, 10);
+	      var m = parseInt(date.monthIndex, 10);
+	      var y = parseInt(date.year, 10);
+	      //console.log('DAY: ' + d + ' MONTH: ' + m + ' YEAR: ' + y);
+	      var x=new Date();
+	      x.setFullYear(y,m-1,d);
+	      var t = new Date();
+
+	      if (x>t)
+	      {
+		link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:yellow;"> Scheduled</span></span><hr></div>';
+                state = 'Scheduled';
+	      }
+	      else
+	      {
+		link = '<div style="position: absolute; top: 200px; width: 200px;"><hr><span style="font-size:12px; font-weight:bold; text-align: center;">Status: <span style="color:red;"> Waiting Feedback</span></span><hr></div>';
+                state = 'Waiting Feedback';
+	      }
+	    }
+
+	    // --Rating--
+	    var ratingStr = '';
+	    var ratingObj = provider.getReviews();
+
+	    var rating = Math.ceil(ratingObj.average);
+	    var rates = ratingObj.total || 0;
+	    //console.log(ratingObj.comments);
+	    if(!rating) {rating = 0;}
+
+	    //var ratingStr = '<div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(Ext.JSON.encode(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
+	    var ratingStr = '';
+	    ratingStr += '<div style="right: -6px;">';
+	    for(var i = rating; i < 5; i++)
+            {
+	      ratingStr += '<img src="images/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+	    }
+	    for(var i = 0; i < rating; i++)
+	    {
+	      ratingStr += '<img src="images/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+	    }
+	    ratingStr += '</div></div><div style="color: #555; text-align: right; position: absolute; top: 15px; right: 0px;">' + rates + ' Reviews</div></div>';
+
+	    // --Name--
+	    var name = provider.getFullName();
+	    var url = provider.getURL();
+	    var label = name;
+	    //console.log(label);
+
+	    var lsObj = localizeSch(appt,ID,d,m,y);
+	    localDay = lsObj.dateStr;
+            console.log(lsObj.sch);
+            var schObj = getServiceFromSchedule(lsObj.sch);
+            var service = schObj.service;
+	    var duration = schObj.duration;
+	    // --Services--
+	    services = member.getProvidedServices();
+            var locality = services[service].locality;
+            var province = services[service].province;
+	    //console.log(services);
+	    var help = '<div style="position: absolute; top: 244px; text-align: left; color: #444; font-weight: lighter; width: 200px;"><div style="font-weight: bold; text-align: left; width: 200px;">' + localDay + '</div>' + lsObj.sch;
+	    help += '</div>';
+	    //console.log(help);
+
+	    // --Company--
+	    var company = provider.getCompany();
+	    var found = 0;
+	    //for(var i = 0; i < companies.length; i++) {if(companies[i] === company) found++;}
+	    //if(!found) {companies.push(company);}
+	    var companyTenure = provider.getCompanyTenure();
+
+	    // --Industry--
+	    var indsutry = provider.getIndustry();
+	    var industryTenure = member.getIndustryTenure();
+
+	    // --Position--
+	    var position = provider.getTitle();
+
+	    var education = provider.getEducation();
+	    //  Only display most recent education
+	    var split = education.split('<br>');
+	    education = split[0];
+
+	    // --Image--
+	    var image = provider.getImageSmall();
+
+            var privacy = provider.getPrivacy();
+	    if(privacy.identity) {label = ""; image = "./images/ghostSmall.png";}
+
+
+
+
+	    var wrapper = document.createElement("div");
+	    wrapper.className = "history-page-card-div";
+
+	    var window = document.createElement("div");
+	    //window.className = "providerHistoryItem";
+	    window.className = "sc-left";
+	    window.id = "historyItem" + index;
+ 
+	    fbKey = ID + ':' + day;
+	    ID = me.getUserID();
+
+	    //if(link.match('Completed'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+	    //else if(link.match('Waiting'))   {window.onclick = new Function( 'doFeedback(\'' + encodeURI(Ext.JSON.encode(feedback[fbKey])) + '\',\'' + fbKey + '\',\'' + ID + '\')');}
+
+
+            var historyPageTitle = document.createElement("div");
+            historyPageTitle.className = "history-page-title-div-service-received";
+
+            var historyPageTitleLeft = document.createElement("div");
+            historyPageTitleLeft.className = "history-page-title-left-div";
+            historyPageTitleLeft.innerHTML = service + ' -- ' + day;
+	    historyPageTitleLeft.style.fontSize = 26 + 'px';
+
+            var historyPageTitleRight = document.createElement("div");
+            historyPageTitleRight.className = "history-page-title-right-div";
+	    historyPageTitleRight.innerHTML = 'status: <span class="status">' + state + '</span>';
+
+            historyPageTitle.appendChild(historyPageTitleLeft);
+            historyPageTitle.appendChild(historyPageTitleRight);
+
+	    window.appendChild(historyPageTitle);
+
+
+            var scLeftInfo = document.createElement("div");
+            scLeftInfo.className = "sc-left-info";
+            var hourStr = (parseInt(duration,10) > 1) ? 'hours' : 'hour';
+            scLeftInfo.innerHTML = '<p><b>interviewer</b> - ' + name + '</p><p><b>location</b> - ' + locality + ', ' + province + '</p><p><b>duration</b> - ' + duration + ' ' + hourStr + '</p><p><b>CV</b> - <a href="">download</a></p>';
+	    window.appendChild(scLeftInfo);
+
+            var historyPageTextarea = document.createElement("div");
+	    historyPageTextarea.className = "history-page-textarea-div";
+            historyPageTextarea.innerHTML = '<div class="interview-report-title-div">interview report</div><div class="interview-report-div"><textarea class="interview-report-text-area"></textarea></div>';
+	    window.appendChild(historyPageTextarea);
+
+
+            var historyPageTextarea = document.createElement("div");
+	    historyPageTextarea.className = "history-page-textarea-div";
+            historyPageTextarea.innerHTML = '<div class="interview-report-title-div">interviewee feedback</div><div class="interview-report-div"><textarea readonly class="interview-report-text-area"></textarea></div><div class="share-the-report-div"><button class="share-the-report-button">share the feedback</button></div>';
+	    window.appendChild(historyPageTextarea);
+
+            wrapper.appendChild(window);
+
+
+
+	    var itemImage = document.createElement("div");
+	    itemImage.className = "circular-small";
+	    itemImage.style.background = 'url(' + image + ') no-repeat center center';
+	    //itemImage.style.background = 'url(' + image + ') no-repeat';
+    
+
+	    /*
+    var itemName = document.createElement("div");
+    itemName.innerHTML = '<span style="font-size:14px; font-weight:bold;">' + label + '</span>';
+    itemName.style.marginTop = -18 + "px";
+    window.appendChild(itemName);
+
+    var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
+    itemPosition.innerHTML = position;
+    window.appendChild(itemPosition);
+
+    var itemCompany = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = company + '<br>Tenure: ' + companyTenure + 'yrs, Experience: ' + industryTenure + 'yrs';
+    window.appendChild(itemCompany);
+
+    var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
+    itemEducation.innerHTML = education;
+    window.appendChild(itemEducation);
+
+    var itemLink = document.createElement("div");
+    itemLink.innerHTML = link;
+    window.appendChild(itemLink);
+
+    var itemRating = document.createElement("div");
+    itemRating.innerHTML = ratingStr;
+    window.appendChild(itemRating);
+
+    var itemServices = document.createElement("div");
+    itemServices.innerHTML = help;
+    window.appendChild(itemServices);
+
+
+
+
+
+    var info = document.createElement("div");
+
+
+
+    wrapper.appendChild(window);
+    wrapper.appendChild(info);
+	    */
+
+	    document.getElementById(elID).appendChild(wrapper);
+
+	  }
+
         }
       }//populateHistory(exp)
+
 
 
       function sortHistoryFunction(a, b)
@@ -2725,9 +3180,63 @@
       }//sortHistoryFunction(a, b)
 
 
+      function applyHistoryFilters()
+      {
+        var me = this;
+      
+        var filterType = 'and';
+        var filtered = new Array();
+        var toSave = new Array();
+
+        for(var j = 0; j <  me.sortedHistoryFilteredList.length; j++)
+        {
+	  var ID =  me.sortedHistoryFilteredList[j].id;
+          toSave[ID] = (filterType == 'and') ? true : false;
+	  //console.log("\n\nID: " + ID);
+	  var member = members.getMember(ID);
+
+	  for(var key in me.historyFilters)
+	  {
+	    //console.log("--KEY: " + key);
+	    var filterName = 'historyFilter_' + key;
+	    var e = document.getElementById(filterName);
+	    var opt = e.options[e.selectedIndex].value;
+	    var value = member.get(key + 'historyFilter');
+	    var found = (opt == key) ? true : false;
+	    var currValue = (key != 'services') ? value : 'services';
+	    //console.log("CURRVALUE: " + currValue);
+
+	    if(key == 'services')
+	    {
+	      var services = member.getProvidedServices();
+	      if(!Object.size(services)) {found = true;}
+        
+	      for (var service in services)
+	      {
+		//console.log(service + ' == ' + opt);
+		if(service == opt) {found = true;}
+	      }
+	    }//if(key == 'services')
+	    else
+	    {
+	      //console.log(currValue + ' == ' + opt);
+	      if(currValue == opt) {found = true;}
+	    }
+	    if(filterType == 'and')
+	      toSave[ID] &= found;
+	    else
+	      toSave[ID] |= found;
+	  }
+	}
+	for(var key in toSave)
+        {
+	  if(toSave[key]) {filtered.push({id: key})};
+	}
+	me.sortedHistoryFilteredList = filtered;
+      } //applyFilters()
 
 
-    }
+    }//,populateMyHistory: function(arg)
 
 
 

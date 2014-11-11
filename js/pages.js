@@ -1,7 +1,7 @@
     var step = 1;
     var firstCalShow = true;
 
-    timezoneJS.timezone.zoneFileBasePath = '/TIMEZONE';
+    timezoneJS.timezone.zoneFileBasePath = './js/TIMEZONE';
     timezoneJS.timezone.init();
 
 

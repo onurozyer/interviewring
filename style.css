@@ -38,19 +38,22 @@ button {
 
 .menu-item-1 {
     background-color: #03a9f4;
-    /*background-color: #3fa4d1;*/
+	cursor: pointer;
 }
 
 .menu-item-2 {
     background-color: #039be5;
+	cursor: pointer;
 }
 
 .menu-item-3 {
     background-color: #0288d1;
+	cursor: pointer;
 }
 
 .menu-item-4 {
     background-color: #0277bd;
+	cursor: pointer;
 }
 
 .header-container {

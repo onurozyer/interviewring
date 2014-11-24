@@ -2053,6 +2053,7 @@
       }
 
 
+
       var scheduleTime = document.getElementById("scheduleTime");
       scheduleTime.innerHTML = '';
       scheduleTime.style.lineHeight = 0 + 'px';
@@ -2095,29 +2096,11 @@
 
 
 
-      var scheduleDates = new Array();
-      var provider = members.getMember(app.getProviderID());
-      var cal = provider.getCalendar();
-      for(var key in cal)
-      {
-        var split = key.split('/');
-        var d = parseInt(split[0], 10);
-        var m = parseInt(split[1], 10);
-        var y = parseInt(split[2], 10);
-        var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
-        var lsObj = localizeSch(cal[key], app.getProviderID(), d, m, y);
-        var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-        //console.log(localizedAppt);
-
-	scheduleDates.push({date: dateStr, title: '', desc: lsObj.sch});
-      }
-
-
 
       var cal = $("#scheduleCal").ical({
         startOnSunday: true,
 
-	eventdates: scheduleDates,
+	eventdates: [],
 
         click: function(d)
         {
@@ -2135,24 +2118,37 @@
           app.apptDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
 
           
+	  var e = document.getElementById("selectServiceComboBox");
+	  var service = e.options[e.selectedIndex].value;
+	  service = service.split(/\s*\$/)[0];
+	  console.log(service);
 
           var provider = members.getMember(app.getProviderID());
           //console.log(provider.getCalendar());
           var cal = provider.getCalendar();
+          var serviceCal = cal[service];
 
           var date = pad(day, 2)+'/'+pad(month, 2)+'/'+year;
           //console.log(date);
-          var providerSchedule = cal[date];
+          var providerSchedule = serviceCal[date];
           //console.log('PROVIDER SCHEDULE: ' + providerSchedule);
+
+
+
+
+
+
+
 
 
           var member = members.getMember(app.getUserID());
           //console.log(member.getCalendar());
           var cal = member.getCalendar();
+          var serviceCal = cal[service];
 
           var date = pad(day, 2)+'/'+pad(month, 2)+'/'+year;
           //console.log(date);
-          var mySchedule = cal[date];
+          var mySchedule = serviceCal[date];
           //console.log(mySchedule);
 
           showApptScheduler(providerSchedule, mySchedule, day, month, year);
@@ -2170,6 +2166,38 @@
       //$("#scheduleCal").ical.changeEventDates(scheduleDates);
 
       //{"date": "2012-08-08", "title": "My birthday", "desc": "Its my birthday!"},
+
+
+      updateCalendar();
+
+
+      function updateCalendar()
+      {
+	var scheduleDates = new Array();
+	var e = document.getElementById("selectServiceComboBox");
+	var service = e.options[e.selectedIndex].value;
+        service = service.split(/\s*\$/)[0];
+        console.log(service);
+
+	var provider = members.getMember(app.getProviderID());
+	var cal = provider.getCalendar();
+        var serviceCal = cal[service];
+	for(var key in serviceCal)
+        {
+	  var split = key.split('/');
+	  var d = parseInt(split[0], 10);
+	  var m = parseInt(split[1], 10);
+	  var y = parseInt(split[2], 10);
+	  var dateStr = y + '-' + pad(m,2) + '-' + pad(d,2);
+	  console.log(serviceCal[key]);
+	  var lsObj = localizeSch(serviceCal[key], app.getProviderID(), d, m, y);
+	  var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+	  //console.log(localizedAppt);
+
+	  scheduleDates.push({date: dateStr, title: '', desc: lsObj.sch});
+	}
+	$("#scheduleCal").ical.changeEventDates(scheduleDates);
+      }
 
 
       function showApptScheduler(providerSchedule, mySchedule, day, month, year)

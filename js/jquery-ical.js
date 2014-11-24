@@ -433,6 +433,7 @@
 
     $.fn.ical.changeEventDates = function(array){
        eventdates = array;
+       createCalFn(calObj, currDate);
     };
     window.refreshCalendar = function(){
       //console.log('HERE');

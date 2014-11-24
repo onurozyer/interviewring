@@ -472,7 +472,7 @@ session_start();
                                           with spesifics of your CV, you will get feedback and specially prepare your resume for he companies and positions you aim for.
                                         </div>
                                         <div class="select-service-combobox-div">
-                                            <select id="selectServiceComboBox">
+                                            <select id="selectServiceComboBox" onchange="updateCalendar();">
                                                 <option value="na">select a service...</option>
                                                 <option value="ri">remote interview $250/hr</option>
                                                 <option value="im">in-person interview $150/hr</option>

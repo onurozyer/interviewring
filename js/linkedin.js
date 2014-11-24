@@ -57,10 +57,10 @@ function setLoginBadge(profile, el)
 
       //console.log('New User');
       $.ajax({url:"./php/saveData.php", 
-          data: {id: inID, linkedINprofile: JSON.stringify(profile), tzName: tzName, role: application.role, services: {}, calendar: {}, mail: JSON.stringify(mailObj), cart: {} },
+          data: {id: inID, linkedINprofile: JSON.stringify(profile), tzName: tzName, role: application.role || 'both', services: '{}', calendar: '{}', mail: JSON.stringify(mailObj), cart: '{}' },
           type:'post',
           async:false,
-          success: function(response){var newMember = new members.member(inID); newMember.profile = profile; newMember.tzName = tzName; newMember.role = application.role;}
+          success: function(response){var newMember = new members.member(inID); newMember.profile = profile; newMember.tzName = tzName; newMember.role = application.role || 'both';}
       });
     }
     else

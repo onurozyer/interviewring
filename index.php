@@ -529,13 +529,12 @@ session_start();
                     <div class="sc-left-info">
                       <div class="uploader-div">
                         <input type="file" id="uploadFile" name="uploadFile" onchange="startRead();"/>
-                        <br>
-                          <span id="uploadButtonText">
-                            <span>
-                                        
+                        <br/>
+                        <br/>
+                        <span id="uploadButtonText"></span>
                       </div>
-                      <div class="uploader-notice">don't feel like you are ready ?</div>
-                      <div class="uploader-notice">you can skip this step and upload your CV to your account later on</div>
+                      <div class="uploader-notice">you don't feel like you are ready ?</div>
+                      <div class="uploader-notice">skip this step for now and upload your CV to your account later on !</div>
                     </div>
                   </div>
                 </div>

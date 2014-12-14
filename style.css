@@ -110,18 +110,18 @@ button {
 }
 
 .filters-div {
-    /*border-top: 3px solid #4cc4d2;*/
     position: fixed;
-    top: 61px;
     left: 0px;
+	top: 59px;
     width: 100%;
     background-color: #ff5100;
     margin-right: auto;
     margin-left: auto;
     z-index: 99998;
     height: 60px;
-    padding-left: 100px;
-    padding-right: 100px;
+    padding-left: 50px;
+    padding-right: 50px;
+	box-shadow: 0px -3px 20px 6px rgba(0,0,0,0.30);
 }
 
 .filter {
@@ -868,6 +868,7 @@ footer {
     background-color: orange;
     margin: 20px 0px;
     text-align: left;
+	box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);
 }
 
 .box_rotate {
@@ -907,7 +908,7 @@ footer {
     font-weight: 800;
     font-size: 35px;
     color: #ff5100;
-    padding-top: 20px;
+	line-height: 60px;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
@@ -919,7 +920,7 @@ footer {
 .ic-right-name {
     font-weight: 100;
     font-size: 35px;
-    padding-top: 20px;
+	line-height: 60px;
     color: #ff5100;
     /*padding-bottom: 20px;*/
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
@@ -1719,27 +1720,6 @@ footer {
     }
 
 
-
-
-
-
-
-
-
-.filters-div {
-    /*border-top: 3px solid #4cc4d2;*/
-    /*position: fixed;
-    top: 100px;*/
-    /*left: 0px;*/
-    margin-top: 60px;
-    width: 100%;
-    background-color: #ff5100;
-    margin-right: auto;
-    margin-left: auto;
-    z-index: 99999;
-    height: 60px;
-}
-
 .filters-label {
     float: left;
     /*padding-left: 53px;*/
@@ -1760,6 +1740,40 @@ footer {
         margin-top: 3px;
         font-weight: 500;
         margin-top: -5px;
+    }
+
+.search_filter {
+	float: left;
+	width: 10%;
+	/*padding-left: 53px;*/
+	/*margin-left: 10px;*/
+	/*margin-right: 10px;*/
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box; /* Firefox, other Gecko */
+	box-sizing: border-box; /* Opera/IE 8+ */
+	text-align: right;
+    padding-top: 17px;
+}
+
+	.search_filter p {
+        font-size: 30px;
+        color: white;
+        text-align: center;
+        margin-bottom: 0px;
+        margin-top: 3px;
+        font-family: 'Ubuntu', sans-serif;
+        font-weight: 500;
+    }
+
+    .search_filter select {
+        width: 100px;
+        height: 25px;
+        font-family: 'Ubuntu', sans-serif;
+    }
+
+    .search_filter select {
+        width: 110px;
+        font-size: 16px;
     }
 
 .filter {
@@ -1793,8 +1807,14 @@ footer {
 }
 
 
-
-
+.search-filters-div-content {
+    /*margin: 0px 300px;*/
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
 
 .interviewers-main-div {
     margin-top: 0px;

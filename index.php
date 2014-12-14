@@ -187,10 +187,10 @@ session_start();
         </div>
 
 
-        <div id="filterSortBar" class="holder" style="margin-top: 0px; display:none;">
-          <div class="filters-div-content">
+        <div id="filterSortBar" class="filters-div" style="margin-top: 0px; display:none;">
+          <div class="search-filters-div-content">
             <div style="float: left; width: 120px; font-size: 46px;">filters</div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_price" onchange="doSearchInterviewers();">
                 <option value="price">price</option>
                 <option value="FREE">FREE</option>
@@ -202,7 +202,7 @@ session_start();
                 <option value='$250+/hr'>$250+/hr</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_services" onchange="doSearchInterviewers();">
                 <option value="services">services</option>
                 <option value="Remote Interview">remote interview</option>
@@ -210,7 +210,7 @@ session_start();
                 <option value="Resume Review">resume review</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_experience" onchange="doSearchInterviewers();">
                 <option value="experience">experience</option>
                 <option value="40+ years">40+ years</option>
@@ -221,7 +221,7 @@ session_start();
                 <option value="0-4 years">0-4 years</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_rating" onchange="doSearchInterviewers();">
                 <option value="rating">rating</option>
                 <option value="5 star">5 star</option>
@@ -232,12 +232,12 @@ session_start();
                 <option value="0 star">0 star</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_company" onchange="doSearchInterviewers();">
                 <option value="company">company</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="filter_industry" onchange="doSearchInterviewers();">
                 <option value="industry">industry</option>
               </select>
@@ -245,7 +245,7 @@ session_start();
 
 
             <div style="float: left; width: 90px; font-size: 46px; margin-left: 50px;">sort</div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="sortSearch" onchange="doSearchInterviewers();">
                 <option value="company">company</option>
                 <option value="rating">rating</option>
@@ -432,7 +432,7 @@ session_start();
       <!--HOME-->
 
       <!--FIND INTERVIEWS-->
-      <div id="findInterviews" style="display:none; margin-top: 100px;">
+      <div id="findInterviews" style="display:none; margin-top: 140px;">
         <div id="searchItems" class="main-container">
         </div>
       </div>

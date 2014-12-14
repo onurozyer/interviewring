@@ -398,12 +398,14 @@ button {
     margin: auto;
 }
 
+.main-page-photo-div-full-length {
+	background-image: url(img/banner-2.jpg);
+    background-size: cover;
+}
+
 .main-page-top-div {
     background-color: #f4f4f4;
-    background-image: url(img/banner-2.jpg);
-    background-size: cover;
     width: 100%;
-    padding: 20px 0px;
 }
 
 .main-page-photo-div {
@@ -813,9 +815,6 @@ footer {
     background: #3D3D3D;
     padding: 15px;
     font-family: 'Ubuntu', sans-serif;
-    /*border-top: 3px solid #4cc4d2;*/
-    /*box-shadow: 2px 0px 16px 2px #222222;*/
-    box-shadow: 0px 4px 4px 4px #222222;
 }
 
     footer .bottom-text p {

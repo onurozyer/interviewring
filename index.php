@@ -265,10 +265,10 @@ session_start();
 
 
 
-        <div id="historyFilterSortBar" class="holder" style="margin-top: 0px; display:none;">
-          <div class="filters-div-content">
+        <div id="historyFilterSortBar" class="filters-div" style="margin-top: 0px; display:none;">
+          <div class="search-filters-div-content">
             <div style="float: left; width: 120px; font-size: 46px;">filters</div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="historyFilter_status" onchange="doShowHistory();">
                 <option value="status">status</option>
                 <option value="scheduled">Scheduled</option>
@@ -276,7 +276,7 @@ session_start();
                 <option value="completed">Completed</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="historyFilter_date" onchange="doShowHistory();">
                 <option value="date">date</option>
                 <option value=""
@@ -287,7 +287,7 @@ session_start();
                 <option value="> 1 year ago">> 1 year ago</option>
               </select>
             </div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="historyFilter_company" onchange="doShowHistory();">
                 <option value="company">company</option>
               </select>
@@ -295,7 +295,7 @@ session_start();
 
 
             <div style="float: left; width: 90px; font-size: 46px; margin-left: 50px;">sort</div>
-            <div class="filter">
+            <div class="search_filter">
               <select id="sortSearch" onchange="doShowHistory();">
                 <option value="status">status</option>
                 <option value="date">date</option>
@@ -643,7 +643,7 @@ session_start();
                         </div>
                     </div>-->
           </div>
-          <div id="schedule-page-reviews" class="schedule-page-card-div">
+          <div id="schedule-page-reviews" class="schedule-page-card-div review-card-div">
           </div>
         </div>
 

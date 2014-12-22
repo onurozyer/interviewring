@@ -2178,14 +2178,6 @@ application.prototype =
           //getSubTotal();
 
       }
-
-
-
-
-
-
-
-
   } //populateScheduleItems()
 
 
@@ -2198,7 +2190,7 @@ application.prototype =
       arg = arg || document.getElementById('explore').value;
       document.getElementById('explore').value = arg;
 
-      var el = document.getElementById("historyItems").innerHTML = "";
+      var el = document.getElementById("historyItems").innerHTML = "When you give or receive interview services, their information will show up here...";
       historyItemKeyArray = [];
       var companies = new Array();
 

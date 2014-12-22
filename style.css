@@ -1098,7 +1098,9 @@ footer {
 
 
 
-
+.review-card-div {
+    box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);
+}
 
 
 .schedule-page-main-div {
@@ -1177,7 +1179,7 @@ footer {
 
 .schedule-page-interviewer-card .sc-right-bottom {
     /*background-color: #c4c4c4;*/
-    height: 54px;
+    height: 74px;
     line-height: 45px;
     text-align: center;
     font-size: 20px;
@@ -1186,6 +1188,7 @@ footer {
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
     padding-left: 25px;
+    padding-top: 20px;
 }
 
 .schedule-page-interviewer-card .sc-left-info {
@@ -1256,7 +1259,7 @@ footer {
     background-color: orange;
     overflow: auto;
     margin-bottom: 22px;
-    box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);
+    /*box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);*/
 }
 
     .schedule-page-card-div .sc-left-review {

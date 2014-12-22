@@ -604,14 +604,15 @@ session_start();
                 </div>
               </li>
               <li>
-                <div class="css-slider-card-div">
+                <div class="schedule-page-card-div css-slider-card-div">
                   <div class="sc-left">
                     <div class="ic-left-name">
                       4 - payment
                     </div>
                     <div class="payment-divs">
                       <div class="payment-card-left-div">
-                        <div id="payment-card-amount" class="payment-card-amount">2 hours of in person interview - $ 380</div>
+						<div class="total-due-div">total due is:</div>                      
+						<div id="payment-card-amount" class="payment-card-amount">2 hours of in person interview - $ 380</div>
                       </div>
                       <div class="payment-card-right-div">
                         <div>

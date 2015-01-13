@@ -6,6 +6,8 @@ function onLinkedInLogout(el)
 
 function onLinkedInLogin(el)
 {
+  try { [].undef () } catch (e) {console.log (e.stack.split ('\n')[1].split (/\s+/)[2]); }
+  
   // we pass field selectors as a single parameter (array of strings)
   IN.API.Profile("me")
     .fields(["emailAddress", "imAccounts", "phoneNumbers", "id", "firstName", "lastName", "pictureUrls::(original)", "pictureUrl", "publicProfileUrl", "headline", "location:(name)", "industry", "summary", "positions", "educations"])
@@ -15,6 +17,7 @@ function onLinkedInLogin(el)
   })
   .error(function(err) {
       alert('LinkedIn API error<br>' + err + '<br>Please reload the page');
+      console.log(err);
   });
 }
 

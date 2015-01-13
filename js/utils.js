@@ -31,7 +31,10 @@ function enableGroup(groupName)
   for (var i = 0; i < r.length; i++)
   {
     r[i].disabled = false;
-    r[i].parentNode.lastChild.className = r[i].parentNode.lastChild.className.replace('disabled','');
+    if(r[i].parentNode.lastChild.className)
+    {
+      r[i].parentNode.lastChild.className = r[i].parentNode.lastChild.className.replace('disabled','');
+    }
   }
 }
 
@@ -610,6 +613,7 @@ function getDateIndexes(longDateStr)
   var monthName = split[1];
   var dayIndex = split[2];
   var year = split[3];
+  var monthIndex = null;
   
   for(var i = 0; i < app.MONTHS.length; i++)
   {
@@ -850,6 +854,63 @@ function convertCartItemKeys(items)
   }
   return itemsWithConvertedKeys;
 }
+
+
+function setGroupsFromCalendar(checkbox, schedule)
+{
+
+  //console.log(schedule);
+  var check = document.getElementsByName(checkbox);
+
+
+  var isAPPT = false;
+  var isAVAIL = false;
+  var providerName = "";
+
+  var provider = members.getMember(app.getProviderID());
+
+  //console.log(ID);
+  // --Name--
+  var name = provider.getFullName();
+  //console.log(name);
+
+  //console.log('DAY: ' + dayIndex + ' MONTH: ' + monthIndex + ' YEAR: ' + year);
+  //enableGroup(checkbox);
+  setGroup(checkbox, false);
+  //console.log(schedule);
+  var split = schedule.split('<br>');
+  for(var i = 0; i < split.length-1; i++)
+  {
+    //console.log(split[i]);
+    var matchRE = new RegExp("APPT", "i");
+    var appt = split[i].match(matchRE);
+    var matchRE = new RegExp("AVAILABLE", "i");
+    var avail = split[i].match(matchRE);
+
+    if(appt) {isAPPT = true; providerName = split[i].split(/\:\s*/)[1]; continue;}
+    else if(avail) {isAppt = false; continue;}
+    //console.log(name + '==' + providerName);
+    if(isAPPT) {continue;}
+
+    //console.log(name + '==' + providerName);
+    for (var j = 0; j < check.length; j++)
+    {
+      var value = split[i].split(' ')[0];
+
+      var timeStr = Number(value.match(/^(\d+)/)[1]) + ':00' + ' ' + value.match(/([ap]m)/);
+      timeStr = timeStr.replace(/\,[ap]m$/,'');
+      //console.log(timeStr);
+      value = convertTimeTo24(timeStr).hour;
+
+      var service = split[i].split(' -- ')[1];
+      //console.log(check[j].value + " <-> " + value);
+      //if(check[j].value == value) {check[j].checked = true;}//combo[i].options[combo[i].selectedIndex].text
+      if(check[j].value == value) {check[j].disabled = false; check[j].checked = true;}
+    }
+  }
+}
+
+
 
 function setGroupsFromSchedule(checkbox, schedule)
 {

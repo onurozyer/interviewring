@@ -1068,7 +1068,7 @@ application.prototype =
       scLeft.appendChild(icLeftName);
 
       var comments = member.getReviews().comments;
-      console.log(comments);
+      //console.log(comments);
 
       if (comments == undefined) {
           var noReviewsDiv = document.createElement("div");
@@ -1230,6 +1230,11 @@ application.prototype =
           var me = this;
           if (document.getElementById("schedulePageCard")) { document.getElementById("schedulePageCard").parentNode.removeChild(document.getElementById("schedulePageCard")); }
 
+
+
+          var member = members.getMember(app.getUserID());
+          var services = member.getProvidedServices();
+
           var schedulePageCard = document.createElement("div");
           schedulePageCard.className = "schedule-page-card-div";
           schedulePageCard.id = "schedulePageCard";
@@ -1259,7 +1264,7 @@ application.prototype =
           feeRow.appendChild(hourlyFee);
           feeRow.appendChild(hourlyFeeTextBox);
           profilePageFee.appendChild(feeRow);
-
+          if(services[service]) {hourlyFeeTextBox.value = services[service].price;}
 
 
           var scLeftInfoTitle = document.createElement("div");
@@ -1360,6 +1365,30 @@ application.prototype =
 
           document.getElementById("profileItems").insertBefore(schedulePageCard, document.getElementById("profileItems").lastChild);
 
+
+
+          var scheduleDates = [];
+          app.providerID = app.getUserID();
+          var provider = members.getMember(app.getUserID());
+          var cal = provider.getCalendar();
+          var serviceCal = cal[service];
+          for (var key in serviceCal) {
+              var split = key.split('/');
+              var d = parseInt(split[0], 10);
+              var m = parseInt(split[1], 10);
+              var y = parseInt(split[2], 10);
+              var dateStr = y + '-' + pad(m, 2) + '-' + pad(d, 2);
+              //console.log(serviceCal[key]);
+              var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
+              var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+              //console.log(localizedAppt);
+
+              scheduleDates.push({ date: dateStr, title: '', desc: lsObj.sch });
+          }
+          app.providerID = null;
+
+
+
           var cal = $("#ical").ical({
               startOnSunday: true,
               click: function (d) {
@@ -1381,8 +1410,34 @@ application.prototype =
                   opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
                   addOptions("calSelect", opts);
 
+
+
+		  var e = document.getElementById("serviceEditComboBox");
+		  var service = e.options[e.selectedIndex].value;
+		  var member = members.getMember(app.getUserID());
+		  //console.log(member.getCalendar());
+		  var cal = member.getCalendar();
+		  var serviceCal = cal[service];
+
+		  var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
+		  //console.log(date);
+		  var mySchedule = serviceCal[date];
+		  //console.log(mySchedule);
+
+                  app.providerID = app.getUserID();
+		  showApptScheduler(mySchedule, '', day, month, year);
+                  app.providerID = null;
+
+
+
+
+
               } // fired when user clicked on day, in "d" stored date
           });
+
+
+          $("#ical").ical.changeEventDates(scheduleDates);
+
 
           var dtPRV = new timezoneJS.Date();
           //console.log(app.DAYS[dtPRV.getDay()]);
@@ -1396,6 +1451,24 @@ application.prototype =
 
 
 
+      function showApptScheduler(providerSchedule, mySchedule, day, month, year) {
+          var r = document.getElementsByName("serviceTime");
+          for (var i = 0; i < r.length; i++) {
+              r[i].checked = false;
+          }
+
+          localizeApptScheduler(day, month, year);
+
+          enableGroup("serviceTime");
+          //enableGroup("selectService");
+          //addOptions("selectService", selected);
+          //disableGroup("serviceTime", controlValue);
+          //disableGroup("selectService", controlValue);
+
+          //Show previously selected options
+          if (providerSchedule) { setGroupsFromCalendar("serviceTime", providerSchedule); }
+
+      }//showApptScheduler
 
 
           function saveService(service) {
@@ -1587,7 +1660,6 @@ application.prototype =
   , populateScheduleItems: function (ID) {
       //console.log('populateScheduleItems: ' + ID);
       var me = this;
-
 
 
       var member = members.getMember(ID);
@@ -2177,7 +2249,8 @@ application.prototype =
 
           //getSubTotal();
 
-      }
+      }//showApptScheduler
+      window.showApptScheduler = showApptScheduler;
   } //populateScheduleItems()
 
 

@@ -718,11 +718,6 @@ application.prototype =
           icRightInfo.appendChild(icRightInfoRight);
           icRight.appendChild(icRightInfo);
 
-          var icRightBottom = document.createElement("div");
-          icRightBottom.className = "ic-right-bottom";
-          icRightBottom.innerHTML = '<button class="ic-right-schedule">schedule a service</button><button class="ic-right-linkedin"><a href="' + url + '" target="_blank">linkedin profile</a></button>';
-          icRight.appendChild(icRightBottom);
-
           itemInfoWrapper.appendChild(icRight);
 
           window.appendChild(itemInfoWrapper);
@@ -1224,7 +1219,18 @@ application.prototype =
           });
       }
 
+      function isNumberKey(evt) {
+          var maxlength = 4;
+          if (evt.currentTarget.value.length > maxlength)
+              return false;
 
+          var charCode = (evt.which) ? evt.which : evt.keyCode;
+          if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57))
+              return false;
+
+          return true;
+      }
 
       function showItemToEdit(service) {
           var me = this;
@@ -1256,13 +1262,20 @@ application.prototype =
           var feeRow = document.createElement("div");
           feeRow.className = "fee-row";
           var hourlyFee = document.createElement("p");
-          hourlyFee.innerHTML = 'hourly fee $';
+          hourlyFee.innerHTML = 'how much would you like to charge hourly ?';
+          var priceDiv = document.createElement("div");
+          var currencySign = document.createElement("p");
+          currencySign.className = "currencySignDiv"
+          currencySign.innerHTML = '$&nbsp;';
           var hourlyFeeTextBox = document.createElement("input");
           hourlyFeeTextBox.className = "fee-text-box";
+          hourlyFeeTextBox.onkeypress = isNumberKey;
           hourlyFeeTextBox.id = "hourlyFeeTextBox";
           hourlyFeeTextBox.type = "text";
+          priceDiv.appendChild(currencySign);
+          priceDiv.appendChild(hourlyFeeTextBox);
           feeRow.appendChild(hourlyFee);
-          feeRow.appendChild(hourlyFeeTextBox);
+          feeRow.appendChild(priceDiv);
           profilePageFee.appendChild(feeRow);
           if(services[service]) {hourlyFeeTextBox.value = services[service].price;}
 
@@ -1392,11 +1405,11 @@ application.prototype =
           var cal = $("#ical").ical({
               startOnSunday: true,
               click: function (d) {
-                  //console.log('SELECTED: ' + d);
-                  var split = d.split(".");
-                  var year = parseInt(split[2], 10);
+                  console.log('SELECTED: ' + d);
+                  var split = d.split("-");
+                  var year = parseInt(split[0], 10);
                   var month = parseInt(split[1], 10);
-                  var day = parseInt(split[0], 10);
+                  var day = parseInt(split[2], 10);
 
                   //console.log(year+'/'+month+'/'+day);
 

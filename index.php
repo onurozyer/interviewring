@@ -168,7 +168,7 @@ session_start();
                 <a onclick="showHome();">home</a>
               </li>
               <li class="menu-item-2">
-                <a onclick="showProfile();">my account</a>
+                <a onclick="showProfile();">create service</a>
               </li>
               <li class="menu-item-3">
                 <a onclick="showHistory();">my history</a>
@@ -180,7 +180,7 @@ session_start();
           </div>
           <div class="search-form-div">
             <div class="form-search">
-              <input id="explore" type="text" class="input-xxlarge" placeholder="search for interviewers" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);'>
+              <input id="explore" type="text" class="input-xxlarge" placeholder="search for interviewers" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){ window.showFindInterviews(document.getElementById("explore").value,2);}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);'>
                 <img class="btn" onclick='if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'></img>
               </div>
           </div>
@@ -326,10 +326,12 @@ session_start();
       <div id="home" class="main-page-top-div">
 
         <!--HOW IT WORKS-->
-        <div class="main-page-photo-div-full-length">
-          <div class="main-page-photo-div">
+        <div class="main-page-photo-div-full-length">				
+		  <img class='photo' src="img/banner-2.jpg"/>
+		  <img class='photo' src="img/banner.jpg"/>
+		  <img class='photo' src="img/banner-1.jpg"/>
+          <div class="main-page-content-div">
             <div class="main-page-video-div">
-              <div class="how-it-works-div">how it works?</div>
               <iframe class="video-frame" width="100%" height="306" src="http://www.youtube.com/embed/kk00IAP7cqw?rel=0" frameborder="0" allowfullscreen="1"></iframe>
               <div>
                 <button class="main-page-signin-linkedin">
@@ -487,6 +489,14 @@ session_start();
                       1 - select a service
                     </div>
                     <div class="sc-left-info">
+					  <div class="select-service-combobox-div">
+                        <select id="selectServiceComboBox" onchange="updateCalendar();">
+                          <option value="na">select a service...</option>
+                          <option value="ri">remote interview $250/hr</option>
+                          <option value="im">in-person interview $150/hr</option>
+                          <option value="rr">resume review $100/hr</option>
+                        </select>
+                      </div>
                       <div class="sc-left-info-title">
                         <p style="text-transform: uppercase; font-weight: bold;">description of services</p>
                       </div>
@@ -507,14 +517,6 @@ session_start();
                           resume review ( ready in <span class="description-emphasis">4</span> days ! )
                         </p>Resume is your gateway to interviews. Preparing a good one is a burden. You will get help
                         with spesifics of your CV, you will get feedback and specially prepare your resume for he companies and positions you aim for.
-                      </div>
-                      <div class="select-service-combobox-div">
-                        <select id="selectServiceComboBox" onchange="updateCalendar();">
-                          <option value="na">select a service...</option>
-                          <option value="ri">remote interview $250/hr</option>
-                          <option value="im">in-person interview $150/hr</option>
-                          <option value="rr">resume review $100/hr</option>
-                        </select>
                       </div>
                     </div>
                   </div>

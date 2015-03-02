@@ -399,8 +399,91 @@ button {
 }
 
 .main-page-photo-div-full-length {
-    background-image: url(img/banner-2.jpg);
-    background-size: cover;
+    /*background-image: url(img/banner-2.jpg);
+    background-size: cover;*/
+    position: relative;
+    overflow: hidden;
+}
+
+    .main-page-photo-div-full-length .photo {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        -webkit-animation: round 24s infinite; /* Safari 4+ */
+        -moz-animation: round 24s infinite; /* Fx 5+ */
+        -o-animation: round 24s infinite; /* Opera 12+ */
+        animation: round 24s infinite; /* IE 10+, Fx 29+ */
+    }
+
+@-webkit-keyframes round {
+    15% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 0;
+    }
+}
+
+@-moz-keyframes round {
+    15% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 0;
+    }
+}
+
+@-o-keyframes round {
+    15% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 0;
+    }
+}
+
+@keyframes round {
+    15% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 0;
+    }
+}
+
+.main-page-photo-div-full-length img:nth-child(3) {
+    animation-delay: 0s;
+    -webkit-animation-delay: 0s;
+}
+
+.main-page-photo-div-full-length img:nth-child(2) {
+    animation-delay: 8s;
+    -webkit-animation-delay: 8s;
+}
+
+.main-page-photo-div-full-length img:nth-child(1) {
+    animation-delay: 16s;
+    -webkit-animation-delay: 16s;
 }
 
 .main-page-top-div {
@@ -408,27 +491,21 @@ button {
     width: 100%;
 }
 
-.main-page-photo-div {
+.main-page-content-div {
     width: 1140px;
     margin-right: auto;
     margin-left: auto;
     overflow: auto;
+    position: relative;
 }
 
 .main-page-video-div {
     float: left;
-    padding: 40px 0px;
-}
-
-.how-it-works-div {
-    font-size: 40px;
-    font-weight: 100;
-    text-align: center;
-    color: #6e6e6e;
+    padding: 70px 0px;
 }
 
 .video-frame {
-    margin: 30px 0;
+    margin-bottom: 30px;
 }
 
 
@@ -443,6 +520,7 @@ button {
         width: 100%;
         padding-top: 80px;
         padding-bottom: 80px;
+        z-index: 5;
     }
 
         .holder-top .container .container_row-fluid .row-fluid {
@@ -969,29 +1047,28 @@ footer {
 
 .ic-left-name {
     font-weight: 800;
-    font-size: 35px;
+    font-size: 1.7em;
     color: #ff5100;
-    line-height: 60px;
+    line-height: 2em;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
-    padding-left: 20px;
     border-bottom: 1px solid #ff5100;
-    height: 60px;
+    padding-left: 20px;
+    height: 2em;
 }
 
 .ic-right-name {
     font-weight: 100;
-    font-size: 35px;
-    line-height: 60px;
+    font-size: 1.7em;
     color: #ff5100;
-    /*padding-bottom: 20px;*/
+    line-height: 2em;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
     border-bottom: 1px solid #ff5100;
     padding-left: 20px;
-    height: 60px;
+    height: 2em;
 }
 
 .ic-right-bottom {
@@ -1017,6 +1094,7 @@ footer {
     box-sizing: border-box; /* Opera/IE 8+ */
     padding-left: 25px;
     padding-top: 10px;
+    overflow: auto;
 }
 
     .ic-left-info p {
@@ -1029,6 +1107,22 @@ footer {
         color: #545454;
     }
 
+.ic-left-info-left {
+    width: 80px;
+    text-align: right;
+    float: left;
+    border-right: 1px dotted #ff5100;
+    padding-right: 4px;
+}
+
+.ic-left-info-right {
+    width: 550px;
+    text-align: left;
+    float: left;
+    overflow: hidden;
+    padding-left: 4px;
+}
+
 .ic-right-info {
     font-weight: 200;
     font-size: 15px;
@@ -1038,7 +1132,8 @@ footer {
     box-sizing: border-box; /* Opera/IE 8+ */
     padding-left: 20px;
     padding-top: 20px;
-    height: 130px;
+    padding-right: 20px;
+    height: 182px;
 }
 
     .ic-right-info p {
@@ -1126,10 +1221,13 @@ footer {
 }
 
 .schedule-textarea {
-    height: 150px;
-    width: 350px;
+    height: 100%;
+    width: 100%;
     padding: 5px;
     font-family: 'Ubuntu', sans-serif;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    box-sizing: border-box; /* Opera/IE 8+ */
 }
 
 .schedule-page-interviewer-card .sc-left {
@@ -1194,7 +1292,7 @@ footer {
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
-    padding-left: 25px;
+    padding-left: 20px;
     padding-top: 20px;
 }
 
@@ -1266,7 +1364,7 @@ footer {
     background-color: orange;
     overflow: auto;
     margin-bottom: 22px;
-    box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);
+    /*box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);*/
 }
 
     .schedule-page-card-div .sc-left-review {
@@ -1343,7 +1441,7 @@ footer {
 }
 
 .select-service-combobox-div {
-    padding-top: 20px;
+    padding: 20px 0px;
 }
 
 .sc-left-info-title {
@@ -1690,13 +1788,6 @@ footer {
     float: left;
 }
 
-.i-review-summary-div {
-    padding-top: 10px;
-    font-size: 20px;
-    float: left;
-    padding-right: 10px;
-}
-
 .review-div {
     overflow: auto;
     padding-top: 50px;
@@ -2001,11 +2092,10 @@ footer {
     background: url("img/search.png") no-repeat #ff5100;
     background-size: 20px 20px;
     background-position: 10px 10px;
-    border: 0px solid #df5100;
     color: #FFFFFF;
     cursor: pointer;
     font-size: 1em;
-    height: 100%;
+    height: 40px;
     width: 40px;
     font-family: 'Segoe UI Symbol';
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
@@ -2084,13 +2174,6 @@ footer {
     padding-top: 5px;
     font-size: 25px;
     float: left;
-}
-
-.i-review-summary-div {
-    padding-top: 10px;
-    font-size: 20px;
-    float: left;
-    padding-right: 10px;
 }
 
 .review-div {
@@ -2522,4 +2605,34 @@ div#spinner {
         -webkit-transform: rotate(-360deg);
         transform: rotate(-360deg);
     }
+}
+
+.stars-div {
+    float: left;
+    overflow: auto;
+    line-height: 1.5em;
+}
+
+.reviews-and-ratings-div {
+}
+
+.ic-left-info-upper {
+    overflow: auto;
+}
+
+.ic-left-info-lower {
+    margin-top: 10px;
+    overflow: auto;
+}
+
+.number-of-reviews-div {
+    font-size: 1.4em;
+    float: left;
+    margin-right: 20px;
+}
+
+.star-image {
+    height: 2em;
+    width: 2em;
+    margin-right:3px;
 }

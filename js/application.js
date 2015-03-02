@@ -501,17 +501,15 @@ application.prototype =
           //console.log(ratingObj.comments);
           if (!rating) { rating = 0; }
 
-          //var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(JSON.parse(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
-          //ratingStr += '<div style="right: -6px;">';
-          var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
-          ratingStr += '<div style="right: -6px;">';
+          var ratingStr = '<div class="number-of-reviews-div">' + rates + ' reviews</div>';
+          ratingStr += '<div class="stars-div">';
           for (var i = 0; i < rating; i++) {
-              ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+              ratingStr += '<img class="star-image" src="./img/star.png"/>';
           }
           for (var i = rating; i < 5; i++) {
-              ratingStr += '<img src="./img/starEmpty.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
+              ratingStr += '<img class="star-image" src="./img/starEmpty.png"/>';
           }
-          ratingStr += '</div></div></div></a>';
+          ratingStr += '</div>';
           //console.log(ratingStr);
 
           // --Name--
@@ -588,14 +586,12 @@ application.prototype =
           var icLeftInfo = document.createElement("div");
           icLeftInfo.className = "ic-left-info";
 
-          var icLeftInfoLeft = document.createElement("div");
-          //icLeftInfoLeft.style = "width: 80px; text-align: right; float:left; border-right: 1px dotted #ff5100; padding-right: 4px;";
-          icLeftInfoLeft.style.width = 80 + 'px';
-          icLeftInfoLeft.style.textAlign = 'right';
-          icLeftInfoLeft.style.float = 'left';
-          icLeftInfoLeft.style.borderRight = 1 + 'px dotted #ff5100';
-          icLeftInfoLeft.style.paddingRight = 4 + 'px';
+		  var icLeftInfoUpper = document.createElement("div");
+          icLeftInfoUpper.className = "ic-left-info-upper";
 
+          var icLeftInfoLeft = document.createElement("div");
+          icLeftInfoLeft.className = "ic-left-info-left";
+          
           var itemIndustry = document.createElement("div");
           //itemCompany.style.textAlign = "left";
           itemIndustry.innerHTML = '<p>' + 'industry' + '</p>';
@@ -621,15 +617,8 @@ application.prototype =
           itemEducation.innerHTML = '<p>' + 'education' + '</p>';
           icLeftInfoLeft.appendChild(itemEducation);
 
-
-
           var icLeftInfoRight = document.createElement("div");
-          //icLeftInfoRight.style = "text-align: left; float: left; padding-left: 4px;";
-          icLeftInfoRight.style.textAlign = 'left';
-          icLeftInfoRight.style.float = 'left';
-          icLeftInfoRight.style.paddingLeft = 4 + 'px';
-          icLeftInfoRight.style.overflow = 'hidden';
-          icLeftInfoRight.style.width = 550 + 'px';
+		  icLeftInfoRight.className = "ic-left-info-right";
 
           var itemIndustry = document.createElement("div");
           //itemCompany.style.textAlign = "left";
@@ -656,24 +645,18 @@ application.prototype =
           itemEducation.innerHTML = '<p>' + education + '</p>';
           icLeftInfoRight.appendChild(itemEducation);
 
-          icLeftInfo.appendChild(icLeftInfoLeft);
-          icLeftInfo.appendChild(icLeftInfoRight);
+          icLeftInfoUpper.appendChild(icLeftInfoLeft);
+          icLeftInfoUpper.appendChild(icLeftInfoRight);
+		  icLeftInfo.appendChild(icLeftInfoUpper);
 
           var itemRating = document.createElement("div");
+		  itemRating.className = "ic-left-info-lower";
           itemRating.innerHTML = ratingStr;
           icLeftInfo.appendChild(itemRating);
 
 
           icLeft.appendChild(icLeftInfo);
           itemInfoWrapper.appendChild(icLeft);
-
-
-
-
-
-
-
-
 
           var icRight = document.createElement("div");
           icRight.className = "ic-right";
@@ -796,9 +779,7 @@ application.prototype =
       //console.log(ratingObj.comments);
       if (!rating) { rating = 0; }
 
-      //var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(JSON.parse(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
-      //ratingStr += '<div style="right: -6px;">';
-      var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+      var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="number-of-reviews-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
       ratingStr += '<div style="right: -6px;">';
       for (var i = 0; i < rating; i++) {
           ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
@@ -1694,9 +1675,7 @@ application.prototype =
       //console.log(ratingObj.comments);
       if (!rating) { rating = 0; }
 
-      //var ratingStr = '<div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: absolute; top: 6px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true; showRatings(\'' + encodeURI(JSON.parse(ratingObj.comments)) + '\',' + index + ',this.parentNode.parentNode.id' + ',\'' + ID + '\');"><div style="z-index: 100; height: 35px;">';
-      //ratingStr += '<div style="right: -6px;">';
-      var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="i-review-summary-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+      var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div class="number-of-reviews-div">' + rates + ' reviews</div><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
       ratingStr += '<div style="right: -6px;">';
       for (var i = 0; i < rating; i++) {
           ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
@@ -1882,7 +1861,6 @@ application.prototype =
 
       var icRightBottom = document.createElement("div");
       icRightBottom.className = "sc-right-bottom";
-      icRightBottom.style.marginTop = 50 + 'px';
       icRightBottom.innerHTML = '<button class="sc-right-send">send</button>';
       icRight.appendChild(icRightBottom);
 
@@ -1987,7 +1965,7 @@ application.prototype =
 
           var dateStr = weekDay + ', ' + month + ' ' + day + ', ' + year;
 
-          var ratingStr = '<a href="#link-to-reviews"><div style="clear:both;"><div style="position: relative; top: 9px; width: 200px;" onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
+          var ratingStr = '<div class="rating-starts"><div onmouseover="this.style.cursor=\'pointer\';" onclick="event = event || window.event; event.stopPropagation(); event.cancelBubble = true;"><div style="z-index: 100; height: 35px;">';
           ratingStr += '<div style="right: -6px;">';
           for (var i = 0; i < rating; i++) {
               ratingStr += '<img src="./img/star.png" style="z-index: 99; margin-right: 4px; height: 15px;"/>';
@@ -2127,10 +2105,10 @@ application.prototype =
 
           click: function (d) {
               //console.log('SELECTED: ' + d);
-              var split = d.split(".");
-              var year = parseInt(split[2], 10);
+              var split = d.split("-");
+              var year = parseInt(split[0], 10);
               var month = parseInt(split[1], 10);
-              var day = parseInt(split[0], 10);
+              var day = parseInt(split[2], 10);
 
               //console.log(year+'/'+month+'/'+day);
 
@@ -2194,6 +2172,11 @@ application.prototype =
 
 
       function updateCalendar() {
+		  if(e.SelectedIndex != 0)
+		  {
+			  
+		  }
+		  
           var scheduleDates = new Array();
           var e = document.getElementById("selectServiceComboBox");
           var service = e.options[e.selectedIndex].value;

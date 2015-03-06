@@ -46,6 +46,8 @@
     {
       window.scrollTo(0, 0);
 
+      arg = arg || document.getElementById('explore').value;
+      console.log(arg);
       document.getElementById('explore').value = '';
 
       document.getElementById('filterSortBar').style.display = '';
@@ -125,7 +127,7 @@
 
 
 
-    function showProfile(arg)
+    function showProfile()
     {
       window.scrollTo(0, 0);
 
@@ -211,7 +213,7 @@
 
 
 
-    function showCheckOut(ID)
+    function showCheckOut(ID, STEP)
     {
       window.scrollTo(0, 0);
 
@@ -236,6 +238,7 @@
 
       //document.getElementById("quickLinks").style.display = 'none';   
       //document.getElementById("sideBarMenu").style.display = '';
+      console.log('ID: ' + ID);
       app.providerID = ID;
 
       var provider = members.getMember(ID);
@@ -247,6 +250,7 @@
 
       document.getElementById("scheduleTimezone").innerHTML = tzAbbreviation;
 
+      window.location.hash = "#!" + encodeURI("service&PROVIDER=" + ID + "&STEP=" + STEP);
       app.populateScheduleItems(ID);
     }
 

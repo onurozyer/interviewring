@@ -38,7 +38,6 @@ function application() {
     this.providerID = null;
     this.apptDay = null;
     this.serviceDay = null;
-    this.paymentReturn = false;
     this.socialShareReturn = false;
     this.rateReturn = false;
     this.feedbackReturn = false;
@@ -46,6 +45,8 @@ function application() {
     this.cartItems = {};
 
     this.usersLoaded = false;
+    this.usersLoading = false;
+
     this.sortedFilteredList = [];
     this.sortedHistoryFilteredList = [];
     this.currInterviewer = 0;
@@ -68,6 +69,9 @@ application.prototype =
       var me = this;
       //console.log('loadUsers');
       $.ajaxSetup({ cache: false });
+
+      if(me.usersLoading) {return;}
+      me.usersLoading = true;
 
       $.ajax({
           url: "./php/loadData.php",
@@ -124,8 +128,16 @@ application.prototype =
                   coins = obj[i].coins;
                   resume = obj[i].resume;
 
+                  var temp = resume.split(/\,/)[0];
+                  var name = temp.split(/\;/)[0];
+                  name = name.replace('name:','');
                   var temp = resume.split(/\,/)[1];
-                  if (temp) { resume = decodeBase64(temp); }
+                  if (temp)
+                  {
+		    resume = decodeBase64(temp);
+		    document.getElementById("uploadFileLabel").innerHTML = name;
+                    document.getElementById("uploader-notice").innerHTML = '<div class="uploader-notice">You have already uploaded file: ' + name + '</div><div class="uploader-notice">Uploading a different CV will replace the existing one.</div></div>';
+		  }
 
                   //console.log("LOADING: " + inID);
                   var newMember = new members.member(inID);
@@ -149,6 +161,7 @@ application.prototype =
               }//for
 
               me.usersLoaded = true;
+              me.usersLoading = false;
           }//function
       });//ajax
       //console.log("users loaded");
@@ -550,13 +563,14 @@ application.prototype =
 
 
 
-
           var window = document.createElement("div");
           window.className = "interviewer-card";
           window.id = "searchItem" + index;
           //window.onclick = function() {makeAppt(this.id);};
           //window.onclick = new Function() ('showCheckOut(\'' + ID + '\');');
+          //window.onclick = new Function('showCheckOut(\'' + ID + '\')');
           window.onclick = new Function('showCheckOut(\'' + ID + '\')');
+          //window.onclick = new Function('window.location.hash = "#!" + encodeURI("service&PROVIDER=\'" + ID + "\'&STEP=1")');
 
           var itemImage = document.createElement("div");
           itemImage.className = "circular-small";
@@ -1387,10 +1401,10 @@ application.prototype =
               startOnSunday: true,
               click: function (d) {
                   console.log('SELECTED: ' + d);
-                  var split = d.split("-");
-                  var year = parseInt(split[0], 10);
+                  var split = d.split(".");
+                  var year = parseInt(split[2], 10);
                   var month = parseInt(split[1], 10);
-                  var day = parseInt(split[2], 10);
+                  var day = parseInt(split[0], 10);
 
                   //console.log(year+'/'+month+'/'+day);
 
@@ -1415,12 +1429,25 @@ application.prototype =
 
 		  var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
 		  //console.log(date);
-		  var mySchedule = serviceCal[date];
-		  //console.log(mySchedule);
+                  try
+		  {
+                    if(typeof serviceCal[date] !== 'undefined')
+		    {
+		      var mySchedule = serviceCal[date];
+		      //console.log(mySchedule);
 
-                  app.providerID = app.getUserID();
-		  showApptScheduler(mySchedule, '', day, month, year);
-                  app.providerID = null;
+                      app.providerID = app.getUserID();
+		      showApptScheduler(mySchedule, '', day, month, year);
+                      app.providerID = null;
+		    }
+                    else
+		    {
+                      app.providerID = app.getUserID();
+		      showApptScheduler(null, '', day, month, year);
+                      app.providerID = null;
+		    }
+		  }
+                  catch (error) {}
 
 
 
@@ -1430,7 +1457,7 @@ application.prototype =
           });
 
 
-          $("#ical").ical.changeEventDates(scheduleDates);
+          //$("#ical").ical.changeEventDates(scheduleDates);
 
 
           var dtPRV = new timezoneJS.Date();
@@ -1442,7 +1469,37 @@ application.prototype =
           opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
           addOptions("calSelect", opts);
 
+      updateMyCalendar();
 
+
+      function updateMyCalendar() {
+          var scheduleDates = new Array();
+	  var e = document.getElementById("serviceEditComboBox");
+          var service = e.options[e.selectedIndex].value;
+          service = service.split(/\s*\$/)[0];
+          console.log('SERVICE: ' + service);
+
+          var provider = members.getMember(app.getUserID());
+          var cal = provider.getCalendar();
+          var serviceCal = cal[service];
+          for (var key in serviceCal) {
+              var split = key.split('/');
+              var d = parseInt(split[0], 10);
+              var m = parseInt(split[1], 10);
+              var y = parseInt(split[2], 10);
+              var dateStr = pad(d, 2) + '.' + pad(m, 2) + '.' + y;
+              console.log(serviceCal[key]);
+	      app.providerID = app.getUserID();
+              var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
+              var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+	      app.providerID = null;
+              console.log(localizedAppt);
+
+              scheduleDates.push({ date: dateStr, title: '', desc: lsObj.sch });
+          }
+          $("#ical").ical.changeEventDates(scheduleDates);
+      }
+      window.updateMyCalendar = updateMyCalendar;
 
 
       function showApptScheduler(providerSchedule, mySchedule, day, month, year) {
@@ -2049,6 +2106,7 @@ application.prototype =
       }
 
       addOptions2("selectServiceComboBox", options);
+      document.getElementById("selectServiceComboBox").onchange = function () { updateCalendar(); };
 
       if (services['In-person Interview']) {
           document.getElementById("scheduleLocality").innerHTML = services['In-person Interview'].locality + ', ' + services['In-person Interview'].province;
@@ -2121,45 +2179,74 @@ application.prototype =
               var e = document.getElementById("selectServiceComboBox");
               var service = e.options[e.selectedIndex].value;
               service = service.split(/\s*\$/)[0];
-              console.log(service);
+              //console.log(service);
 
               var provider = members.getMember(app.getProviderID());
               //console.log(provider.getCalendar());
-              var cal = provider.getCalendar();
-              var serviceCal = cal[service];
-
-              var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
-              //console.log(date);
-              var providerSchedule = serviceCal[date];
-              //console.log('PROVIDER SCHEDULE: ' + providerSchedule);
+	      var member = members.getMember(app.getUserID());
 
 
 
+              try
+	      {
+                if(typeof provider.getCalendar()[service] !== 'undefined' && typeof member.getCalendar()[service] !== 'undefined')
+		{
+
+		  var cal = provider.getCalendar();
+		  var serviceCal = cal[service];
+
+		  var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
+		  //console.log(date);
 
 
 
+		  try
+		  {
+		    if(typeof serviceCal[date] !== 'undefined')
+		    {
 
 
+		      var providerSchedule = serviceCal[date];
+		      //console.log('PROVIDER SCHEDULE: ' + providerSchedule);
 
-              var member = members.getMember(app.getUserID());
-              //console.log(member.getCalendar());
-              var cal = member.getCalendar();
-              var serviceCal = cal[service];
+		      //console.log(member.getCalendar());
+		      var cal = member.getCalendar();
+		      var serviceCal = cal[service];
 
-              var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
-              //console.log(date);
-              var mySchedule = serviceCal[date];
-              //console.log(mySchedule);
+		      var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
+		      //console.log(date);
+                      
+		      try
+		      {
+		        if(typeof serviceCal[date] !== 'undefined')
+		        {
+		          var mySchedule = serviceCal[date];
+		          //console.log(mySchedule);
 
-              showApptScheduler(providerSchedule, mySchedule, day, month, year);
+			  showApptScheduler(providerSchedule, mySchedule, day, month, year);
+			}
+			else
+		        {
+			  showApptScheduler(null, null, day, month, year);
+			}
+		      }
+                      catch(error) {}
+		    }
+                    else
+		    {
+		      showApptScheduler(null, null, day, month, year);
+		    }
+		  }
+		  catch(error) {}
 
-              /*
-                  var opts = new Array();
-                  opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
-                  opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
-                  opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
-                  addOptions("calSelect", opts);
-              */
+		}
+		else
+		{
+		  showApptScheduler(null, null, day, month, year);
+		}
+	      }
+	      catch(error) {}
+
           } // fired when user clicked on day, in "d" stored date
       });
 
@@ -2181,7 +2268,7 @@ application.prototype =
           var e = document.getElementById("selectServiceComboBox");
           var service = e.options[e.selectedIndex].value;
           service = service.split(/\s*\$/)[0];
-          console.log(service);
+          //console.log('SERVICE: ' + service);
 
           var provider = members.getMember(app.getProviderID());
           var cal = provider.getCalendar();
@@ -2191,8 +2278,8 @@ application.prototype =
               var d = parseInt(split[0], 10);
               var m = parseInt(split[1], 10);
               var y = parseInt(split[2], 10);
-              var dateStr = y + '-' + pad(m, 2) + '-' + pad(d, 2);
-              console.log(serviceCal[key]);
+              var dateStr = pad(d, 2) + '.' + pad(m, 2) + '.' + y;
+              //console.log(serviceCal[key]);
               var lsObj = localizeSch(serviceCal[key], app.getProviderID(), d, m, y);
               var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
               //console.log(localizedAppt);
@@ -2201,7 +2288,7 @@ application.prototype =
           }
           $("#scheduleCal").ical.changeEventDates(scheduleDates);
       }
-
+      window.updateCalendar = updateCalendar;
 
       function showApptScheduler(providerSchedule, mySchedule, day, month, year) {
           var r = document.getElementsByName("serviceTime");
@@ -2213,12 +2300,12 @@ application.prototype =
 
           var controlValue = {};
           if (providerSchedule) {
-              console.log(providerSchedule);
+	    //console.log(providerSchedule);
               var split = providerSchedule.split('<br>');
               split.shift();
               for (var i = 0; i < split.length; i++) {
                   if (split[i]) {
-                      console.log(split[i]);
+		    //console.log(split[i]);
                       var timeStr = Number(split[i].match(/^(\d+)/)[1]) + ':00' + ' ' + split[i].match(/([ap]m)/);
                       timeStr = timeStr.replace(/\,[ap]m$/, '');
                       split[i] = convertTimeTo24(timeStr).hour;
@@ -3213,6 +3300,16 @@ application.prototype =
 
 
 
+  , saveCart: function (ID, cartItems)
+  {
+	//console.log("Saving cart..." + ID);
+
+	$.ajax({url:"./php/saveCart.php", 
+          data: {id: ID, cart: JSON.stringify(cartItems) },
+          type:'post',
+          async:true
+        });
+  }
 
 
 
@@ -3224,7 +3321,7 @@ application.prototype =
       var idx = 1;
 
       //var returnUrl = "http://www.interviewring.com/index.php?return&ID=" + app.getUserID() + "&CODE=" + document.getElementById('promoForm').value;
-      var returnUrl = "http://www.interviewring.com/index.php?return&ID=" + app.getUserID() + "&CODE=" + 'NONE';
+      var returnUrl = "http://www.interviewring.com/index.php#!Return&ID=" + app.getUserID() + "&CODE=" + 'NONE';
       //console.log(returnUrl);
       //return;
 
@@ -3248,6 +3345,8 @@ application.prototype =
           'shipping': '0',                  // Shipping.
           'tax': '0'                        // Tax.
       });
+
+      app.saveCart(app.getUserID(), me.cartItems);
 
       for (var key in me.cartItems) {
           var split = key.split(/\:/);
@@ -3351,7 +3450,332 @@ application.prototype =
 
   }//makePayment()
 
+  , paymentReturn: function(providerID, total, lsObj)
+  {
 
+    var page = document.getElementById('return');
+    page.innerHTML = '';
+
+    var provider = members.getMember(providerID);
+    
+    // --Company--
+    var company = provider.getCompany() || '--';
+    var companyTenure = provider.getCompanyTenure(company);
+
+    // --Industry--
+    var industry = provider.getIndustry() || '--';
+    var industryTenure = provider.getIndustryTenure(industry);
+
+    // --Position--
+    var position = provider.getTitle() || '--';
+
+    var education = provider.getEducation() || '--';
+    //  Only display most recent education
+    var split = education.split('<br>');
+    education = split[0];
+
+
+
+    //var lsObj = localizeSch(appt, ID, d, m, y);
+    localDay = lsObj.dateStr;
+    //console.log(lsObj.sch);
+    var schObj = getServiceFromSchedule(lsObj.sch);
+    var service = schObj.service;
+    var duration = schObj.duration;
+    //console.log(service);
+    //console.log(duration);
+    // --Services--
+    services = provider.getProvidedServices();
+    var locality = services[service].locality;
+    var province = services[service].province;
+    var notes = '';
+
+
+    var holder = document.createElement("div");
+    holder.className = "holder";
+    holder.style.color = '#383838';
+    holder.style.fontFamily =  '"Ubuntu", sans-serif';
+    holder.style.fontSize = '40px';
+    holder.style.paddingBottom = '0px';
+    holder.style.boxShadow = '0 4px 4px -4px #222222';
+    holder.style.textAlign = 'center';
+
+
+
+
+    var scheduleInfoThanks = document.createElement("div");
+    scheduleInfoThanks.className = "schedule-info-thanks";
+    scheduleInfoThanks.style.width = 1070 + 'px';
+    scheduleInfoThanks.style.margin = 'auto';
+    scheduleInfoThanks.style.backgroundColor = '#fff2e8';
+    scheduleInfoThanks.style.fontSize = 50 + 'px';
+    scheduleInfoThanks.style.lineHeight = 70 + 'px';
+    scheduleInfoThanks.style.margin = '20px 0px';
+    scheduleInfoThanks.style.textAlign = 'left';
+    scheduleInfoThanks.style.borderLeft = '15px solid #ff5100';
+    scheduleInfoThanks.style.boxShadow = '0px 0px 20px 6px rgba(0,0,0,0.10)';
+    scheduleInfoThanks.style.marginTop = '50px';
+    scheduleInfoThanks.style.marginBottom = '50px';
+    scheduleInfoThanks.style.paddingLeft = '20px';
+    scheduleInfoThanks.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    scheduleInfoThanks.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    scheduleInfoThanks.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+
+
+
+    var scheduleInfoInterviewerCard = document.createElement("div");
+    scheduleInfoInterviewerCard.className="schedule-info-interviewer-card";
+    scheduleInfoInterviewerCard.style.width = 1070 + 'px';
+    scheduleInfoInterviewerCard.style.margin = 'auto';
+    scheduleInfoInterviewerCard.style.backgroundColor = '#fff2e8';
+    scheduleInfoInterviewerCard.style.fontSize = 50 + 'px';
+    scheduleInfoInterviewerCard.style.lineHeight = 70 + 'px';
+    scheduleInfoInterviewerCard.style.margin = '20px 0px';
+    scheduleInfoInterviewerCard.style.textAlign = 'left';
+    scheduleInfoInterviewerCard.style.borderLeft = '15px solid #ff5100';
+    scheduleInfoInterviewerCard.style.boxShadow = '0px 0px 20px 6px rgba(0,0,0,0.10)';
+    scheduleInfoInterviewerCard.style.marginTop = '50px';
+    scheduleInfoInterviewerCard.style.marginBottom = '50px';
+    scheduleInfoInterviewerCard.style.height = '265px';
+    scheduleInfoInterviewerCard.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    scheduleInfoInterviewerCard.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    scheduleInfoInterviewerCard.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+
+    var icLeftName = document.createElement("div");
+    icLeftName.className ="ic-left-name";
+    icLeftName.style.fontWeight = '800';
+    icLeftName.style.fontSize = '35px';
+    icLeftName.style.color = '#ff5100';
+    icLeftName.style.lineHeight = '60px';
+    icLeftName.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    icLeftName.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    icLeftName.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+    icLeftName.style.paddingLeft = '20px';
+    icLeftName.style.borderBottom = '1px solid #ff5100';
+    icLeftName.style.height = '60px';
+
+
+    icLeftName.innerHTML = 'You are meeting with ' + provider.getFullName();
+
+    var icLeftInfo = document.createElement("div");
+    icLeftInfo.className = "ic-left-info";
+    icLeftInfo.style.fontWeight = '200';
+    icLeftInfo.style.fontSize = '15px';
+    icLeftInfo.style.lineHeight = '19px';
+    icLeftInfo.style.color = '#3D3D3D';
+    icLeftInfo.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    icLeftInfo.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    icLeftInfo.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+    icLeftInfo.style.paddingLeft = '25px';
+    icLeftInfo.style.paddingTop = '10px';
+
+
+
+    var icLeftInfoLeft = document.createElement("div");
+    //icLeftInfoLeft.style = "width: 80px; text-align: right; float:left; border-right: 1px dotted #ff5100; padding-right: 4px;";
+    icLeftInfoLeft.style.width = 80 + 'px';
+    icLeftInfoLeft.style.textAlign = 'right';
+    icLeftInfoLeft.style.float = 'left';
+    icLeftInfoLeft.style.borderRight = 1 + 'px dotted #ff5100';
+    icLeftInfoLeft.style.paddingRight = 4 + 'px';
+
+    var itemIndustry = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemIndustry.innerHTML = '<p>' + 'industry' + '</p>';
+    icLeftInfoLeft.appendChild(itemIndustry);
+
+    var itemCompany = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = '<p>' + 'company' + '</p>';
+    icLeftInfoLeft.appendChild(itemCompany);
+
+    var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
+    itemPosition.innerHTML = '<p>' + 'title' + '</p>';
+    icLeftInfoLeft.appendChild(itemPosition);
+
+    var itemTenure = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemTenure.innerHTML = '<p>' + 'tenure' + '</p>';
+    icLeftInfoLeft.appendChild(itemTenure);
+
+    var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
+    itemEducation.innerHTML = '<p>' + 'education' + '</p>';
+    icLeftInfoLeft.appendChild(itemEducation);
+
+
+
+    var icLeftInfoRight = document.createElement("div");
+    //icLeftInfoRight.style = "text-align: left; float: left; padding-left: 4px;";
+    icLeftInfoRight.style.textAlign = 'left';
+    icLeftInfoRight.style.float = 'left';
+    icLeftInfoRight.style.paddingLeft = 4 + 'px';
+    icLeftInfoRight.style.overflow = 'hidden';
+    icLeftInfoRight.style.width = 550 + 'px';
+
+    var itemIndustry = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemIndustry.innerHTML = '<p>' + industry + '</p>';
+    icLeftInfoRight.appendChild(itemIndustry);
+
+    var itemCompany = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemCompany.innerHTML = '<p>' + company + '</p>';
+    icLeftInfoRight.appendChild(itemCompany);
+
+    var itemPosition = document.createElement("div");
+    //itemPosition.style.textAlign = "left";
+    itemPosition.innerHTML = '<p>' + position + '</p>';
+    icLeftInfoRight.appendChild(itemPosition);
+
+    var itemTenure = document.createElement("div");
+    //itemCompany.style.textAlign = "left";
+    itemTenure.innerHTML = '<p>company: ' + companyTenure + 'yrs, industry: ' + industryTenure + 'yrs</p>';
+    icLeftInfoRight.appendChild(itemTenure);
+
+    var itemEducation = document.createElement("div");
+    //itemEducation.style.textAlign = "left";
+    itemEducation.innerHTML = '<p>' + education + '</p>';
+    icLeftInfoRight.appendChild(itemEducation);
+
+    icLeftInfo.appendChild(icLeftInfoLeft);
+    icLeftInfo.appendChild(icLeftInfoRight);
+
+    scheduleInfoInterviewerCard.appendChild(icLeftName);
+    scheduleInfoInterviewerCard.appendChild(icLeftInfo);
+
+
+
+
+    var scheduleInfoLocationCard = document.createElement("div");
+    scheduleInfoLocationCard.className="schedule-info-location-card";
+    scheduleInfoLocationCard.style.width = 1070 + 'px';
+    scheduleInfoLocationCard.style.margin = 'auto';
+    scheduleInfoLocationCard.style.backgroundColor = '#fff2e8';
+    scheduleInfoLocationCard.style.fontSize = 50 + 'px';
+    scheduleInfoLocationCard.style.lineHeight = 70 + 'px';
+    scheduleInfoLocationCard.style.margin = '20px 0px';
+    scheduleInfoLocationCard.style.textAlign = 'left';
+    scheduleInfoLocationCard.style.borderLeft = '15px solid #ff5100';
+    scheduleInfoLocationCard.style.boxShadow = '0px 0px 20px 6px rgba(0,0,0,0.10)';
+    scheduleInfoLocationCard.style.marginTop = '50px';
+    scheduleInfoLocationCard.style.marginBottom = '50px';
+    scheduleInfoLocationCard.style.height = '265px';
+    scheduleInfoLocationCard.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    scheduleInfoLocationCard.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    scheduleInfoLocationCard.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+
+    var icLeftName = document.createElement("div");
+    icLeftName.className ="ic-left-name";
+    icLeftName.style.fontWeight = '800';
+    icLeftName.style.fontSize = '35px';
+    icLeftName.style.color = '#ff5100';
+    icLeftName.style.lineHeight = '60px';
+    icLeftName.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    icLeftName.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    icLeftName.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+    icLeftName.style.paddingLeft = '20px';
+    icLeftName.style.borderBottom = '1px solid #ff5100';
+    icLeftName.style.height = '60px';
+    icLeftName.innerHTML = 'Meeting Details';
+
+    var icLeftInfo = document.createElement("div");
+    icLeftInfo.className = "ic-left-info";
+    icLeftInfo.style.fontWeight = '200';
+    icLeftInfo.style.fontSize = '15px';
+    icLeftInfo.style.lineHeight = '19px';
+    icLeftInfo.style.color = '#3D3D3D';
+    icLeftInfo.style.webkitBoxSizing = 'border-box'; /* Safari/Chrome, other WebKit */
+    icLeftInfo.style.MozBoxSizing = 'border-box'; /* Firefox, other Gecko */
+    icLeftInfo.style.boxSizing = 'border-box'; /* Opera/IE 8+ */
+    icLeftInfo.style.paddingLeft = '25px';
+    icLeftInfo.style.paddingTop = '10px';
+
+    var icLeftInfoLeft = document.createElement("div");
+    //icLeftInfoLeft.style = "width: 80px; text-align: right; float:left; border-right: 1px dotted #ff5100; padding-right: 4px;";
+    icLeftInfoLeft.style.width = 80 + 'px';
+    icLeftInfoLeft.style.textAlign = 'right';
+    icLeftInfoLeft.style.float = 'left';
+    icLeftInfoLeft.style.borderRight = 1 + 'px dotted #ff5100';
+    icLeftInfoLeft.style.paddingRight = 4 + 'px';
+
+    var itemLocation = document.createElement("div");
+    itemLocation.innerHTML = '<p>' + 'location' + '</p>';
+    icLeftInfoLeft.appendChild(itemLocation);
+
+    var itemDuration = document.createElement("div");
+    itemDuration.innerHTML = '<p>' + 'duration' + '</p>';
+    icLeftInfoLeft.appendChild(itemDuration);
+
+    var itemNotes = document.createElement("div");
+    itemNotes.innerHTML = '<p>' + 'notes' + '</p>';
+    icLeftInfoLeft.appendChild(itemNotes);
+
+
+
+
+    var icLeftInfoRight = document.createElement("div");
+    //icLeftInfoRight.style = "text-align: left; float: left; padding-left: 4px;";
+    icLeftInfoRight.style.textAlign = 'left';
+    icLeftInfoRight.style.float = 'left';
+    icLeftInfoRight.style.paddingLeft = 4 + 'px';
+    icLeftInfoRight.style.overflow = 'hidden';
+    icLeftInfoRight.style.width = 550 + 'px';
+
+    var itemLocation = document.createElement("div");
+    //itemLocation.innerHTML = '<p>' + locality + ', ' + province + '</p>';
+    itemLocation.innerHTML = '<p>' + locality + '</p>';
+    icLeftInfoRight.appendChild(itemLocation);
+
+    var itemDuration = document.createElement("div");
+    itemDuration.innerHTML = '<p>' + duration + ' hour' + (duration > 1 ? 's' : '') + '</p>';
+    icLeftInfoRight.appendChild(itemDuration);
+
+    var itemNotes = document.createElement("div");
+    itemNotes.innerHTML = '<p>' + notes + '</p>';
+    icLeftInfoRight.appendChild(itemNotes);
+
+
+
+    icLeftInfo.appendChild(icLeftInfoLeft);
+    icLeftInfo.appendChild(icLeftInfoRight);
+
+    scheduleInfoLocationCard.appendChild(icLeftName);
+    scheduleInfoLocationCard.appendChild(icLeftInfo);
+
+
+
+
+
+
+    holder.appendChild(scheduleInfoThanks);
+    holder.appendChild(scheduleInfoInterviewerCard);
+    holder.appendChild(scheduleInfoLocationCard);
+
+    page.appendChild(holder);
+    page.style.display = 'block';
+
+
+
+
+
+
+    var payment = '0.00';
+    var providerName = 'George Saul';
+    var industry = 'ggg';
+    var tenure = '5';
+    var experience = '6';
+    var education = 'B.S. Electrical Engineering';
+    var company = 'Microsoft';
+    var location = 'Everett, WA';
+    var duration = '1';
+    var note = 'I want help getting a job';
+    
+
+    var HTML = '<div class="holder" style="margin-top:141px; color: #383838; font-family: "Ubuntu", sans-serif; font-size: 40px; padding-bottom: 0px; box-shadow: 0 4px 4px -4px #222222; text-align: center;"><div class="schedule-info-thanks" style="width: 1070px; margin: auto; background-color: #fff2e8; font-size: 50px; line-height: 70px; margin: 20px 0px; text-align: left; border-left: 15px solid #ff5100; box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10); margin-top: 50px; margin-bottom: 50px; padding-left: 20px; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */">Thank you!<br />Your payment of $<span style="color: red;">' + payment + '</span> has been received<br />You will have the following information emailed to you as well.</div><div class="schedule-info-interviewer-card" style="width: 1070px; height: 265px; margin: auto; background-color: #fff2e8; margin: 20px 0px; text-align: left; border-left: 15px solid #ff5100; box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10); margin-top: 50px; margin-bottom: 50px; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */"><div class="ic-left-name" style="font-weight: 800; font-size: 35px; color: #ff5100; line-height: 60px; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */ padding-left: 20px; border-bottom: 1px solid #ff5100; height: 60px;">You are meeting with ' + providerName + '</div><div class="ic-left-info" style="font-weight: 200; font-size: 15px; color: #3D3D3D; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */ padding-left: 25px; padding-top: 10px;"><p><b>industry</b> - ' + industry + '</p><p><b>tenure</b> - ' + tenure + 'years</p><p><b>experience</b> - ' + experience + ' years</p><p><b>education</b> - ' + education + '</p><p><b>occupation</b> - ' + company + '</p></div></div><div class="schedule-info-location-card" style="width: 1070px; height: 265px; margin: auto; background-color: #fff2e8; margin: 20px 0px; text-align: left; border-left: 15px solid #ff5100; box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10); margin-top: 50px; margin-bottom: 50px; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */"><div class="ic-left-name">location information</div><div class="ic-left-info" style="font-weight: 200; font-size: 15px; color: #3D3D3D; -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */ -moz-box-sizing: border-box; /* Firefox, other Gecko */ box-sizing: border-box; /* Opera/IE 8+ */ padding-left: 25px; padding-top: 10px;"><p><b>location</b> - ' + location + '</p><p><b>length</b> - ' + duration + ' hours</p><p><b>notes</b> - ' + note + '</p></div></div></div>';
+
+  }
 
 
 }//application.prototype
@@ -3359,4 +3783,272 @@ application.prototype =
 
 
 
+function pageHandler ()
+{
+  //console.log('Users loaded: ' + app.usersLoaded);
+  //console.log(app.inID);
+  document.getElementById("explore").value = '';
+
+  var hash = decodeURI((window.location.href.split("#!")[1] || "home"));
+  //hash = hash.split("\.")[0] || "";
+  //console.log(hash);
+  var tag = hash.split("&") || "";
+  var addr = tag.shift();
+  //console.log('TAG: ' + tag);
+  //console.log('ADDR: ' + addr);
+  if(addr) {hash = addr;}
+  //console.log(hash);
+  
+
+  if(!app.usersLoaded)
+  {
+    app.loadUsers();
+    //console.log('Waiting...Locality: ' + app.localityObj.locality);
+    countdown = setTimeout('pageHandler()', 500);
+  }
+  else
+  {
+    var hash = decodeURI((window.location.href.split("#!")[1] || "home"));
+    //hash = hash.split("\.")[0] || "";
+    //console.log(hash);
+    var tag = hash.split("&") || "";
+    var addr = tag.shift();
+    if(addr) {hash = addr;}
+    //console.log(addr);
+  
+    if(addr.toLowerCase() == 'return')
+    {
+      if(!app.usersLoaded || !app.inID)
+      {
+	//console.log('Waiting...Locality: ' + app.localityObj.locality);
+	countdown = setTimeout('pageHandler()', 500);
+      }
+      else
+      {
+	var key;
+	var item;
+
+	var ID;
+
+	for(var i = 0; i < tag.length; i++)
+        {
+	  if(!tag[i]) {continue;}
+	  key = decodeURI(tag[i].split("=")[0]);
+	  item = decodeURI(tag[i].split("=")[1]);
+	  if(key == 'ID') {ID = item;}
+	}
+	app.returnParameters.ID = ID;
+        //console.log(ID);
+
+        
+         var cart = {};
+	 var member = members.getMember(app.inID);
+	 cart = member.get('cart');
+         var history = member.get('history');
+
+         app.cartItems = {};
+         for(var key in history) {app.cartItems[key] = history[key];}
+         for(var key in cart)    {app.cartItems[key] = cart[key]; var split = key.split(/\:/); app.providerID = split[0];}
+
+	 $.ajax({url:"./php/saveHistory.php", 
+	   data: {id: app.inID, history: JSON.stringify(app.cartItems) },
+           type:'post',
+           async:true
+	});
+
+        //console.log('CART: ' + cart);
+        //console.log(cart);
+        if(Object.size(cart))
+	{
+          //app.populateProductCategory('PM', 'Thank You!');
+          console.log('Thank You!');
+	}
+        else
+	{
+          //app.populateProductCategory('NF', '404 Page Not Found!');
+          console.log('404 Page Not Found!');
+          return;
+	}
+
+        var name = document.getElementById('first_name') ? document.getElementById('first_name').value : app.inID ? app.inID : 'Guest';
+        name = member.getFirstName();
+        var email = member.getEmail() ? member.getEmail() : (document.getElementById('payer_email') ? document.getElementById('payer_email').value : 'fake@mail.com');
+        var txn_id = document.getElementById('txn_id') ? document.getElementById('txn_id').value : '';
+        var cc_list = null;
+        var MsgHTML = null;
+        var attachment = '';
+        var total = currencyFormatted(getSubTotal());
+
+        var purchaseDate = new Date();
+        var year =  purchaseDate.getFullYear();
+        //console.log(purchaseDate.getMonth());
+        //console.log(app.MONTHS[purchaseDate.getMonth()]);
+        var month =  app.MONTHS[purchaseDate.getMonth()];
+        var weekDay = app.DAYS[purchaseDate.getDay()];
+        var day =  purchaseDate.getDate();
+        var hours =  purchaseDate.getHours();
+        var minutes =  purchaseDate.getMinutes();
+        var seconds =  purchaseDate.getSeconds();
+
+        var dateStr = weekDay + ', ' + month + ' ' + day + ', ' + year;
+        //console.log(dateStr);
+        var timeObj = convertTimeTo12(hours + ':' + minutes);
+        var timeStr = timeObj.hour + ':' + timeObj.minute + timeObj.ampm;
+
+        //cartDownload(attachment);
+
+
+        MsgHTML = '<html><head></head><body style="background: #f8f4f3;color: #787c6b;width: 100%; ;margin: 0;font-size: .80em;padding: 0px;font-family: &quot;Open Sans&quot;, sans-serif;height: 0px; padding: 20px;"><div style="width: 60%; margin: 0 auto;"><div style="margin-left: 6px; height: 80px;"><div style="float: left;"><img style="height:20px;" src="http://www.interviewring.com/img/logo150x50.png"/></div><div style="float: left; margin-left: 4px; font-size: 18px; line-height: 80px;">www.interviewring.com</div></div><br><div style="width: 95%; border: 1px solid #606060; background: #ffffff;"><div style="margin: 20px; border-bottom: 1px solid #606060; height: 50px; margin-bottom: 0px;"><div style="float: left;">' + dateStr + '<br>' + timeStr + '</div><div style="float:right;">Transaction ID<br>' + txn_id + '</div></div><div style="margin: 20px; border-bottom: 1px solid #606060; padding-bottom: 10px;"><p style="font-size: 16px;">' + name + ',</p>Thank you for your purchase!<br>If you have any questions or concerns do not hesitate to contact us.</div><div style="margin: 20px; border-bottom: 1px solid #606060;"><table style="border: 1px solid #303030; margin-bottom: 40px; width: 100%; border-collapse: collapse; font-size: 14px; color: #000000;"><thead style="background: #c0c0c0;"><tr><th style="border: 1px solid #303030; width: 80%;">ITEM</th><th style="border: 1px solid #303030;">PRICE</th></tr></thead><tbody>';
+
+        var lastImage = null;
+
+        var total = 0;
+        var lsObj = {};
+        var cartItemNum = 0;
+	for (var key in cart)
+	{
+          var split = key.split(/\:/);
+          var ID = split[0];
+          app.providerID = ID;
+          var item = app.cartItems[key];
+          if (!item) { continue; }
+          //console.log("ITEM: " + item + " KEY: " + key);
+          var date = key.split(':')[1];
+          //console.log(date);
+          var dateObj = getDateIndexes(date);
+
+          var d = parseInt(dateObj.dayIndex, 10);
+          //console.log(d);
+          var m = parseInt(dateObj.monthIndex - 1, 10);
+          var y = parseInt(dateObj.year, 10);
+          var dateStr = y + '-' + pad(m, 2) + '-' + pad(d, 2);
+          //console.log(item);
+          //console.log(app.getProviderID());
+          //console.log(d + '.' + m + '.' + y);
+          lsObj = localizeCartItem(item, app.getProviderID(), d, m, y);
+          var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+          //console.log(localizedAppt);
+
+
+
+
+
+
+          var sku = 'sku' + cartItemNum;
+          var desc = localizedAppt;
+          //console.log("DESC: " + desc);
+          desc = desc.replace(/"/g, '\\"');
+          desc = desc.replace(/'/g, "\\'");
+          //desc = desc.replace(/\<br\>/g, "\n");
+          //console.log("DESC2: " + desc);
+
+          var unitPrice = getSubTotalFromSch(item, ID);
+          total += parseFloat(unitPrice);
+          var quantity = 1;
+          var discounted = 0;
+          var customStr = '';
+
+          var src = 'img/appt.png';
+
+          var bgColor = (cartItemNum++ % 2) ? '#f8f4f3' : '#ffffff';
+	  //console.log(productCategory + ' === ' + category);
+          MsgHTML += '<tr><td style="border: 1px solid #303030; padding: 4px; background: ' + bgColor + ';"><img style="height: 50px; width: 50px;" src="http://www.interviewring.com/' + encodeURI(src) + '"/><span style="padding-left:6px;">' + desc + '</span></td><td style="border: 1px solid #303030; text-align: right; padding: 4px; background: ' + bgColor + ';">$' + unitPrice + '</td></tr>';
+
+	}
+
+        app.paymentReturn(app.getProviderID(), total, lsObj);
+
+        total = currencyFormatted(total);
+        var paymentProcessor = parseFloat(total) ? 'Paypal' : 'interviewring.com';
+
+        MsgHTML += '<tr><td></td><td style="text-align: right; padding: 4px;">Total: $' + total + '</td></tr></tbody></table><div style="height: 50px;"><div style="float:left;">Payment via ' + paymentProcessor + '</div><div style="float:right; font-size: 18px;">Amount Paid $' + total + '</div></div></div><div style="height: 20px; margin-top: -10px; font-size: 10px; text-align: center; padding-bottom: 2px;">Your one stop shop for crowd sourced career services</div></div></div>';
+
+
+
+        //console.log(document.getElementById('return').innerHTML);
+
+        MsgHTML += '<br><br><br>' + document.getElementById('return').innerHTML + '</body></html>';
+
+        //console.log(MsgHTML);
+        //console.log(attachment);
+
+        
+	//console.log(cart);
+        if(cart)
+	{
+          //console.log('Sending email: ' + email + ' -> ' + MsgHTML);
+          $.ajax({url:"./php/email.php", 
+	    data: {id: app.getUserID(), name: name, email: email, subject: "Your purchase from interviewring.com", MsgHTML: MsgHTML, attachResume: '1'},
+            type:'post',
+	    success: function (result) {console.log(result);},
+            async:true
+          });
+	}
+
+
+        app.cartItems = {};
+        app.saveCart(app.getUserID(), app.cartItems);
+
+
+	//window.showReturn();
+      }
+    }
+
+    else if(hash === 'home')          {showHome();}
+    else if(hash === 'my account')    {showProfile();}
+    else if(hash === 'my history')    {showHistory();}
+    else if(hash === 'find services')
+    {
+      app.returnParameters.SEARCH = '';
+      if(addr.toLowerCase() == 'find services')
+      {
+	var key;
+	var item;
+
+	for(var i = 0; i < tag.length; i++)
+	{
+	  if(!tag[i]) {continue;}
+	  key = decodeURI(tag[i].split("=")[0].toLowerCase());
+	  item = decodeURI(tag[i].split("=")[1]);
+	  if(key == 'search') {app.returnParameters.SEARCH = item;}
+	}
+	
+	//console.log(ID);
+      }
+      //console.log('->' + app.returnParameters.SEARCH);
+      if(app.returnParameters.SEARCH === '') {window.location.hash = encodeURI("#!find services");}
+      showFindInterviews(app.returnParameters.SEARCH);
+    }
+    else if(hash === 'service')
+    {
+      app.returnParameters.PROVIDER = '';
+      app.returnParameters.STEP = '1';
+      if(addr.toLowerCase() == 'service')
+      {
+	var key;
+	var item;
+
+	var searchStr;
+
+	for(var i = 0; i < tag.length; i++)
+	{
+	  if(!tag[i]) {continue;}
+	  key = decodeURI(tag[i].split("=")[0].toLowerCase());
+	  item = decodeURI(tag[i].split("=")[1]);
+	  if(key == 'provider') {app.returnParameters.PROVIDER = item;}
+	  if(key == 'step') {app.returnParameters.STEP = item;}
+	}
+	//console.log(ID);
+      }
+      //console.log('->' + app.returnParameters.PROVIDER);
+      showCheckOut(app.returnParameters.PROVIDER, app.returnParameters.STEP);
+    }
+    else
+    {
+      //console.log(hash);
+      console.log('404 Page Not Found');
+      //app.populateProductCategory('NF', '404 Page Not Found!');
+    }
+  }
+}
 

@@ -105,7 +105,11 @@ session_start();
 
 
                         var app = new application();
-                        app.loadUsers();
+                        //app.loadUsers();
+
+			window.addEventListener("load", pageHandler);
+			window.addEventListener("hashchange", pageHandler);
+
 
                         function doSearchInterviewers(arg) {
                         if (!app.usersLoaded) {
@@ -165,13 +169,13 @@ session_start();
           <div class="top-menu-div">
             <ul class="nav">
               <li class="menu-item-1">
-                <a onclick="showHome();">home</a>
+                <a onclick="window.location.hash = '#!' + encodeURI('home');">home</a>
               </li>
               <li class="menu-item-2">
-                <a onclick="showProfile();">create service</a>
+                <a onclick="window.location.hash = '#!' + encodeURI('my account');">my account</a>
               </li>
               <li class="menu-item-3">
-                <a onclick="showHistory();">my history</a>
+                <a onclick="window.location.hash = '#!' + encodeURI('my history');">my history</a>
               </li>
               <li class="menu-item-4" id="login">
                 <a onclick="IN.User.authorize();">sign in</a>
@@ -180,8 +184,8 @@ session_start();
           </div>
           <div class="search-form-div">
             <div class="form-search">
-              <input id="explore" type="text" class="input-xxlarge" placeholder="search for interviewers" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){ window.showFindInterviews(document.getElementById("explore").value,2);}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}}, 500);'>
-                <img class="btn" onclick='if(document.getElementById("profile").style.display == "none") {window.showFindInterviews(document.getElementById("explore").value,2);} else {window.showProfile(document.getElementById("explore").value,2);}'></img>
+              <input id="explore" type="text" class="input-xxlarge" placeholder="search for interviewers" onkeyup='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.location.hash = "#!" + encodeURI("find services&SEARCH=" + document.getElementById("explore").value);} else {window.location.hash = "#!" + encodeURI("my account");}}, 500);' oninput='if(window.mytimeout) window.clearTimeout(window.mytimeout); window.mytimeout = window.setTimeout(function(){if(document.getElementById("profile").style.display == "none") {window.location.hash = "#!" + encodeURI("find services&SEARCH=" + document.getElementById("explore").value);} else {window.location.hash = "#!" + encodeURI("my account");}}, 500);'>
+                <img class="btn" onclick='if(document.getElementById("profile").style.display == "none") {window.location.hash = "#!" + encodeURI("find services&SEARCH=" + document.getElementById("explore").value);} else {window.location.hash = "#!" + encodeURI("my account");}'></img>
               </div>
           </div>
         </div>
@@ -518,6 +522,15 @@ session_start();
                         </p>Resume is your gateway to interviews. Preparing a good one is a burden. You will get help
                         with spesifics of your CV, you will get feedback and specially prepare your resume for he companies and positions you aim for.
                       </div>
+                      <div class="select-service-combobox-div">
+                        <!--<select id="selectServiceComboBox" onchange="window.updateCalendar();">-->
+                        <select id="selectServiceComboBox">
+                          <option value="na">select a service...</option>
+                          <option value="ri">remote interview $250/hr</option>
+                          <option value="im">in-person interview $150/hr</option>
+                          <option value="rr">resume review $100/hr</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -530,13 +543,15 @@ session_start();
                     </div>
                     <div class="sc-left-info">
                       <div class="uploader-div">
-                        <input type="file" id="uploadFile" name="uploadFile" onchange="startRead();"/>
+                        <input type="file" id="uploadFile" name="uploadFile" onchange="startRead();"/><label id="uploadFileLabel" style="font-size: 26px;">No CV uploaded</label>
                         <br/>
                         <br/>
                         <span id="uploadButtonText"></span>
                       </div>
-                      <div class="uploader-notice">you don't feel like you are ready ?</div>
-                      <div class="uploader-notice">skip this step for now and upload your CV to your account later on !</div>
+                      <div id="uploader-notice">
+                        <div class="uploader-notice">Don't feel like you are ready?</div>
+                        <div class="uploader-notice">Skip this step for now and upload your CV to your account later on!</div>
+		      </div>
                     </div>
                   </div>
                 </div>
@@ -630,20 +645,17 @@ session_start();
               </li>
             </ul>
             <div class="arrows">
+<!--
+              <label for="slides_1" onclick="window.location.hash = '#!' + encodeURI('service&PROVIDER=' + app.getProviderID() + '&STEP=1');"></label>
+              <label for="slides_2" onclick="window.location.hash = '#!' + encodeURI('service&PROVIDER=' + app.getProviderID() + '&STEP=2');"></label>
+              <label for="slides_3" onclick="window.location.hash = '#!' + encodeURI('service&PROVIDER=' + app.getProviderID() + '&STEP=3');"></label>
+              <label for="slides_4" onclick="window.location.hash = '#!' + encodeURI('service&PROVIDER=' + app.getProviderID() + '&STEP=4');"></label>
+-->
               <label for="slides_1"></label>
               <label for="slides_2"></label>
               <label for="slides_3"></label>
               <label for="slides_4"></label>
             </div>
-            <!--<div class="navigation">
-                        <div>
-                            <label for="slides_1"></label>
-                            <label for="slides_2"></label>
-                            <label for="slides_3"></label>
-                            <label for="slides_4"></label>
-                            <label for="slides_N"></label>
-                        </div>
-                    </div>-->
           </div>
           <div id="schedule-page-reviews" class="schedule-page-card-div review-card-div">
           </div>
@@ -653,7 +665,9 @@ session_start();
       <!--CHECK OUT-->
 
       <!--RETURN-->
-      <div id="return" style="display:none;">
+      <div id="return" style="display:block;">
+
+
       </div>
       <!--RETURN-->
 
@@ -794,7 +808,28 @@ session_start();
     });
     })
 
+    app.loadUsers();
+
 
   </script>
 
 </html>
+
+<?php
+$first_name = isset($_POST['first_name']) ? $_POST['first_name'] : '';
+$payer_email = isset($_POST['payer_email']) ? $_POST['payer_email'] : '';
+$txn_id = isset($_POST['txn_id']) ? $_POST['txn_id'] : '';
+
+if($first_name)
+{
+  echo '<input type="hidden" id="first_name" name="first_name" value=\''.$first_name.'\'>';
+}
+if($payer_email)
+{
+  echo '<input type="hidden" id="payer_email" name="payer_email" value=\''.$payer_email.'\'>';
+}
+if($txn_id)
+{
+  echo '<input type="hidden" id="txn_id" name="txn_id" value=\''.$txn_id.'\'>';
+}
+?>

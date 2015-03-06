@@ -138,8 +138,10 @@ function getSubTotal()
 
   var sch = getGroupSelections('serviceTime', 'selectServiceComboBox', true);
   //console.log(sch);
-  app.cartItems[app.getProviderID() + ':' + app.getApptDay()] = sch;
-
+  if(sch)
+  {
+    app.cartItems[app.getProviderID() + ':' + app.getApptDay()] = sch;
+  }
   var split = sch.split('<br>');
   for(var i = 0; i < split.length-1; i++)
   {
@@ -524,12 +526,15 @@ function loaded(evt)
   var filename = document.getElementById('uploadFile').files[0].name;
 
   //console.log(filename);
-  //console.log(fileString);
+  fileString = 'name:' + filename + ';' + fileString;
+  console.log(fileString);
 
+  console.log('Saving resume...');
   $.ajax({url:"./php/saveResume.php", 
          data: {id: app.getUserID(), resume: fileString },
          type:'post',
-        async:false
+	 success: function (result) {console.log(result);},
+         async:true
   });
 
   document.getElementById("uploadButtonText").style.fontSize = 21 + "px";
@@ -903,6 +908,9 @@ function setGroupsFromCalendar(checkbox, schedule)
       value = convertTimeTo24(timeStr).hour;
 
       var service = split[i].split(' -- ')[1];
+      //service = service.replace(/.*\s\-\-\s/,'');
+      //service = service.replace(/\s*\$.*/,'');
+
       //console.log(check[j].value + " <-> " + value);
       //if(check[j].value == value) {check[j].checked = true;}//combo[i].options[combo[i].selectedIndex].text
       if(check[j].value == value) {check[j].disabled = false; check[j].checked = true;}
@@ -953,6 +961,9 @@ function setGroupsFromSchedule(checkbox, schedule)
     {
       var value = split[i].split(' ')[0];
       var service = split[i].split(' -- ')[1];
+      //service = service.replace(/.*\s\-\-\s/,'');
+      //service = service.replace(/\s*\$.*/,'');
+
       //console.log(check[j].value + " <-> " + value + " : " + service + " [" + comboItems[service] + "]");
       //if(check[j].value == value) {check[j].checked = true;}//combo[i].options[combo[i].selectedIndex].text
       if(check[j].value == value) {check[j].disabled = false; check[j].checked = true;}
@@ -995,6 +1006,9 @@ function disableGroupsFromSchedule(checkbox, schedule)
     {
       var value = split[i].split(' ')[0];
       var service = split[i].split(' -- ')[1];
+      //service = service.replace(/.*\s\-\-\s/,'');
+      //service = service.replace(/\s*\$.*/,'');
+
       //console.log(check[j].value + " <-> " + value + " : " + name);
       if(check[j].value == value) {check[j].checked = true; check[j].disabled = true;}
     }
@@ -1014,7 +1028,9 @@ function localizeCartItem(item, inID, thisDayIndex, thisMonthIndex, thisYear)
   {
       if(split[i])
       {
-        //console.log(split[i]);
+        //console.log('CHUNK: ' + split[i]);
+        //console.log(split[i].indexOf('APPT'));
+        if(split[i].indexOf('APPT') >= 0) {continue;}
         var exploded = split[i].split(' ');
         var time = exploded.shift();
         //console.log("TIME: " + time);
@@ -1087,6 +1103,9 @@ function getServiceFromSchedule(schedule)
   var split = schedule.split('<br>');
   var duration = split.length-1;
   var service = split[0].split(/\s*--\s*/)[1];
+  service = service.replace(/.*\s\-\-\s/,'');
+  service = service.replace(/\s*\$.*/,'');
+
   return {service: service, duration: duration};
 }
 
@@ -1164,3 +1183,4 @@ function codeLatLng(lat, lng)
 
   });
 }
+

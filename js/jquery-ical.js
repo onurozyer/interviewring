@@ -292,12 +292,12 @@
         };
         
         function evaluateEventDate(eventdate, date){
-            var eventdate = eventdate.split('-');
-            var date = date.split('-');
+            var eventdate = eventdate.split('.');
+            var date = date.split('.');
             
-            if (eventdate[0] === 'yyyy')
+            if (eventdate[2] === 'yyyy')
             {
-                eventdate[0] = date[0];
+                eventdate[2] = date[2];
             }
             
             if (eventdate[1] === 'mm') 
@@ -305,12 +305,12 @@
                 eventdate[1] = date[1];
             }
             
-            if (eventdate[2] === 'dd')
+            if (eventdate[0] === 'dd')
             {
-                eventdate[2] = date[2];
+                eventdate[0] = date[0];
             }
             
-            return eventdate[0]+'-'+eventdate[1]+'-'+eventdate[2];
+            return eventdate[0]+'.'+eventdate[1]+'.'+eventdate[2];
         };
 
         function getLastDayOfMonth(year, month, days){
@@ -338,7 +338,8 @@
         };
         
         function formatDate (year, month, day){    
-            return year+'-'+formatMonth(month)+'-'+formatDay(day);
+	  //return year+'-'+formatMonth(month)+'-'+formatDay(day);
+            return formatDay(day)+'.'+formatMonth(month)+'.'+year;
         };
         
         function formatMonth(month){
@@ -433,6 +434,8 @@
 
     $.fn.ical.changeEventDates = function(array){
        eventdates = array;
+       //console.log(array);
+       //console.log(currDate);
        createCalFn(calObj, currDate);
     };
     window.refreshCalendar = function(){

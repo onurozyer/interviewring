@@ -460,14 +460,14 @@ session_start();
       <!--SLIDER-->
 
       <!--PROFILE-->
-      <div id="profile" style="display:none; margin-top: -0px;">
+      <div id="profile" style="display:none;">
         <div id="profileItems" class="main-container">
         </div>
       </div>
       <!--PROFILE-->
 
       <!--HISTORY-->
-      <div id="history" style="display:none; margin-top: -0px;">
+      <div id="history" style="display:none;">
         <div id="historyItems" class="main-container">
         </div>
       </div>
@@ -477,7 +477,7 @@ session_start();
       <div id="checkOut" style="display:none;">
 
         <div id="scheduleItems" class="main-container">
-          <div id="schedule-page-interviewer-card" class="schedule-page-interviewer-card" style="margin-top: -0px;">
+          <div id="schedule-page-interviewer-card" class="schedule-page-interviewer-card">
           </div>
           <div class="csslider">
             <input type="radio" name="slides" id="slides_1" checked="" />
@@ -502,7 +502,7 @@ session_start();
                         </select>
                       </div>
                       <div class="sc-left-info-title">
-                        <p style="text-transform: uppercase; font-weight: bold;">description of services</p>
+                        <p>description of services</p>
                       </div>
                       <div id="scheduleDescription_remoteinterview" style="display:none;">
                         <p style="font-weight: bold;">remote interview</p>You will be meeting with your mock interviwer online with A or B services.
@@ -521,15 +521,6 @@ session_start();
                           resume review ( ready in <span class="description-emphasis">4</span> days ! )
                         </p>Resume is your gateway to interviews. Preparing a good one is a burden. You will get help
                         with spesifics of your CV, you will get feedback and specially prepare your resume for he companies and positions you aim for.
-                      </div>
-                      <div class="select-service-combobox-div">
-                        <!--<select id="selectServiceComboBox" onchange="window.updateCalendar();">-->
-                        <select id="selectServiceComboBox">
-                          <option value="na">select a service...</option>
-                          <option value="ri">remote interview $250/hr</option>
-                          <option value="im">in-person interview $150/hr</option>
-                          <option value="rr">resume review $100/hr</option>
-                        </select>
                       </div>
                     </div>
                   </div>

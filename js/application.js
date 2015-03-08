@@ -241,31 +241,24 @@ application.prototype = {
         ,
         setFilterKeys: function (member) {
                 var me = this;
+				var services = member.getProvidedServices();
+				if( !Object.keys(services).length ) {return;}      
 
                 member.industryFilter = member.getIndustry();
                 member.companyFilter = member.getCompany();
 
-                // --Services--
-                var LO = 999999;
-                var HI = 0;
-                var services = member.getProvidedServices();
-                for (var key in services) {
-                    if (parseFloat(services[key].price) < LO) {
-                        LO = parseFloat(services[key].price);
-                    }
-                    if (parseFloat(services[key].price) > HI) {
-                        HI = parseFloat(services[key].price);
-                    }
-                }
-
                 // --Rating --
                 var ratingObj = member.getReviews();
                 var rating = Math.ceil(ratingObj.average) || 0;
+     
+	 // --Price--
 
                 for (var key in me.filters) {
                     if (key == 'price') {
                         //console.log("PRICE");
                         var items = me.filters[key];
+						var priceFilterHash = new Array();
+
                         for (var i = 0; i < items.length; i++) {
                             var item = items[i];
                             //console.log(item);
@@ -277,10 +270,14 @@ application.prototype = {
                             var priceLO = parseFloat(split[0]);
                             var priceHI = parseFloat(split[1]) || parseFloat('0');
                             //console.log(LO + "->" + " LO: " + priceLO + " HI: " + priceHI);
-                            if (LO >= priceLO && LO <= priceHI) {
-                                member.priceFilter = items[i];
-                            }
-                        }
+							for (var skey in services) {
+								var sprice = parseFloat(services[skey].price);  
+								if (sprice >= priceLO && sprice <= priceHI ){  
+									priceFilterHash[skey]=items[i];
+								}
+							}                  
+						}
+						member.priceFilter = priceFilterHash;
                         //console.log("SET TO: " + member.priceFilter);
                     } else if (key == 'rating') {
                         //console.log("PRICE");
@@ -513,7 +510,7 @@ application.prototype = {
                         var opt = e.options[e.selectedIndex].value;
                         var value = member.get(key + 'Filter');
                         var found = (opt == key) ? true : false;
-                        var currValue = (key != 'services') ? value : 'services';
+						var currValue = (key == 'services') ? 'services' : (key == 'price') ? 'price' : value;
                         //console.log("CURRVALUE: " + currValue);
 
                         if (key == 'services') {
@@ -529,6 +526,24 @@ application.prototype = {
                                 }
                             }
                         } //if(key == 'services')
+						else if (key == 'price' ){
+							if (currValue == opt) { found = true; }
+							else{
+								var e2 = document.getElementById('filter_services');
+								if(e2.selectedIndex == 0){
+									for(var priceKey in value){
+										if (value[priceKey] == opt ) {
+											found = true; 
+											break;
+										}
+									}
+								}
+								else{
+									var opt2 = e2.options[e2.selectedIndex].value;
+									if (value[opt2] && value[opt2] == opt) { found = true; }
+								}
+							}
+						}							
                         else {
                             //console.log(currValue + ' == ' + opt);
                             if (currValue == opt) {

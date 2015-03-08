@@ -682,23 +682,6 @@ application.prototype = {
                     //window.appendChild(itemServices);
 
                     document.getElementById("searchItems").appendChild(window);
-
-
-                    var childID = "full_itemInfoWrapper" + index;
-                    var popup = document.createElement("div");
-                    popup.className = "darkBlue";
-                    popup.onmouseout = function () {
-                        document.getElementById(this.id).style.display = 'none';
-                    };
-                    popup.style.position = 'absolute';
-                    popup.style.top = 96 + 'px';
-                    popup.style.width = 200 + 'px';
-                    popup.style.height = 206 + 'px';
-                    popup.style.display = 'none';
-                    popup.id = childID;
-                    popup.innerHTML = window.innerHTML;
-                    //window.appendChild(popup);
-
                 }
             } //populateSearchItems()
 
@@ -937,34 +920,12 @@ application.prototype = {
                 document.getElementById("profileItems").appendChild(window);
                 document.getElementById("profileItems").appendChild(schedulePageCard);
 
-
-                var childID = "full_itemInfoWrapper";
-                var popup = document.createElement("div");
-                popup.className = "darkBlue";
-                popup.onmouseout = function () {
-                    document.getElementById(this.id).style.display = 'none';
-                };
-                popup.style.position = 'absolute';
-                popup.style.top = 96 + 'px';
-                popup.style.width = 200 + 'px';
-                popup.style.height = 206 + 'px';
-                popup.style.display = 'none';
-                popup.id = childID;
-                popup.innerHTML = itemInfoWrapper.innerHTML;
-                //window.appendChild(popup);
-
                 var options = new Array();
                 options.push('Select a service...');
-                //for (var key in services)
-                //{
-                //  options.push(key);
-                //}
 
                 for (var key in me.providedServices) {
                     options.push(me.providedServices[key]);
                 }
-
-
 
                 addFilterOptions("serviceEditComboBox", options);
 
@@ -1368,29 +1329,17 @@ application.prototype = {
                         function saveCalendar() {
                                 var member = members.getMember(app.getUserID());
                                 var calendar = member.getCalendar();
-
-                                var e = document.getElementById("serviceEditComboBox");
-                                var service = e.options[e.selectedIndex].value;
-
+                                var service = SelectedService();
                                 var e = document.getElementById("calSelect");
                                 var opt = e.options[e.selectedIndex].value;
-
-
-
-                                //app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
                                 var serviceDay = app.getServiceDay();
-
                                 console.log(serviceDay);
                                 var dateObj = getDateIndexes(serviceDay);
-
                                 var d = parseInt(dateObj.dayIndex, 10);
-                                //console.log(d);
                                 var m = parseInt(dateObj.monthIndex, 10);
                                 var y = parseInt(dateObj.year, 10);
                                 var weekDay = parseInt(dateObj.weekDay, 10);
-
                                 var sch = getTimeGroup('serviceTime', true);
-                                //var availability = "AVAILABLE:\n" + sch;
                                 var availability = "AVAILABLE:<br>" + sch;
 
                                 if (e.selectedIndex == 0) {
@@ -1509,7 +1458,6 @@ application.prototype = {
 
         ,
         populateScheduleItems: function (ID) {
-                //console.log('populateScheduleItems: ' + ID);
                 var me = this;
 
 
@@ -1728,65 +1676,45 @@ application.prototype = {
 
                 var itemLink = document.createElement("div");
                 itemLink.innerHTML = link;
-                //window.appendChild(itemLink);
 
                 var numInterviews = document.createElement("div");
                 numInterviews.innerHTML = interviewsStr;
                 numInterviews.style.textAlign = 'left';
-                //window.appendChild(numInterviews);
 
                 var numCharityCoins = document.createElement("div");
                 numCharityCoins.innerHTML = charityCoinStr;
                 numCharityCoins.style.textAlign = 'left';
-                //window.appendChild(numCharityCoins);
-
 
                 var itemServices = document.createElement("div");
-                //itemServices.innerHTML = help;
-                //window.appendChild(itemServices);
-
-                //document.getElementById("scheduleItems").appendChild(window);
                 document.getElementById("scheduleItems").appendChild(schedulePageCard);
-
-
-                var childID = "full_itemInfoWrapper";
-                var popup = document.createElement("div");
-                popup.className = "darkBlue";
-                popup.onmouseout = function () {
-                    document.getElementById(this.id).style.display = 'none';
-                };
-                popup.style.position = 'absolute';
-                popup.style.top = 96 + 'px';
-                popup.style.width = 200 + 'px';
-                popup.style.height = 206 + 'px';
-                popup.style.display = 'none';
-                popup.id = childID;
-                popup.innerHTML = itemInfoWrapper.innerHTML;
-                //window.appendChild(popup);
 
                 var options = new Array();
                 options.push('Select a service...');
                 for (var key in services) {
-                    options.push(key + ' ' + '$' + services[key].price + '/hr');
-                    var descID = 'scheduleDescription_' + key.toLowerCase();
-                    descID = descID.replace(/ /g, '');
-                    descID = descID.replace(/\-/g, '');
-                    //console.log(descID + ': found(' + (document.getElementById(descID) ? 'true' : 'false') + ')');
-                    if (document.getElementById(descID)) {
-                        document.getElementById(descID).style.display = '';
+                    if (key == "Remote Interview") {
+                        document.getElementById("remote-interview-button").style.display = "inherit";
+                        document.getElementById("remote-interview-button-label").innerHTML = "remote interview $" + services[key].price + "/hr";
+                    }
+
+                    if (key == "In-person Interview") {
+                        document.getElementById("in-person-interview-button").style.display = "inherit";
+                        document.getElementById("in-person-interview-button-label").innerHTML = "in-person interview $" + services[key].price + "/hr";
+                    }
+
+                    if (key == "Resume Review") {
+                        document.getElementById("resume-review-button").style.display = "inherit";
+                        document.getElementById("resume-review-button-label").innerHTML = "resume review $" + services[key].price + "/hr";
                     }
                 }
 
-                addOptions2("selectServiceComboBox", options);
-                document.getElementById("selectServiceComboBox").onchange = function () {
-                    updateCalendar();
-                };
+                //addOptions2("selectServiceComboBox", options);
+                //document.getElementById("selectServiceComboBox").onchange = function () {
+                //    updateCalendar();
+                //};
 
-                if (services['In-person Interview']) {
-                    document.getElementById("scheduleLocality").innerHTML = services['In-person Interview'].locality + ', ' + services['In-person Interview'].province;
-                }
-
-
+                //if (services['In-person Interview']) {
+                //    document.getElementById("scheduleLocality").innerHTML = services['In-person Interview'].locality + ', ' + services['In-person Interview'].province;
+                //}
 
                 var scheduleTime = document.getElementById("scheduleTime");
                 scheduleTime.innerHTML = '';
@@ -1827,50 +1755,33 @@ application.prototype = {
 
                 getSubTotal();
 
-
-
-
                 var cal = $("#scheduleCal").ical({
                     startOnSunday: true,
 
                     eventdates: [],
 
                     click: function (d) {
-                            //console.log('SELECTED: ' + d);
                             var split = d.split("-");
                             var year = parseInt(split[0], 10);
                             var month = parseInt(split[1], 10);
                             var day = parseInt(split[2], 10);
 
-                            //console.log(year+'/'+month+'/'+day);
-
                             var dtPRV = new timezoneJS.Date(year, month - 1, day);
-                            //console.log(app.DAYS[dtPRV.getDay()]);
 
                             app.apptDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
 
-
-                            var e = document.getElementById("selectServiceComboBox");
-                            var service = e.options[e.selectedIndex].value;
-                            service = service.split(/\s*\$/)[0];
-                            //console.log(service);
-
+                            var selectedService = SelectedService();
+                            
                             var provider = members.getMember(app.getProviderID());
-                            //console.log(provider.getCalendar());
                             var member = members.getMember(app.getUserID());
 
-
-
                             try {
-                                if (typeof provider.getCalendar()[service] !== 'undefined' && typeof member.getCalendar()[service] !== 'undefined') {
+                                if (typeof provider.getCalendar()[selectedService] !== 'undefined' && typeof member.getCalendar()[selectedService] !== 'undefined') {
 
                                     var cal = provider.getCalendar();
-                                    var serviceCal = cal[service];
+                                    var serviceCal = cal[selectedService];
 
                                     var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
-                                    //console.log(date);
-
-
 
                                     try {
                                         if (typeof serviceCal[date] !== 'undefined') {
@@ -1881,7 +1792,7 @@ application.prototype = {
 
                                             //console.log(member.getCalendar());
                                             var cal = member.getCalendar();
-                                            var serviceCal = cal[service];
+                                            var serviceCal = cal[selectedService];
 
                                             var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
                                             //console.log(date);
@@ -1918,16 +1829,10 @@ application.prototype = {
 
 
                 function updateCalendar() {
-                    if (e.SelectedIndex != 0) {
-
-                    }
-
+                    
                     var scheduleDates = new Array();
-                    var e = document.getElementById("selectServiceComboBox");
-                    var service = e.options[e.selectedIndex].value;
+                    var service = SelectedService();
                     service = service.split(/\s*\$/)[0];
-                    //console.log('SERVICE: ' + service);
-
                     var provider = members.getMember(app.getProviderID());
                     var cal = provider.getCalendar();
                     var serviceCal = cal[service];
@@ -1937,10 +1842,8 @@ application.prototype = {
                         var m = parseInt(split[1], 10);
                         var y = parseInt(split[2], 10);
                         var dateStr = pad(d, 2) + '.' + pad(m, 2) + '.' + y;
-                        //console.log(serviceCal[key]);
                         var lsObj = localizeSch(serviceCal[key], app.getProviderID(), d, m, y);
                         var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-                        //console.log(localizedAppt);
 
                         scheduleDates.push({
                             date: dateStr,
@@ -1962,27 +1865,20 @@ application.prototype = {
 
                         var controlValue = {};
                         if (providerSchedule) {
-                            //console.log(providerSchedule);
                             var split = providerSchedule.split('<br>');
                             split.shift();
                             for (var i = 0; i < split.length; i++) {
                                 if (split[i]) {
-                                    //console.log(split[i]);
                                     var timeStr = Number(split[i].match(/^(\d+)/)[1]) + ':00' + ' ' + split[i].match(/([ap]m)/);
                                     timeStr = timeStr.replace(/\,[ap]m$/, '');
                                     split[i] = convertTimeTo24(timeStr).hour;
-                                    //console.log(split[i]);
                                     controlValue[split[i]] = true;
                                 }
                             }
                         }
                         enableGroup("serviceTime");
-                        //enableGroup("selectService");
-                        //addOptions("selectService", selected);
                         disableGroup("serviceTime", controlValue);
-                        //disableGroup("selectService", controlValue);
 
-                        //Show previously selected options
                         if (mySchedule) {
                             setGroupsFromSchedule("serviceTime", mySchedule);
                         }
@@ -1991,22 +1887,14 @@ application.prototype = {
                             setGroupsFromSchedule("serviceTime", cartItemsSchedule);
                         }
 
-                        //Disable previously scheduled hours from other providers
                         if (mySchedule) {
                             disableGroupsFromSchedule("serviceTime", mySchedule);
                         }
 
-                        //getSubTotal();
-
                     } //showApptScheduler
                 window.showApptScheduler = showApptScheduler;
             } //populateScheduleItems()
-
-
-
-
-
-        ,
+            ,
         populateMyHistory: function (arg) {
                 var me = this;
                 console.log("populateMyHistory()");
@@ -2039,7 +1927,6 @@ application.prototype = {
                         var member = members.getMember(app.getUserID());
 
                         historyItems = member.getProviderHistory();
-
 
                         for (var key in historyItems) {
                             console.log("KEY: " + key);
@@ -3952,7 +3839,7 @@ function ServiceEditUserCardRight() {
     itemName.className = "ic-right-name";
     itemName.innerHTML = 'select a service to edit';
     icRight.appendChild(itemName);
-    
+
     var icRightInfo = document.createElement("div");
     icRightInfo.className = "ic-right-info";
 
@@ -3972,7 +3859,7 @@ function ServiceEditUserCardRight() {
 
     var location = document.createElement("p");
     location.innerHTML = 'location';
-    
+
     var locationSelect = document.createElement("select");
     locationSelect.id = "localitySelect";
     locationSelect.name = "localitySelect";
@@ -3982,10 +3869,10 @@ function ServiceEditUserCardRight() {
 
     var feeRow = document.createElement("div");
     feeRow.className = "service-edit-combo-box";
-    
+
     var timezone = document.createElement("p");
     timezone.innerHTML = 'timezone';
-    
+
     var timezoneSelect = document.createElement("select");
     timezoneSelect.id = "timezoneSelect";
     timezoneSelect.name = "timezoneSelect";
@@ -3995,4 +3882,41 @@ function ServiceEditUserCardRight() {
     icRight.appendChild(icRightInfo);
 
     return icRight;
+}
+
+function SelectServiceTypeButtonClick(serviceButton) {
+    "use strict";
+    serviceButton.style.opacity = "1.0";
+    if (serviceButton.id == "remote-interview-button") {
+        document.getElementById("in-person-interview-button").style.opacity = "0.5";
+        document.getElementById("resume-review-button").style.opacity = "0.5";
+    } else if (serviceButton.id == "in-person-interview-button") {
+        document.getElementById("remote-interview-button").style.opacity = "0.5";
+        document.getElementById("resume-review-button").style.opacity = "0.5";
+    } else if (serviceButton.id == "resume-review-button") {
+        document.getElementById("in-person-interview-button").style.opacity = "0.5";
+        document.getElementById("remote-interview-button").style.opacity = "0.5";
+    }
+}
+
+function SelectedService() {
+    var inperson = document.getElementById("in-person-interview-button");
+    var resume = document.getElementById("resume-review-button");
+    var remote = document.getElementById("remote-interview-button");
+
+    if (inperson.style.opacity != "0.5" && resume.style.opacity != "0.5" && resume.style.opacity != "0.5") {
+        return "none";
+    } else {
+        if (inperson.style.opacity != "0.5") {
+            return "In-person Interview";
+        } else if (resume.style.opacity != "0.5") {
+            return "Resume Review";
+        } else if (remote.style.opacity != "0.5") {
+            return "Remote Interview";
+        }
+    }
+}
+
+function GetPriceFromButton(buttonId) {
+    var button = document.getElementById(buttonId);
 }

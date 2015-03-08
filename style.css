@@ -1561,6 +1561,14 @@ footer .bottom-text p {
     background-color: orange;
     overflow: auto;
     margin-bottom: 22px;
+    -webkit-box-sizing: border-box;
+    /* Safari/Chrome, other WebKit */
+    
+    -moz-box-sizing: border-box;
+    /* Firefox, other Gecko */
+    
+    box-sizing: border-box;
+    /* Opera/IE 8+ */
     /*box-shadow: 0px 0px 20px 6px rgba(0,0,0,0.10);*/
 }
 
@@ -1668,6 +1676,11 @@ footer .bottom-text p {
 .sc-left-info-title {
     font-size: 20px;
 }
+
+.sc-left-calendar-time-div {
+    display: inline-block;
+    padding-top: 20px;
+}
 /****************************************************************************/
 
 .hours-applies-to-div {
@@ -1704,16 +1717,11 @@ footer .bottom-text p {
 
 .sc-left-calendar-div {
     float: left;
-    padding: 30px;
-    padding-right: 50px;
 }
 
 .sc-left-time-selection-div {
-    padding: 30px;
+    padding-left: 30px;
     float: left;
-    overflow: hidden;
-    height: 630px;
-    /*width: 600px;*/
 }
 
 .sc-left-time-selection-div input {
@@ -2924,4 +2932,45 @@ div#spinner {
     height: 2em;
     width: 2em;
     margin-right: 3px;
+}
+
+.select-service-button {
+    width: 500px;
+    height: 120px;
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: deepskyblue;
+    border: solid 8px #0093C4;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.10);
+    display: none;
+}
+
+.service-name-label {
+    font-size: 1.5em;
+    padding-bottom: 15px;
+    color: white;
+    font-weight: 800;
+}
+
+.upload-cv-label {
+    font-size: 1.2em;
+    margin-left: 20px;
+}
+
+.uploader-notice-div {}
+
+.upload-cv-button {
+    font-size: 2em !important;
+}
+
+.uploader-notice {
+    margin-bottom: 5px;
 }

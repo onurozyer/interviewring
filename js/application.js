@@ -967,506 +967,7 @@ application.prototype = {
 
                     });
                 }
-
-                function isNumberKey(evt) {
-                    var maxlength = 4;
-                    if (evt.currentTarget.value.length > maxlength)
-                        return false;
-
-                    var charCode = (evt.which) ? evt.which : evt.keyCode;
-                    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
-                        return false;
-
-                    return true;
-                }
-
-                function showItemToEdit(service) {
-                        var me = this;
-                        if (document.getElementById("schedulePageCard")) {
-                            document.getElementById("schedulePageCard").parentNode.removeChild(document.getElementById("schedulePageCard"));
-                        }
-
-
-
-                        var member = members.getMember(app.getUserID());
-                        var services = member.getProvidedServices();
-
-                        var schedulePageCard = document.createElement("div");
-                        schedulePageCard.className = "schedule-page-card-div";
-                        schedulePageCard.id = "schedulePageCard";
-
-                        var scLeft = document.createElement("div");
-                        scLeft.className = "sc-left-review";
-
-                        var icLeftName = document.createElement("div");
-                        icLeftName.className = "ic-left-name";
-                        icLeftName.innerHTML = service;
-
-                        scLeft.appendChild(icLeftName);
-
-                        var scLeftInfo = document.createElement("div");
-                        scLeftInfo.className = "sc-left-info";
-                        var profilePageFee = document.createElement("div");
-                        profilePageFee.className = "profile-page-fee-div";
-
-                        var feeRow = document.createElement("div");
-                        feeRow.className = "fee-row";
-                        var hourlyFee = document.createElement("p");
-                        hourlyFee.innerHTML = 'how much would you like to charge hourly ?';
-                        var priceDiv = document.createElement("div");
-                        var currencySign = document.createElement("p");
-                        currencySign.className = "currencySignDiv"
-                        currencySign.innerHTML = '$&nbsp;';
-                        var hourlyFeeTextBox = document.createElement("input");
-                        hourlyFeeTextBox.className = "fee-text-box";
-                        hourlyFeeTextBox.onkeypress = isNumberKey;
-                        hourlyFeeTextBox.id = "hourlyFeeTextBox";
-                        hourlyFeeTextBox.type = "text";
-                        priceDiv.appendChild(currencySign);
-                        priceDiv.appendChild(hourlyFeeTextBox);
-                        feeRow.appendChild(hourlyFee);
-                        feeRow.appendChild(priceDiv);
-                        profilePageFee.appendChild(feeRow);
-                        if (services[service]) {
-                            hourlyFeeTextBox.value = services[service].price;
-                        }
-
-
-                        var scLeftInfoTitle = document.createElement("div");
-                        scLeftInfoTitle.className = "sc-left-info-title";
-                        var green = document.createElement("p");
-                        green.style.fontWeight = 'bold';
-                        green.innerHTML = 'green means available';
-                        scLeftInfoTitle.appendChild(green);
-
-                        var calendarTime = document.createElement("div");
-                        calendarTime.className = "sc-left-calendar-time-div";
-
-                        var calContainer = document.createElement("div");
-                        calContainer.id = "calContainer";
-                        calContainer.className = "sc-left-calendar-div";
-                        var ical = document.createElement("div");
-                        ical.id = "ical";
-                        calContainer.appendChild(ical);
-
-
-                        var timeSelection = document.createElement("div");
-                        timeSelection.className = "sc-left-time-selection-div";
-                        var hoursAppliesTo = document.createElement("div");
-                        hoursAppliesTo.className = "hours-applies-to-div";
-                        var appliesTo = document.createElement("p");
-                        appliesTo.style.fontWeight = 'bold';
-                        appliesTo.innerHTML = 'applies to';
-                        var calSelect = document.createElement("select");
-                        calSelect.style.marginLeft = 4 + 'px';
-                        calSelect.name = "calSelect";
-                        calSelect.id = "calSelect";
-                        var lineBreak = document.createElement("br");
-                        hoursAppliesTo.appendChild(appliesTo);
-                        hoursAppliesTo.appendChild(lineBreak);
-                        hoursAppliesTo.appendChild(calSelect);
-
-
-
-
-
-
-                        var timeCheckBoxesDiv = document.createElement("div");
-                        for (var i = 7; i < 20; i++) {
-                            var checkBox = document.createElement("input");
-                            checkBox.type = "checkbox";
-                            checkBox.name = "serviceTime";
-                            checkBox.value = pad(i, 2);
-
-
-                            var timeObj = convertTimeTo12(i + ':' + '00');
-                            var hour = timeObj.hour;
-                            var minute = timeObj.minute;
-                            var ampm = timeObj.ampm;
-                            localTimeStr = hour + ':' + minute + ampm;
-
-                            var timeObj = convertTimeTo12((i + 1) + ':' + '00');
-                            var hour = timeObj.hour;
-                            var minute = timeObj.minute;
-                            var ampm = timeObj.ampm;
-                            localTimeStrPlusOne = hour + ':' + minute + ampm;
-
-                            var textNode = localTimeStr + ' - ' + localTimeStrPlusOne;
-                            var label = document.createElement("label");
-                            var description = document.createTextNode(textNode);
-                            label.appendChild(checkBox); // add the box to the element
-                            label.appendChild(description); // add the description to the element
-                            timeCheckBoxesDiv.appendChild(label);
-                            timeCheckBoxesDiv.appendChild(document.createElement("br"));
-                        }
-
-                        var saveScheduleDiv = document.createElement("div");
-                        saveScheduleDiv.style.position = "relative";
-                        saveScheduleDiv.style.top = -400 + "px";
-                        saveScheduleDiv.style.left = 160 + "px";
-                        var saveSchedule = document.createElement("button");
-                        saveSchedule.innerHTML = "save schedule";
-                        saveSchedule.onclick = function () {
-                            saveService(service);
-                        };
-                        //saveSchedule.onclick = new Function( 'saveService()');
-                        saveScheduleDiv.appendChild(saveSchedule);
-
-                        timeSelection.appendChild(hoursAppliesTo);
-                        timeSelection.appendChild(lineBreak);
-                        timeSelection.appendChild(lineBreak);
-                        timeSelection.appendChild(timeCheckBoxesDiv);
-                        timeSelection.appendChild(saveScheduleDiv);
-
-                        calendarTime.appendChild(calContainer);
-                        calendarTime.appendChild(timeSelection);
-
-                        scLeftInfo.appendChild(profilePageFee);
-                        scLeftInfo.appendChild(scLeftInfoTitle);
-                        scLeftInfo.appendChild(calendarTime);
-
-                        scLeft.appendChild(scLeftInfo);
-
-                        schedulePageCard.appendChild(scLeft);
-                        //document.getElementById("profileItems").appendChild(schedulePageCard);
-
-                        document.getElementById("profileItems").insertBefore(schedulePageCard, document.getElementById("profileItems").lastChild);
-
-
-
-                        var scheduleDates = [];
-                        app.providerID = app.getUserID();
-                        var provider = members.getMember(app.getUserID());
-                        var cal = provider.getCalendar();
-                        var serviceCal = cal[service];
-                        for (var key in serviceCal) {
-                            var split = key.split('/');
-                            var d = parseInt(split[0], 10);
-                            var m = parseInt(split[1], 10);
-                            var y = parseInt(split[2], 10);
-                            var dateStr = y + '-' + pad(m, 2) + '-' + pad(d, 2);
-                            //console.log(serviceCal[key]);
-                            var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
-                            var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-                            //console.log(localizedAppt);
-
-                            scheduleDates.push({
-                                date: dateStr,
-                                title: '',
-                                desc: lsObj.sch
-                            });
-                        }
-                        app.providerID = null;
-
-
-
-                        var cal = $("#ical").ical({
-                            startOnSunday: true,
-                            click: function (d) {
-                                    console.log('SELECTED: ' + d);
-                                    var split = d.split(".");
-                                    var year = parseInt(split[2], 10);
-                                    var month = parseInt(split[1], 10);
-                                    var day = parseInt(split[0], 10);
-
-                                    //console.log(year+'/'+month+'/'+day);
-
-                                    var dtPRV = new timezoneJS.Date(year, month - 1, day);
-                                    //console.log(app.DAYS[dtPRV.getDay()]);
-                                    app.serviceDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
-
-                                    var opts = new Array();
-                                    opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
-                                    opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
-                                    opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
-                                    addOptions("calSelect", opts);
-
-
-
-                                    var e = document.getElementById("serviceEditComboBox");
-                                    var service = e.options[e.selectedIndex].value;
-                                    var member = members.getMember(app.getUserID());
-                                    //console.log(member.getCalendar());
-                                    var cal = member.getCalendar();
-                                    var serviceCal = cal[service];
-
-                                    var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
-                                    //console.log(date);
-                                    try {
-                                        if (typeof serviceCal[date] !== 'undefined') {
-                                            var mySchedule = serviceCal[date];
-                                            //console.log(mySchedule);
-
-                                            app.providerID = app.getUserID();
-                                            showApptScheduler(mySchedule, '', day, month, year);
-                                            app.providerID = null;
-                                        } else {
-                                            app.providerID = app.getUserID();
-                                            showApptScheduler(null, '', day, month, year);
-                                            app.providerID = null;
-                                        }
-                                    } catch (error) {}
-
-
-
-
-
-                                } // fired when user clicked on day, in "d" stored date
-                        });
-
-
-                        //$("#ical").ical.changeEventDates(scheduleDates);
-
-
-                        var dtPRV = new timezoneJS.Date();
-                        //console.log(app.DAYS[dtPRV.getDay()]);
-
-                        var opts = new Array();
-                        opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
-                        opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
-                        opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
-                        addOptions("calSelect", opts);
-
-                        updateMyCalendar();
-
-
-                        function updateMyCalendar() {
-                            var scheduleDates = new Array();
-                            var e = document.getElementById("serviceEditComboBox");
-                            var service = e.options[e.selectedIndex].value;
-                            service = service.split(/\s*\$/)[0];
-                            console.log('SERVICE: ' + service);
-
-                            var provider = members.getMember(app.getUserID());
-                            var cal = provider.getCalendar();
-                            var serviceCal = cal[service];
-                            for (var key in serviceCal) {
-                                var split = key.split('/');
-                                var d = parseInt(split[0], 10);
-                                var m = parseInt(split[1], 10);
-                                var y = parseInt(split[2], 10);
-                                var dateStr = pad(d, 2) + '.' + pad(m, 2) + '.' + y;
-                                console.log(serviceCal[key]);
-                                app.providerID = app.getUserID();
-                                var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
-                                var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
-                                app.providerID = null;
-                                console.log(localizedAppt);
-
-                                scheduleDates.push({
-                                    date: dateStr,
-                                    title: '',
-                                    desc: lsObj.sch
-                                });
-                            }
-                            $("#ical").ical.changeEventDates(scheduleDates);
-                        }
-                        window.updateMyCalendar = updateMyCalendar;
-
-
-                        function showApptScheduler(providerSchedule, mySchedule, day, month, year) {
-                                var r = document.getElementsByName("serviceTime");
-                                for (var i = 0; i < r.length; i++) {
-                                    r[i].checked = false;
-                                }
-
-                                localizeApptScheduler(day, month, year);
-
-                                enableGroup("serviceTime");
-                                //enableGroup("selectService");
-                                //addOptions("selectService", selected);
-                                //disableGroup("serviceTime", controlValue);
-                                //disableGroup("selectService", controlValue);
-
-                                //Show previously selected options
-                                if (providerSchedule) {
-                                    setGroupsFromCalendar("serviceTime", providerSchedule);
-                                }
-
-                            } //showApptScheduler
-
-
-                        function saveService(service) {
-                            var price = currencyFormatted(Math.abs(document.getElementById('hourlyFeeTextBox').value));
-                            //console.log(price);
-                            var locality = document.getElementById('localitySelect').value;
-                            //console.log(locality);
-                            var timeZone = document.getElementById('timezoneSelect').value;
-                            //console.log(timeZone);
-
-                            //var province = Ext.get('serviceProvinceText').getValue();
-                            //var postalCode = Ext.get('servicePostalCodeText').getValue();
-                            //var radius = Ext.get('serviceRadiusText').getValue();
-
-                            var member = members.getMember(app.getUserID());
-                            member.tzName = timeZone;
-
-                            //TODO:  Pull this out and add to onchange for timezoneSelect element
-                            //Save tzName to database
-                            $.ajax({
-                                url: "./php/saveTZname.php",
-                                data: {
-                                    id: app.getUserID(),
-                                    tzName: timeZone
-                                },
-                                type: 'post',
-                                async: true
-                            });
-
-                            var providedServices = member.getProvidedServices();
-
-                            //console.log("SERVICE: " + service);
-                            if (!providedServices[service]) {
-                                providedServices[service] = {};
-                            }
-                            providedServices[service].price = price;
-                            providedServices[service].locality = locality;
-                            member.providedServices = providedServices;
-                            //Save providedServices to database
-                            $.ajax({
-                                url: "./php/saveServices.php",
-                                data: {
-                                    id: app.getUserID(),
-                                    services: JSON.stringify(providedServices)
-                                },
-                                type: 'post',
-                                async: true
-                            });
-
-
-                            saveCalendar();
-
-
-                        }
-
-
-
-                        function saveCalendar() {
-                                var member = members.getMember(app.getUserID());
-                                var calendar = member.getCalendar();
-                                var service = SelectedService();
-                                var e = document.getElementById("calSelect");
-                                var opt = e.options[e.selectedIndex].value;
-                                var serviceDay = app.getServiceDay();
-                                console.log(serviceDay);
-                                var dateObj = getDateIndexes(serviceDay);
-                                var d = parseInt(dateObj.dayIndex, 10);
-                                var m = parseInt(dateObj.monthIndex, 10);
-                                var y = parseInt(dateObj.year, 10);
-                                var weekDay = parseInt(dateObj.weekDay, 10);
-                                var sch = getTimeGroup('serviceTime', true);
-                                var availability = "AVAILABLE:<br>" + sch;
-
-                                if (e.selectedIndex == 0) {
-                                    var currDate = pad(d, 2) + '/' + pad(m, 2) + '/' + y;
-                                    //SAVE CALENDAR
-                                    console.log("Saving date: " + currDate + " -> " + availability);
-                                    if (!calendar[service]) {
-                                        calendar[service] = {};
-                                    }
-                                    calendar[service][currDate] = availability;
-                                } else if (e.selectedIndex == 1) {
-                                    saveDayThisMonth(d, m, y)
-                                } else {
-                                    saveDayThisYear(d, m, y, weekDay)
-                                }
-
-                                member.calendar = calendar;
-                                //Save calendar to database
-                                $.ajax({
-                                    url: "./php/saveCalendar.php",
-                                    data: {
-                                        id: app.getUserID(),
-                                        calendar: JSON.stringify(calendar)
-                                    },
-                                    type: 'post',
-                                    async: true
-                                });
-
-
-
-
-
-
-                                function saveDayThisMonth(d, m, y) {
-                                        var currDay = d;
-                                        var currDate = d + "/" + m + "/" + y;
-
-                                        var today = new Date();
-                                        today.setDate(today.getDate() + 0);
-                                        //console.log('TODAY: ' + today.getDate());
-                                        var thisDate = today.getDate();
-                                        var thisMonth = today.getMonth() + 1;
-                                        var thisYear = today.getFullYear();
-                                        console.log(y + " <= " + thisYear + " && " + m + " <= " + thisMonth);
-                                        var calMinDate = (y <= thisYear && m <= thisMonth) ? thisDate : 0;
-
-                                        console.log(currDay + " >= " + calMinDate);
-
-                                        //rewind day to beginning of month
-                                        while (isDate(currDate) && currDay >= calMinDate) {
-                                            currDay = parseInt(currDay, 10) - 7;
-                                            currDay = pad(currDay, 2);
-                                            //console.log(day + " " + month);
-                                            currDate = currDay + "/" + m + "/" + y;
-                                            console.log(currDate);
-                                        }
-                                        currDay = parseInt(currDay, 10) + 7;
-                                        currDay = pad(currDay, 2);
-                                        //console.log(day + " " + month);
-                                        currDate = currDay + "/" + m + "/" + y;
-
-
-                                        while (isDate(currDate)) {
-                                            //SAVE CALENDAR
-                                            var day = pad(currDay, 2) + '/' + pad(m, 2) + '/' + y;
-                                            console.log("Saving date: " + currDate);
-                                            calendar[day] = availability;
-
-                                            currDay = parseInt(currDay, 10) + 7;
-                                            currDay = pad(currDay, 2);
-                                            //console.log(day + " " + month);
-                                            currDate = currDay + "/" + m + "/" + y;
-                                        }
-                                    } //saveDayThisMonth()
-
-
-
-                                function saveDayThisYear(d, m, y, dayNumber) {
-                                        //console.log('dayNumber: ' + dayNumber);
-                                        d = pad(d, 2);
-                                        m = pad(m, 2);
-
-                                        var tDay = d + "/" + m + "/" + y;
-                                        //console.log(tDay);
-                                        var currDay = d;
-                                        var currMonth = m;
-
-                                        //rewind day to beginning of month
-                                        while (isDate(tDay)) {
-                                            currDay = saveDayThisMonth(currDay, currMonth, y);
-                                            var now = new Date(y, currMonth, 1);
-                                            var firstDay = now.getDay();
-                                            //console.log('firstDay: ' + firstDay);
-                                            currDay = 1 + (dayNumber - firstDay + 7) % 7;
-                                            currDay = pad(currDay, 2);
-                                            currMonth = parseInt(currMonth, 10) + 1;
-                                            currMonth = pad(currMonth, 2);
-                                            //console.log(currDay + " " + currMonth);
-                                            tDay = currDay + "/" + currMonth + "/" + y;
-                                        }
-                                    } //saveDayThisYear()
-
-
-
-
-
-                            } //saveCalendar()
-
-
-                    } //showItemToEdit()
-
-
+               
             } //populateProfileItems()
 
 
@@ -3935,3 +3436,501 @@ function SelectedService() {
 function GetPriceFromButton(buttonId) {
     var button = document.getElementById(buttonId);
 }
+
+function showItemToEdit(service) {
+                        var me = this;
+                        if (document.getElementById("schedulePageCard")) {
+                            document.getElementById("schedulePageCard").parentNode.removeChild(document.getElementById("schedulePageCard"));
+                        }
+
+
+
+                        var member = members.getMember(app.getUserID());
+                        var services = member.getProvidedServices();
+
+                        var schedulePageCard = document.createElement("div");
+                        schedulePageCard.className = "schedule-page-card-div";
+                        schedulePageCard.id = "schedulePageCard";
+
+                        var scLeft = document.createElement("div");
+                        scLeft.className = "sc-left-review";
+
+                        var icLeftName = document.createElement("div");
+                        icLeftName.className = "ic-left-name";
+                        icLeftName.innerHTML = service;
+
+                        scLeft.appendChild(icLeftName);
+
+                        var scLeftInfo = document.createElement("div");
+                        scLeftInfo.className = "sc-left-info";
+                        var profilePageFee = document.createElement("div");
+                        profilePageFee.className = "profile-page-fee-div";
+
+                        var feeRow = document.createElement("div");
+                        feeRow.className = "fee-row";
+                        var hourlyFee = document.createElement("p");
+                        hourlyFee.innerHTML = 'how much would you like to charge hourly ?';
+                        var priceDiv = document.createElement("div");
+                        var currencySign = document.createElement("p");
+                        currencySign.className = "currencySignDiv"
+                        currencySign.innerHTML = '$&nbsp;';
+                        var hourlyFeeTextBox = document.createElement("input");
+                        hourlyFeeTextBox.className = "fee-text-box";
+                        hourlyFeeTextBox.onkeypress = isNumberKey;
+                        hourlyFeeTextBox.id = "hourlyFeeTextBox";
+                        hourlyFeeTextBox.type = "text";
+                        priceDiv.appendChild(currencySign);
+                        priceDiv.appendChild(hourlyFeeTextBox);
+                        feeRow.appendChild(hourlyFee);
+                        feeRow.appendChild(priceDiv);
+                        profilePageFee.appendChild(feeRow);
+                        if (services[service]) {
+                            hourlyFeeTextBox.value = services[service].price;
+                        }
+
+
+                        var scLeftInfoTitle = document.createElement("div");
+                        scLeftInfoTitle.className = "sc-left-info-title";
+                        var green = document.createElement("p");
+                        green.style.fontWeight = 'bold';
+                        green.innerHTML = 'green means available';
+                        scLeftInfoTitle.appendChild(green);
+
+                        var calendarTime = document.createElement("div");
+                        calendarTime.className = "sc-left-calendar-time-div";
+
+                        var calContainer = document.createElement("div");
+                        calContainer.id = "calContainer";
+                        calContainer.className = "sc-left-calendar-div";
+                        var ical = document.createElement("div");
+                        ical.id = "ical";
+                        calContainer.appendChild(ical);
+
+
+                        var timeSelection = document.createElement("div");
+                        timeSelection.className = "sc-left-time-selection-div";
+                        var hoursAppliesTo = document.createElement("div");
+                        hoursAppliesTo.className = "hours-applies-to-div";
+                        var appliesTo = document.createElement("p");
+                        appliesTo.style.fontWeight = 'bold';
+                        appliesTo.innerHTML = 'applies to';
+                        var calSelect = document.createElement("select");
+                        calSelect.style.marginLeft = 4 + 'px';
+                        calSelect.name = "calSelect";
+                        calSelect.id = "calSelect";
+                        var lineBreak = document.createElement("br");
+                        hoursAppliesTo.appendChild(appliesTo);
+                        hoursAppliesTo.appendChild(lineBreak);
+                        hoursAppliesTo.appendChild(calSelect);
+
+
+
+
+
+
+                        var timeCheckBoxesDiv = document.createElement("div");
+                        for (var i = 7; i < 20; i++) {
+                            var checkBox = document.createElement("input");
+                            checkBox.type = "checkbox";
+                            checkBox.name = "serviceTime";
+                            checkBox.value = pad(i, 2);
+
+
+                            var timeObj = convertTimeTo12(i + ':' + '00');
+                            var hour = timeObj.hour;
+                            var minute = timeObj.minute;
+                            var ampm = timeObj.ampm;
+                            localTimeStr = hour + ':' + minute + ampm;
+
+                            var timeObj = convertTimeTo12((i + 1) + ':' + '00');
+                            var hour = timeObj.hour;
+                            var minute = timeObj.minute;
+                            var ampm = timeObj.ampm;
+                            localTimeStrPlusOne = hour + ':' + minute + ampm;
+
+                            var textNode = localTimeStr + ' - ' + localTimeStrPlusOne;
+                            var label = document.createElement("label");
+                            var description = document.createTextNode(textNode);
+                            label.appendChild(checkBox); // add the box to the element
+                            label.appendChild(description); // add the description to the element
+                            timeCheckBoxesDiv.appendChild(label);
+                            timeCheckBoxesDiv.appendChild(document.createElement("br"));
+                        }
+
+                        var saveScheduleDiv = document.createElement("div");
+                        saveScheduleDiv.style.position = "relative";
+                        saveScheduleDiv.style.top = -400 + "px";
+                        saveScheduleDiv.style.left = 160 + "px";
+                        var saveSchedule = document.createElement("button");
+                        saveSchedule.innerHTML = "save schedule";
+                        saveSchedule.onclick = function () {
+                            saveService(service);
+                        };
+                        //saveSchedule.onclick = new Function( 'saveService()');
+                        saveScheduleDiv.appendChild(saveSchedule);
+
+                        timeSelection.appendChild(hoursAppliesTo);
+                        timeSelection.appendChild(lineBreak);
+                        timeSelection.appendChild(lineBreak);
+                        timeSelection.appendChild(timeCheckBoxesDiv);
+                        timeSelection.appendChild(saveScheduleDiv);
+
+                        calendarTime.appendChild(calContainer);
+                        calendarTime.appendChild(timeSelection);
+
+                        scLeftInfo.appendChild(profilePageFee);
+                        scLeftInfo.appendChild(scLeftInfoTitle);
+                        scLeftInfo.appendChild(calendarTime);
+
+                        scLeft.appendChild(scLeftInfo);
+
+                        schedulePageCard.appendChild(scLeft);
+                        //document.getElementById("profileItems").appendChild(schedulePageCard);
+
+                        document.getElementById("profileItems").insertBefore(schedulePageCard, document.getElementById("profileItems").lastChild);
+
+
+
+                        var scheduleDates = [];
+                        app.providerID = app.getUserID();
+                        var provider = members.getMember(app.getUserID());
+                        var cal = provider.getCalendar();
+                        var serviceCal = cal[service];
+                        for (var key in serviceCal) {
+                            var split = key.split('/');
+                            var d = parseInt(split[0], 10);
+                            var m = parseInt(split[1], 10);
+                            var y = parseInt(split[2], 10);
+                            var dateStr = y + '-' + pad(m, 2) + '-' + pad(d, 2);
+                            //console.log(serviceCal[key]);
+                            var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
+                            var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+                            //console.log(localizedAppt);
+
+                            scheduleDates.push({
+                                date: dateStr,
+                                title: '',
+                                desc: lsObj.sch
+                            });
+                        }
+                        app.providerID = null;
+
+
+
+                        var cal = $("#ical").ical({
+                            startOnSunday: true,
+                            click: function (d) {
+                                    console.log('SELECTED: ' + d);
+                                    var split = d.split(".");
+                                    var year = parseInt(split[2], 10);
+                                    var month = parseInt(split[1], 10);
+                                    var day = parseInt(split[0], 10);
+
+                                    //console.log(year+'/'+month+'/'+day);
+
+                                    var dtPRV = new timezoneJS.Date(year, month - 1, day);
+                                    //console.log(app.DAYS[dtPRV.getDay()]);
+                                    app.serviceDay = app.DAYS[dtPRV.getDay()] + ' ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear();
+
+                                    var opts = new Array();
+                                    opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
+                                    opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
+                                    opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
+                                    addOptions("calSelect", opts);
+
+
+
+                                    var e = document.getElementById("serviceEditComboBox");
+                                    var service = e.options[e.selectedIndex].value;
+                                    var member = members.getMember(app.getUserID());
+                                    //console.log(member.getCalendar());
+                                    var cal = member.getCalendar();
+                                    var serviceCal = cal[service];
+
+                                    var date = pad(day, 2) + '/' + pad(month, 2) + '/' + year;
+                                    //console.log(date);
+                                    try {
+                                        if (typeof serviceCal[date] !== 'undefined') {
+                                            var mySchedule = serviceCal[date];
+                                            //console.log(mySchedule);
+
+                                            app.providerID = app.getUserID();
+                                            showApptScheduler(mySchedule, '', day, month, year);
+                                            app.providerID = null;
+                                        } else {
+                                            app.providerID = app.getUserID();
+                                            showApptScheduler(null, '', day, month, year);
+                                            app.providerID = null;
+                                        }
+                                    } catch (error) {}
+
+
+
+
+
+                                } // fired when user clicked on day, in "d" stored date
+                        });
+
+
+                        //$("#ical").ical.changeEventDates(scheduleDates);
+
+
+                        var dtPRV = new timezoneJS.Date();
+                        //console.log(app.DAYS[dtPRV.getDay()]);
+
+                        var opts = new Array();
+                        opts[0] = 'Just this ' + app.DAYS[dtPRV.getDay()] + ' (' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getDate() + ', ' + dtPRV.getFullYear() + ')';
+                        opts[1] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + app.MONTHS[dtPRV.getMonth()] + ' ' + dtPRV.getFullYear();
+                        opts[2] = 'All ' + app.DAYS[dtPRV.getDay()] + '\'s in ' + dtPRV.getFullYear();
+                        addOptions("calSelect", opts);
+
+                        updateMyCalendar();
+
+
+                        function updateMyCalendar() {
+                            var scheduleDates = new Array();
+                            var e = document.getElementById("serviceEditComboBox");
+                            var service = e.options[e.selectedIndex].value;
+                            service = service.split(/\s*\$/)[0];
+                            console.log('SERVICE: ' + service);
+
+                            var provider = members.getMember(app.getUserID());
+                            var cal = provider.getCalendar();
+                            var serviceCal = cal[service];
+                            for (var key in serviceCal) {
+                                var split = key.split('/');
+                                var d = parseInt(split[0], 10);
+                                var m = parseInt(split[1], 10);
+                                var y = parseInt(split[2], 10);
+                                var dateStr = pad(d, 2) + '.' + pad(m, 2) + '.' + y;
+                                console.log(serviceCal[key]);
+                                app.providerID = app.getUserID();
+                                var lsObj = localizeSch(serviceCal[key], app.getUserID(), d, m, y);
+                                var localizedAppt = lsObj.dateStr + '<br>' + lsObj.sch;
+                                app.providerID = null;
+                                console.log(localizedAppt);
+
+                                scheduleDates.push({
+                                    date: dateStr,
+                                    title: '',
+                                    desc: lsObj.sch
+                                });
+                            }
+                            $("#ical").ical.changeEventDates(scheduleDates);
+                        }
+                        window.updateMyCalendar = updateMyCalendar;
+
+
+                        function showApptScheduler(providerSchedule, mySchedule, day, month, year) {
+                                var r = document.getElementsByName("serviceTime");
+                                for (var i = 0; i < r.length; i++) {
+                                    r[i].checked = false;
+                                }
+
+                                localizeApptScheduler(day, month, year);
+
+                                enableGroup("serviceTime");
+                                //enableGroup("selectService");
+                                //addOptions("selectService", selected);
+                                //disableGroup("serviceTime", controlValue);
+                                //disableGroup("selectService", controlValue);
+
+                                //Show previously selected options
+                                if (providerSchedule) {
+                                    setGroupsFromCalendar("serviceTime", providerSchedule);
+                                }
+
+                            } //showApptScheduler
+
+
+                        function saveService(service) {
+                            var price = currencyFormatted(Math.abs(document.getElementById('hourlyFeeTextBox').value));
+                            //console.log(price);
+                            var locality = document.getElementById('localitySelect').value;
+                            //console.log(locality);
+                            var timeZone = document.getElementById('timezoneSelect').value;
+                            //console.log(timeZone);
+
+                            //var province = Ext.get('serviceProvinceText').getValue();
+                            //var postalCode = Ext.get('servicePostalCodeText').getValue();
+                            //var radius = Ext.get('serviceRadiusText').getValue();
+
+                            var member = members.getMember(app.getUserID());
+                            member.tzName = timeZone;
+
+                            //TODO:  Pull this out and add to onchange for timezoneSelect element
+                            //Save tzName to database
+                            $.ajax({
+                                url: "./php/saveTZname.php",
+                                data: {
+                                    id: app.getUserID(),
+                                    tzName: timeZone
+                                },
+                                type: 'post',
+                                async: true
+                            });
+
+                            var providedServices = member.getProvidedServices();
+
+                            //console.log("SERVICE: " + service);
+                            if (!providedServices[service]) {
+                                providedServices[service] = {};
+                            }
+                            providedServices[service].price = price;
+                            providedServices[service].locality = locality;
+                            member.providedServices = providedServices;
+                            //Save providedServices to database
+                            $.ajax({
+                                url: "./php/saveServices.php",
+                                data: {
+                                    id: app.getUserID(),
+                                    services: JSON.stringify(providedServices)
+                                },
+                                type: 'post',
+                                async: true
+                            });
+
+
+                            saveCalendar();
+
+
+                        }
+
+
+
+                        function saveCalendar() {
+                                var member = members.getMember(app.getUserID());
+                                var calendar = member.getCalendar();
+                                var service = SelectedService();
+                                var e = document.getElementById("calSelect");
+                                var opt = e.options[e.selectedIndex].value;
+                                var serviceDay = app.getServiceDay();
+                                console.log(serviceDay);
+                                var dateObj = getDateIndexes(serviceDay);
+                                var d = parseInt(dateObj.dayIndex, 10);
+                                var m = parseInt(dateObj.monthIndex, 10);
+                                var y = parseInt(dateObj.year, 10);
+                                var weekDay = parseInt(dateObj.weekDay, 10);
+                                var sch = getTimeGroup('serviceTime', true);
+                                var availability = "AVAILABLE:<br>" + sch;
+
+                                if (e.selectedIndex == 0) {
+                                    var currDate = pad(d, 2) + '/' + pad(m, 2) + '/' + y;
+                                    //SAVE CALENDAR
+                                    console.log("Saving date: " + currDate + " -> " + availability);
+                                    if (!calendar[service]) {
+                                        calendar[service] = {};
+                                    }
+                                    calendar[service][currDate] = availability;
+                                } else if (e.selectedIndex == 1) {
+                                    saveDayThisMonth(d, m, y)
+                                } else {
+                                    saveDayThisYear(d, m, y, weekDay)
+                                }
+
+                                member.calendar = calendar;
+                                //Save calendar to database
+                                $.ajax({
+                                    url: "./php/saveCalendar.php",
+                                    data: {
+                                        id: app.getUserID(),
+                                        calendar: JSON.stringify(calendar)
+                                    },
+                                    type: 'post',
+                                    async: true
+                                });
+
+
+
+
+
+
+                                function saveDayThisMonth(d, m, y) {
+                                        var currDay = d;
+                                        var currDate = d + "/" + m + "/" + y;
+
+                                        var today = new Date();
+                                        today.setDate(today.getDate() + 0);
+                                        //console.log('TODAY: ' + today.getDate());
+                                        var thisDate = today.getDate();
+                                        var thisMonth = today.getMonth() + 1;
+                                        var thisYear = today.getFullYear();
+                                        console.log(y + " <= " + thisYear + " && " + m + " <= " + thisMonth);
+                                        var calMinDate = (y <= thisYear && m <= thisMonth) ? thisDate : 0;
+
+                                        console.log(currDay + " >= " + calMinDate);
+
+                                        //rewind day to beginning of month
+                                        while (isDate(currDate) && currDay >= calMinDate) {
+                                            currDay = parseInt(currDay, 10) - 7;
+                                            currDay = pad(currDay, 2);
+                                            //console.log(day + " " + month);
+                                            currDate = currDay + "/" + m + "/" + y;
+                                            console.log(currDate);
+                                        }
+                                        currDay = parseInt(currDay, 10) + 7;
+                                        currDay = pad(currDay, 2);
+                                        //console.log(day + " " + month);
+                                        currDate = currDay + "/" + m + "/" + y;
+
+
+                                        while (isDate(currDate)) {
+                                            //SAVE CALENDAR
+                                            var day = pad(currDay, 2) + '/' + pad(m, 2) + '/' + y;
+                                            console.log("Saving date: " + currDate);
+                                            calendar[day] = availability;
+
+                                            currDay = parseInt(currDay, 10) + 7;
+                                            currDay = pad(currDay, 2);
+                                            //console.log(day + " " + month);
+                                            currDate = currDay + "/" + m + "/" + y;
+                                        }
+                                    } //saveDayThisMonth()
+
+
+
+                                function saveDayThisYear(d, m, y, dayNumber) {
+                                        //console.log('dayNumber: ' + dayNumber);
+                                        d = pad(d, 2);
+                                        m = pad(m, 2);
+
+                                        var tDay = d + "/" + m + "/" + y;
+                                        //console.log(tDay);
+                                        var currDay = d;
+                                        var currMonth = m;
+
+                                        //rewind day to beginning of month
+                                        while (isDate(tDay)) {
+                                            currDay = saveDayThisMonth(currDay, currMonth, y);
+                                            var now = new Date(y, currMonth, 1);
+                                            var firstDay = now.getDay();
+                                            //console.log('firstDay: ' + firstDay);
+                                            currDay = 1 + (dayNumber - firstDay + 7) % 7;
+                                            currDay = pad(currDay, 2);
+                                            currMonth = parseInt(currMonth, 10) + 1;
+                                            currMonth = pad(currMonth, 2);
+                                            //console.log(currDay + " " + currMonth);
+                                            tDay = currDay + "/" + currMonth + "/" + y;
+                                        }
+                                    } //saveDayThisYear()
+
+
+
+
+
+                            } //saveCalendar()
+
+
+                    } //showItemToEdit()
+
+                function isNumberKey(evt) {
+                    var maxlength = 4;
+                    if (evt.currentTarget.value.length > maxlength)
+                        return false;
+
+                    var charCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+                        return false;
+
+                    return true;
+                }
